@@ -49,6 +49,28 @@ Setelah selesai, jalankan pengecekan Verify dan laporkan mana yang benar-benar
 dijalankan dan mana yang belum diverifikasi.
 ```
 
+## Cara Menjalankan Lokal
+
+### 1. Database (PostgreSQL 16)
+```bash
+docker compose up -d db
+```
+
+### 2. Backend (Go API Server)
+```bash
+cd backend
+go run ./cmd/server
+```
+API berjalan di `http://localhost:8080`. Endpoint health check: `http://localhost:8080/healthz`.
+
+### 3. Frontend (React + Vite SPA)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Aplikasi web berjalan di `http://localhost:5173`. Request `/healthz` dan `/api` otomatis diproxy ke backend.
+
 ## Alur Kerja Git
 
 ```bash
@@ -59,3 +81,4 @@ git commit -m "chore: setup struktur proyek"
 git push -u origin feat/phase-0-setup
 # buka Pull Request, baca diff, baru merge ke main
 ```
+
