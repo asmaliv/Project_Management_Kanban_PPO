@@ -2,7 +2,7 @@
 
 Aplikasi web Project Management Kanban Board (Go + React) dengan role: Admin, Project Manager, Team Leader, Audit, dan Risk Management.
 
-> Proyek belajar. Jangan memasukkan data nyata nasabah/karyawan/bank.
+> Proyek Internal PPO
 
 ## Dokumen Perencanaan
 
