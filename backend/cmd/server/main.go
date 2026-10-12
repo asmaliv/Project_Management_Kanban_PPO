@@ -10,6 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"ppo-kanban/internal/auditlog"
 	"ppo-kanban/internal/auth"
 	"ppo-kanban/internal/config"
 	"ppo-kanban/internal/db"
@@ -51,16 +52,21 @@ func main() {
 
 	queries := db.New(dbPool)
 
+	// Create audit log store and service
+	auditStore := auditlog.NewStore(queries)
+	auditService := auditlog.NewService(auditStore, logger)
+
 	// Bootstrap initial admin if configured
 	if err := auth.BootstrapAdmin(ctx, queries, cfg.BootstrapAdminEmail, cfg.BootstrapAdminPassword, logger); err != nil {
 		logger.Error("failed to bootstrap admin", slog.String("error", err.Error()))
 	}
 
-	authService := auth.NewService(queries, cfg.SessionSecret, logger)
+	authService := auth.NewService(queries, cfg.SessionSecret, logger, auditService)
 
 	router := httpapi.NewRouter(httpapi.RouterParams{
 		Logger:        logger,
 		AuthService:   authService,
+		AuditService:  auditService,
 		SessionSecret: cfg.SessionSecret,
 		CookieSecure:  cfg.CookieSecure,
 	})
