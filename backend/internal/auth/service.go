@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"ppo-kanban/internal/auditlog"
 	"ppo-kanban/internal/db"
 )
 
@@ -54,18 +55,20 @@ type Service struct {
 	queries       db.Querier
 	sessionSecret string
 	logger        *slog.Logger
+	auditLog      *auditlog.Service
 }
 
-func NewService(queries db.Querier, sessionSecret string, logger *slog.Logger) *Service {
+func NewService(queries db.Querier, sessionSecret string, logger *slog.Logger, auditLog *auditlog.Service) *Service {
 	return &Service{
 		queries:       queries,
 		sessionSecret: sessionSecret,
 		logger:        logger,
+		auditLog:      auditLog,
 	}
 }
 
 // Login authenticates a user by email and password, handling lockout and sessions.
-func (s *Service) Login(ctx context.Context, email, password, ip, userAgent string) (*LoginResult, error) {
+func (s *Service) Login(ctx context.Context, email, password, ip, userAgent, requestID string) (*LoginResult, error) {
 	cleanEmail := strings.ToLower(strings.TrimSpace(email))
 	now := time.Now().UTC()
 
@@ -75,6 +78,21 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent stri
 		if errors.Is(err, pgx.ErrNoRows) {
 			// Run a dummy argon2 verify to mitigate timing attacks
 			_, _ = VerifyPassword("dummy-password-to-waste-time", "$argon2id$v=19$m=65536,t=1,p=4$c29tZXNhbHQxMjM0NTY3OA$aGFzaGhhc2hoYXNoaGFzaGhhc2hoYXNoaGFzaGg")
+			
+			// Log failed login attempt with no actor
+			if s.auditLog != nil {
+				_ = s.auditLog.Log(ctx, auditlog.LogParams{
+					ActorID:    pgtype.UUID{}, // null UUID
+					ActorRole:  db.NullUserRole{},
+					Action:     "auth.login_failed",
+					EntityType: "user",
+					EntityID:   "",
+					After:      map[string]any{"email": cleanEmail, "reason": "user_not_found"},
+					IP:         ip,
+					RequestID:  requestID,
+				})
+			}
+			
 			return nil, ErrInvalidCredentials
 		}
 		return nil, fmt.Errorf("query user by email: %w", err)
@@ -83,6 +101,20 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent stri
 	// 2. Inactive account returns generic error per requirements
 	if !user.IsActive {
 		s.logger.Warn("login attempt on inactive account", slog.String("email", cleanEmail))
+		
+		if s.auditLog != nil {
+			_ = s.auditLog.Log(ctx, auditlog.LogParams{
+				ActorID:    user.ID,
+				ActorRole:  db.NullUserRole{UserRole: user.Role, Valid: true},
+				Action:     "auth.login_failed",
+				EntityType: "user",
+				EntityID:   uuid.UUID(user.ID.Bytes).String(),
+				After:      map[string]any{"email": cleanEmail, "reason": "account_inactive"},
+				IP:         ip,
+				RequestID:  requestID,
+			})
+		}
+		
 		return nil, ErrInvalidCredentials
 	}
 
@@ -92,6 +124,23 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent stri
 			slog.String("email", cleanEmail),
 			slog.Time("locked_until", user.LockedUntil.Time),
 		)
+		
+		if s.auditLog != nil {
+			_ = s.auditLog.Log(ctx, auditlog.LogParams{
+				ActorID:    user.ID,
+				ActorRole:  db.NullUserRole{UserRole: user.Role, Valid: true},
+				Action:     "auth.login_locked",
+				EntityType: "user",
+				EntityID:   uuid.UUID(user.ID.Bytes).String(),
+				After: map[string]any{
+					"email":        cleanEmail,
+					"locked_until": user.LockedUntil.Time.Format(time.RFC3339),
+				},
+				IP:        ip,
+				RequestID: requestID,
+			})
+		}
+		
 		return nil, ErrAccountLocked
 	}
 
@@ -117,7 +166,38 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent stri
 				slog.String("email", cleanEmail),
 				slog.Time("locked_until", lockUntil),
 			)
+			
+			if s.auditLog != nil {
+				_ = s.auditLog.Log(ctx, auditlog.LogParams{
+					ActorID:    user.ID,
+					ActorRole:  db.NullUserRole{UserRole: user.Role, Valid: true},
+					Action:     "auth.login_locked",
+					EntityType: "user",
+					EntityID:   uuid.UUID(user.ID.Bytes).String(),
+					After: map[string]any{
+						"email":         cleanEmail,
+						"locked_until":  lockUntil.Format(time.RFC3339),
+						"failed_count":  failedCount,
+					},
+					IP:        ip,
+					RequestID: requestID,
+				})
+			}
+			
 			return nil, ErrAccountLocked
+		}
+		
+		if s.auditLog != nil {
+			_ = s.auditLog.Log(ctx, auditlog.LogParams{
+				ActorID:    user.ID,
+				ActorRole:  db.NullUserRole{UserRole: user.Role, Valid: true},
+				Action:     "auth.login_failed",
+				EntityType: "user",
+				EntityID:   uuid.UUID(user.ID.Bytes).String(),
+				After:      map[string]any{"email": cleanEmail, "reason": "wrong_password", "failed_count": failedCount},
+				IP:         ip,
+				RequestID:  requestID,
+			})
 		}
 
 		return nil, ErrInvalidCredentials
@@ -136,7 +216,7 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent stri
 	tokenHash := HashSessionToken(rawToken)
 	expiresAt := now.Add(AbsoluteTimeout)
 
-	_, err = s.queries.CreateSession(ctx, db.CreateSessionParams{
+	session, err := s.queries.CreateSession(ctx, db.CreateSessionParams{
 		UserID:    user.ID,
 		TokenHash: tokenHash,
 		ExpiresAt: pgtype.Timestamptz{Time: expiresAt, Valid: true},
@@ -149,6 +229,25 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent stri
 
 	csrfToken := GenerateCSRFToken(rawToken, s.sessionSecret)
 	userUUID := uuid.UUID(user.ID.Bytes).String()
+	sessionUUID := uuid.UUID(session.ID.Bytes).String()
+	
+	// Log successful login
+	if s.auditLog != nil {
+		_ = s.auditLog.Log(ctx, auditlog.LogParams{
+			ActorID:    user.ID,
+			ActorRole:  db.NullUserRole{UserRole: user.Role, Valid: true},
+			Action:     "auth.login_success",
+			EntityType: "session",
+			EntityID:   sessionUUID,
+			After: map[string]any{
+				"user_id": userUUID,
+				"email":   user.Email,
+				"role":    string(user.Role),
+			},
+			IP:        ip,
+			RequestID: requestID,
+		})
+	}
 
 	return &LoginResult{
 		User: UserDTO{
@@ -214,11 +313,35 @@ func (s *Service) ValidateSession(ctx context.Context, rawSessionToken string) (
 }
 
 // Logout invalidates the active session by deleting it from the database.
-func (s *Service) Logout(ctx context.Context, rawSessionToken string) error {
+func (s *Service) Logout(ctx context.Context, rawSessionToken, ip, requestID string) error {
 	if rawSessionToken == "" {
 		return nil
 	}
+	
 	tokenHash := HashSessionToken(rawSessionToken)
+	
+	// Get session info before deletion for audit log
+	sessionRow, err := s.queries.GetSessionWithUser(ctx, tokenHash)
+	if err == nil && s.auditLog != nil {
+		// Log logout
+		userUUID := uuid.UUID(sessionRow.UserID.Bytes).String()
+		sessionUUID := uuid.UUID(sessionRow.SessionID.Bytes).String()
+		
+		_ = s.auditLog.Log(ctx, auditlog.LogParams{
+			ActorID:    sessionRow.UserID,
+			ActorRole:  db.NullUserRole{UserRole: sessionRow.Role, Valid: true},
+			Action:     "auth.logout",
+			EntityType: "session",
+			EntityID:   sessionUUID,
+			After: map[string]any{
+				"user_id": userUUID,
+				"email":   sessionRow.Email,
+			},
+			IP:        ip,
+			RequestID: requestID,
+		})
+	}
+	
 	return s.queries.DeleteSessionByTokenHash(ctx, tokenHash)
 }
 
@@ -238,7 +361,7 @@ func (s *Service) GetMe(ctx context.Context, rawSessionToken string) (*LoginResu
 }
 
 // ChangePassword validates old password, checks policy, and updates password.
-func (s *Service) ChangePassword(ctx context.Context, rawSessionToken, oldPassword, newPassword, confirmPassword string) error {
+func (s *Service) ChangePassword(ctx context.Context, rawSessionToken, oldPassword, newPassword, confirmPassword, ip, requestID string) error {
 	if newPassword != confirmPassword {
 		return ErrPasswordMismatch
 	}
@@ -290,5 +413,23 @@ func (s *Service) ChangePassword(ctx context.Context, rawSessionToken, oldPasswo
 	}
 
 	s.logger.Info("password successfully changed", slog.String("user_id", authInfo.User.ID))
+	
+	// Log password change - NEVER include password values
+	if s.auditLog != nil {
+		_ = s.auditLog.Log(ctx, auditlog.LogParams{
+			ActorID:    userUUID,
+			ActorRole:  db.NullUserRole{UserRole: user.Role, Valid: true},
+			Action:     "auth.password_changed",
+			EntityType: "user",
+			EntityID:   authInfo.User.ID,
+			After: map[string]any{
+				"email":                  user.Email,
+				"must_change_password":   false,
+			},
+			IP:        ip,
+			RequestID: requestID,
+		})
+	}
+	
 	return nil
 }

@@ -218,11 +218,23 @@ func (m *mockStore) UpdatePassword(ctx context.Context, arg db.UpdatePasswordPar
 	return nil
 }
 
+// InsertAuditLog is a no-op for tests
+func (m *mockStore) InsertAuditLog(ctx context.Context, arg db.InsertAuditLogParams) (db.AuditLog, error) {
+	return db.AuditLog{}, nil
+}
+
+// ListAuditLogs is a no-op for tests
+func (m *mockStore) ListAuditLogs(ctx context.Context, arg db.ListAuditLogsParams) ([]db.AuditLog, error) {
+	return []db.AuditLog{}, nil
+}
+
 func setupTestService(t *testing.T) (*Service, *mockStore) {
 	t.Helper()
 	store := newMockStore()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	svc := NewService(store, "test-session-secret-key-32bytes!!", logger)
+	
+	// For tests, we use a nil auditlog service and modify NewService to handle it
+	svc := NewService(store, "test-session-secret-key-32bytes!!", logger, nil)
 	return svc, store
 }
 
@@ -248,7 +260,7 @@ func TestAuthService_Login(t *testing.T) {
 	}
 
 	t.Run("successful login", func(t *testing.T) {
-		res, err := svc.Login(ctx, "banker@bank.local", "CorrectPassword#2026", "127.0.0.1", "test-agent")
+		res, err := svc.Login(ctx, "banker@bank.local", "CorrectPassword#2026", "127.0.0.1", "test-agent", "test-request-id")
 		if err != nil {
 			t.Fatalf("expected login success, got: %v", err)
 		}
@@ -264,14 +276,14 @@ func TestAuthService_Login(t *testing.T) {
 	})
 
 	t.Run("wrong password returns generic error", func(t *testing.T) {
-		_, err := svc.Login(ctx, "banker@bank.local", "WrongPassword#999", "127.0.0.1", "test-agent")
+		_, err := svc.Login(ctx, "banker@bank.local", "WrongPassword#999", "127.0.0.1", "test-agent", "test-request-id")
 		if !errors.Is(err, ErrInvalidCredentials) {
 			t.Errorf("expected ErrInvalidCredentials, got: %v", err)
 		}
 	})
 
 	t.Run("non-existent email returns generic error", func(t *testing.T) {
-		_, err := svc.Login(ctx, "unknown@bank.local", "WrongPassword#999", "127.0.0.1", "test-agent")
+		_, err := svc.Login(ctx, "unknown@bank.local", "WrongPassword#999", "127.0.0.1", "test-agent", "test-request-id")
 		if !errors.Is(err, ErrInvalidCredentials) {
 			t.Errorf("expected ErrInvalidCredentials, got: %v", err)
 		}
@@ -287,7 +299,7 @@ func TestAuthService_Login(t *testing.T) {
 			MustChangePassword: false,
 		})
 
-		_, err := svc.Login(ctx, "inactive@bank.local", "CorrectPassword#2026", "127.0.0.1", "test-agent")
+		_, err := svc.Login(ctx, "inactive@bank.local", "CorrectPassword#2026", "127.0.0.1", "test-agent", "test-request-id")
 		if !errors.Is(err, ErrInvalidCredentials) {
 			t.Errorf("expected ErrInvalidCredentials, got: %v", err)
 		}
@@ -298,20 +310,20 @@ func TestAuthService_Login(t *testing.T) {
 		_ = store.ResetFailedLoginAndTouchLastLogin(ctx, user.ID)
 
 		for i := 1; i <= 4; i++ {
-			_, err := svc.Login(ctx, "banker@bank.local", "WrongPassword#999", "127.0.0.1", "test-agent")
+			_, err := svc.Login(ctx, "banker@bank.local", "WrongPassword#999", "127.0.0.1", "test-agent", "test-request-id")
 			if !errors.Is(err, ErrInvalidCredentials) {
 				t.Fatalf("attempt %d: expected ErrInvalidCredentials, got: %v", i, err)
 			}
 		}
 
 		// 5th attempt triggers lockout
-		_, err := svc.Login(ctx, "banker@bank.local", "WrongPassword#999", "127.0.0.1", "test-agent")
+		_, err := svc.Login(ctx, "banker@bank.local", "WrongPassword#999", "127.0.0.1", "test-agent", "test-request-id")
 		if !errors.Is(err, ErrAccountLocked) {
 			t.Fatalf("5th attempt: expected ErrAccountLocked, got: %v", err)
 		}
 
 		// Subsequent attempt with even correct password is now blocked
-		_, err = svc.Login(ctx, "banker@bank.local", "CorrectPassword#2026", "127.0.0.1", "test-agent")
+		_, err = svc.Login(ctx, "banker@bank.local", "CorrectPassword#2026", "127.0.0.1", "test-agent", "test-request-id")
 		if !errors.Is(err, ErrAccountLocked) {
 			t.Fatalf("subsequent attempt: expected ErrAccountLocked, got: %v", err)
 		}
@@ -337,20 +349,20 @@ func TestAuthService_ChangePassword(t *testing.T) {
 		t.Fatalf("create user: %v", err)
 	}
 
-	loginRes, err := svc.Login(ctx, "pm@bank.local", oldPlain, "127.0.0.1", "test-agent")
+	loginRes, err := svc.Login(ctx, "pm@bank.local", oldPlain, "127.0.0.1", "test-agent", "test-request-id")
 	if err != nil {
 		t.Fatalf("login failed: %v", err)
 	}
 
 	t.Run("rejects mismatched confirm password", func(t *testing.T) {
-		err := svc.ChangePassword(ctx, loginRes.RawSessionToken, oldPlain, "NewValidPassword#2026", "DifferentPassword#2026")
+		err := svc.ChangePassword(ctx, loginRes.RawSessionToken, oldPlain, "NewValidPassword#2026", "DifferentPassword#2026", "127.0.0.1", "test-request-id")
 		if !errors.Is(err, ErrPasswordMismatch) {
 			t.Errorf("expected ErrPasswordMismatch, got: %v", err)
 		}
 	})
 
 	t.Run("rejects incorrect old password", func(t *testing.T) {
-		err := svc.ChangePassword(ctx, loginRes.RawSessionToken, "WrongOldPass#999", "NewValidPassword#2026", "NewValidPassword#2026")
+		err := svc.ChangePassword(ctx, loginRes.RawSessionToken, "WrongOldPass#999", "NewValidPassword#2026", "NewValidPassword#2026", "127.0.0.1", "test-request-id")
 		if !errors.Is(err, ErrOldPasswordIncorrect) {
 			t.Errorf("expected ErrOldPasswordIncorrect, got: %v", err)
 		}
@@ -358,13 +370,13 @@ func TestAuthService_ChangePassword(t *testing.T) {
 
 	t.Run("successful change password updates must_change_password to false", func(t *testing.T) {
 		newPlain := "BrandNewSecurePassword#2026!"
-		err := svc.ChangePassword(ctx, loginRes.RawSessionToken, oldPlain, newPlain, newPlain)
+		err := svc.ChangePassword(ctx, loginRes.RawSessionToken, oldPlain, newPlain, newPlain, "127.0.0.1", "test-request-id")
 		if err != nil {
 			t.Fatalf("expected success, got: %v", err)
 		}
 
 		// Re-login with new password
-		newLogin, err := svc.Login(ctx, "pm@bank.local", newPlain, "127.0.0.1", "test-agent")
+		newLogin, err := svc.Login(ctx, "pm@bank.local", newPlain, "127.0.0.1", "test-agent", "test-request-id")
 		if err != nil {
 			t.Fatalf("login with new password failed: %v", err)
 		}

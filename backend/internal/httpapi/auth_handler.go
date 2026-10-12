@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/go-chi/chi/v5/middleware"
+
 	"ppo-kanban/internal/auth"
 )
 
@@ -54,7 +56,8 @@ func (h *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ip := extractIP(r)
-	result, err := h.authService.Login(r.Context(), req.Email, req.Password, ip, r.UserAgent())
+	requestID := middleware.GetReqID(r.Context())
+	result, err := h.authService.Login(r.Context(), req.Email, req.Password, ip, r.UserAgent(), requestID)
 	if err != nil {
 		if errors.Is(err, auth.ErrAccountLocked) {
 			ErrorJSON(w, http.StatusLocked, "ACCOUNT_LOCKED", "Akun terkunci sementara karena terlalu banyak percobaan gagal. Silakan coba lagi setelah 15 menit.", nil)
@@ -87,7 +90,9 @@ func (h *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	authInfo := GetSessionInfo(r.Context())
 	if authInfo != nil {
-		_ = h.authService.Logout(r.Context(), authInfo.RawSessionToken)
+		ip := extractIP(r)
+		requestID := middleware.GetReqID(r.Context())
+		_ = h.authService.Logout(r.Context(), authInfo.RawSessionToken, ip, requestID)
 	}
 
 	http.SetCookie(w, &http.Cookie{
@@ -147,12 +152,17 @@ func (h *AuthHandler) HandleChangePassword(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	ip := extractIP(r)
+	requestID := middleware.GetReqID(r.Context())
+	
 	err := h.authService.ChangePassword(
 		r.Context(),
 		authInfo.RawSessionToken,
 		req.OldPassword,
 		req.NewPassword,
 		req.ConfirmPassword,
+		ip,
+		requestID,
 	)
 	if err != nil {
 		switch {
