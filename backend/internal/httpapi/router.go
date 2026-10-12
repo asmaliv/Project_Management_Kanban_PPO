@@ -7,24 +7,58 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	"ppo-kanban/internal/auth"
 )
 
-// NewRouter creates and configures the chi router with global middleware.
-func NewRouter(logger *slog.Logger) *chi.Mux {
+type RouterParams struct {
+	Logger        *slog.Logger
+	AuthService   *auth.Service
+	SessionSecret string
+	CookieSecure  bool
+}
+
+// NewRouter creates and configures the chi router with global middleware and API endpoints.
+func NewRouter(params RouterParams) *chi.Mux {
 	r := chi.NewRouter()
 
 	// Global middleware stack (order matches ARCHITECTURE.md)
 	r.Use(middleware.RequestID)
-	r.Use(requestLogger(logger))
+	r.Use(requestLogger(params.Logger))
 	r.Use(middleware.Recoverer)
 	r.Use(securityHeaders)
+
+	// Session middleware: extracts session from cookie if present.
+	// Must be registered before any routes (chi requirement).
+	// No-op for unauthenticated requests (no cookie = pass through).
+	if params.AuthService != nil {
+		r.Use(SessionMiddleware(params.AuthService, params.CookieSecure))
+	}
 
 	// Public endpoints (no auth required per SECURITY.md)
 	r.Get("/healthz", HandleHealthz())
 
-	// API v1 routes will be mounted here in later phases
+	// API v1 routes
 	r.Route("/api/v1", func(r chi.Router) {
-		// Phase 1+: auth, user, project, task, risk, finding, audit, dashboard
+		if params.AuthService != nil {
+			authHandler := NewAuthHandler(params.AuthService, params.SessionSecret, params.CookieSecure)
+
+			r.Route("/auth", func(r chi.Router) {
+				// Login is public but strictly rate-limited
+				r.With(RateLimitLogin()).Post("/login", authHandler.HandleLogin)
+
+				// Authenticated auth routes
+				r.Group(func(r chi.Router) {
+					r.Use(RequireAuth)
+
+					r.Get("/me", authHandler.HandleMe)
+					r.Post("/logout", authHandler.HandleLogout)
+
+					// Change password requires active session and CSRF token
+					r.With(RequireCSRF(params.SessionSecret)).Post("/change-password", authHandler.HandleChangePassword)
+				})
+			})
+		}
 	})
 
 	return r
@@ -51,7 +85,6 @@ func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 }
 
 // securityHeaders adds baseline security headers to every response.
-// Full CSP and HSTS will be configured in Phase 8.
 func securityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
