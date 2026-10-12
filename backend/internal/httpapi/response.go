@@ -35,6 +35,17 @@ func JSON(w http.ResponseWriter, status int, data any) {
 	})
 }
 
+// JSONWithMeta sends a successful JSON response with pagination metadata.
+func JSONWithMeta(w http.ResponseWriter, status int, data any, meta *Pagination) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(ApiResponse{
+		Success: true,
+		Data:    data,
+		Meta:    meta,
+	})
+}
+
 // ErrorJSON sends a structured JSON error response.
 func ErrorJSON(w http.ResponseWriter, status int, code, message string, fields map[string]string) {
 	w.Header().Set("Content-Type", "application/json")

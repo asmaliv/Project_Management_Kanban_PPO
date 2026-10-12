@@ -206,6 +206,32 @@ func (m *httpMockStore) UpdatePassword(ctx context.Context, arg db.UpdatePasswor
 	return nil
 }
 
+func (m *httpMockStore) CountUsers(ctx context.Context) (int64, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return int64(len(m.users)), nil
+}
+
+func (m *httpMockStore) ListUsers(ctx context.Context, arg db.ListUsersParams) ([]db.ListUsersRow, error) {
+	return nil, nil
+}
+
+func (m *httpMockStore) ListUsersSummary(ctx context.Context) ([]db.ListUsersSummaryRow, error) {
+	return nil, nil
+}
+
+func (m *httpMockStore) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.UpdateUserRow, error) {
+	return db.UpdateUserRow{}, nil
+}
+
+func (m *httpMockStore) SetUserActiveStatus(ctx context.Context, arg db.SetUserActiveStatusParams) (db.SetUserActiveStatusRow, error) {
+	return db.SetUserActiveStatusRow{}, nil
+}
+
+func (m *httpMockStore) ResetUserPassword(ctx context.Context, arg db.ResetUserPasswordParams) error {
+	return nil
+}
+
 func setupTestServer(t *testing.T) (http.Handler, *auth.Service, *httpMockStore, string) {
 	t.Helper()
 	secret := "test-secret-key-at-least-32-chars-long"

@@ -9,11 +9,14 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"ppo-kanban/internal/auth"
+	"ppo-kanban/internal/rbac"
+	"ppo-kanban/internal/users"
 )
 
 type RouterParams struct {
 	Logger        *slog.Logger
 	AuthService   *auth.Service
+	UserService   *users.Service
 	SessionSecret string
 	CookieSecure  bool
 }
@@ -56,6 +59,37 @@ func NewRouter(params RouterParams) *chi.Mux {
 
 					// Change password requires active session and CSRF token
 					r.With(RequireCSRF(params.SessionSecret)).Post("/change-password", authHandler.HandleChangePassword)
+				})
+			})
+		}
+
+		if params.UserService != nil {
+			userHandler := NewUserHandler(params.UserService)
+
+			r.Route("/users", func(r chi.Router) {
+				// Base requirements: authenticated and password change completed
+				r.Use(RequireAuth)
+				r.Use(RequirePasswordChanged)
+
+				// GET /users: Admin sees full list; other roles see summary per RBAC matrix
+				r.Get("/", userHandler.ListUsers)
+
+				// Admin-only management endpoints
+				r.Group(func(r chi.Router) {
+					r.Use(RequireRole(rbac.RoleAdmin))
+
+					r.Get("/{id}", userHandler.GetUserByID)
+
+					// State-changing endpoints require CSRF
+					r.Group(func(r chi.Router) {
+						r.Use(RequireCSRF(params.SessionSecret))
+
+						r.Post("/", userHandler.CreateUser)
+						r.Patch("/{id}", userHandler.UpdateUser)
+						r.Post("/{id}/deactivate", userHandler.DeactivateUser)
+						r.Post("/{id}/activate", userHandler.ActivateUser)
+						r.Post("/{id}/reset-password", userHandler.ResetPassword)
+					})
 				})
 			})
 		}

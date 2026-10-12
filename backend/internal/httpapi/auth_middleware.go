@@ -69,6 +69,26 @@ func RequirePasswordChanged(next http.Handler) http.Handler {
 	})
 }
 
+// RequireRole enforces role-based access control with default-deny semantics.
+func RequireRole(allowedRoles ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authInfo := GetSessionInfo(r.Context())
+			if authInfo == nil {
+				ErrorJSON(w, http.StatusUnauthorized, "UNAUTHENTICATED", "Sesi tidak valid atau telah berakhir.", nil)
+				return
+			}
+			for _, role := range allowedRoles {
+				if string(authInfo.User.Role) == role {
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+			ErrorJSON(w, http.StatusForbidden, "FORBIDDEN", "Anda tidak memiliki izin untuk mengakses sumber daya ini.", nil)
+		})
+	}
+}
+
 // GetSessionInfo retrieves the authenticated session info from the request context.
 func GetSessionInfo(ctx context.Context) *auth.SessionAuthInfo {
 	val := ctx.Value(sessionContextKey)

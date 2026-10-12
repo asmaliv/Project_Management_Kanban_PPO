@@ -11,6 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countUsers = `-- name: CountUsers :one
+SELECT COUNT(*) FROM users
+`
+
+func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countUsersByEmail = `-- name: CountUsersByEmail :one
 SELECT COUNT(*) FROM users WHERE email = $1
 `
@@ -133,6 +144,97 @@ func (q *Queries) IncrementFailedLogin(ctx context.Context, id pgtype.UUID) (int
 	return failed_login_count, err
 }
 
+const listUsers = `-- name: ListUsers :many
+SELECT id, email, full_name, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at
+FROM users
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2
+`
+
+type ListUsersParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+type ListUsersRow struct {
+	ID                 pgtype.UUID        `json:"id"`
+	Email              string             `json:"email"`
+	FullName           string             `json:"full_name"`
+	Role               UserRole           `json:"role"`
+	IsActive           bool               `json:"is_active"`
+	MustChangePassword bool               `json:"must_change_password"`
+	FailedLoginCount   int32              `json:"failed_login_count"`
+	LockedUntil        pgtype.Timestamptz `json:"locked_until"`
+	LastLoginAt        pgtype.Timestamptz `json:"last_login_at"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+}
+
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUsersRow, error) {
+	rows, err := q.db.Query(ctx, listUsers, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUsersRow
+	for rows.Next() {
+		var i ListUsersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.FullName,
+			&i.Role,
+			&i.IsActive,
+			&i.MustChangePassword,
+			&i.FailedLoginCount,
+			&i.LockedUntil,
+			&i.LastLoginAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsersSummary = `-- name: ListUsersSummary :many
+SELECT id, full_name, role
+FROM users
+WHERE is_active = true
+ORDER BY full_name ASC
+`
+
+type ListUsersSummaryRow struct {
+	ID       pgtype.UUID `json:"id"`
+	FullName string      `json:"full_name"`
+	Role     UserRole    `json:"role"`
+}
+
+func (q *Queries) ListUsersSummary(ctx context.Context) ([]ListUsersSummaryRow, error) {
+	rows, err := q.db.Query(ctx, listUsersSummary)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUsersSummaryRow
+	for rows.Next() {
+		var i ListUsersSummaryRow
+		if err := rows.Scan(&i.ID, &i.FullName, &i.Role); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const lockAccount = `-- name: LockAccount :exec
 UPDATE users
 SET locked_until = $2,
@@ -164,6 +266,72 @@ func (q *Queries) ResetFailedLoginAndTouchLastLogin(ctx context.Context, id pgty
 	return err
 }
 
+const resetUserPassword = `-- name: ResetUserPassword :exec
+UPDATE users
+SET password_hash = $2,
+    must_change_password = true,
+    failed_login_count = 0,
+    locked_until = NULL,
+    updated_at = NOW()
+WHERE id = $1
+`
+
+type ResetUserPasswordParams struct {
+	ID           pgtype.UUID `json:"id"`
+	PasswordHash string      `json:"password_hash"`
+}
+
+func (q *Queries) ResetUserPassword(ctx context.Context, arg ResetUserPasswordParams) error {
+	_, err := q.db.Exec(ctx, resetUserPassword, arg.ID, arg.PasswordHash)
+	return err
+}
+
+const setUserActiveStatus = `-- name: SetUserActiveStatus :one
+UPDATE users
+SET is_active = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, email, full_name, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at
+`
+
+type SetUserActiveStatusParams struct {
+	ID       pgtype.UUID `json:"id"`
+	IsActive bool        `json:"is_active"`
+}
+
+type SetUserActiveStatusRow struct {
+	ID                 pgtype.UUID        `json:"id"`
+	Email              string             `json:"email"`
+	FullName           string             `json:"full_name"`
+	Role               UserRole           `json:"role"`
+	IsActive           bool               `json:"is_active"`
+	MustChangePassword bool               `json:"must_change_password"`
+	FailedLoginCount   int32              `json:"failed_login_count"`
+	LockedUntil        pgtype.Timestamptz `json:"locked_until"`
+	LastLoginAt        pgtype.Timestamptz `json:"last_login_at"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+}
+
+func (q *Queries) SetUserActiveStatus(ctx context.Context, arg SetUserActiveStatusParams) (SetUserActiveStatusRow, error) {
+	row := q.db.QueryRow(ctx, setUserActiveStatus, arg.ID, arg.IsActive)
+	var i SetUserActiveStatusRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.FullName,
+		&i.Role,
+		&i.IsActive,
+		&i.MustChangePassword,
+		&i.FailedLoginCount,
+		&i.LockedUntil,
+		&i.LastLoginAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updatePassword = `-- name: UpdatePassword :exec
 UPDATE users
 SET password_hash = $2,
@@ -181,4 +349,52 @@ type UpdatePasswordParams struct {
 func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error {
 	_, err := q.db.Exec(ctx, updatePassword, arg.ID, arg.PasswordHash, arg.MustChangePassword)
 	return err
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET full_name = $2,
+    role = $3,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, email, full_name, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at
+`
+
+type UpdateUserParams struct {
+	ID       pgtype.UUID `json:"id"`
+	FullName string      `json:"full_name"`
+	Role     UserRole    `json:"role"`
+}
+
+type UpdateUserRow struct {
+	ID                 pgtype.UUID        `json:"id"`
+	Email              string             `json:"email"`
+	FullName           string             `json:"full_name"`
+	Role               UserRole           `json:"role"`
+	IsActive           bool               `json:"is_active"`
+	MustChangePassword bool               `json:"must_change_password"`
+	FailedLoginCount   int32              `json:"failed_login_count"`
+	LockedUntil        pgtype.Timestamptz `json:"locked_until"`
+	LastLoginAt        pgtype.Timestamptz `json:"last_login_at"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
+	row := q.db.QueryRow(ctx, updateUser, arg.ID, arg.FullName, arg.Role)
+	var i UpdateUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.FullName,
+		&i.Role,
+		&i.IsActive,
+		&i.MustChangePassword,
+		&i.FailedLoginCount,
+		&i.LockedUntil,
+		&i.LastLoginAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

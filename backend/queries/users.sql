@@ -45,3 +45,43 @@ WHERE id = $1;
 
 -- name: CountUsersByEmail :one
 SELECT COUNT(*) FROM users WHERE email = $1;
+
+-- name: ListUsers :many
+SELECT id, email, full_name, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at
+FROM users
+ORDER BY created_at DESC
+LIMIT $1 OFFSET $2;
+
+-- name: CountUsers :one
+SELECT COUNT(*) FROM users;
+
+-- name: ListUsersSummary :many
+SELECT id, full_name, role
+FROM users
+WHERE is_active = true
+ORDER BY full_name ASC;
+
+-- name: UpdateUser :one
+UPDATE users
+SET full_name = $2,
+    role = $3,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, email, full_name, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at;
+
+-- name: SetUserActiveStatus :one
+UPDATE users
+SET is_active = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, email, full_name, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at;
+
+-- name: ResetUserPassword :exec
+UPDATE users
+SET password_hash = $2,
+    must_change_password = true,
+    failed_login_count = 0,
+    locked_until = NULL,
+    updated_at = NOW()
+WHERE id = $1;
+

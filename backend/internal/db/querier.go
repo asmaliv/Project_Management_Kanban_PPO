@@ -11,6 +11,7 @@ import (
 )
 
 type Querier interface {
+	CountUsers(ctx context.Context) (int64, error)
 	CountUsersByEmail(ctx context.Context, email string) (int64, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
@@ -21,10 +22,15 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	IncrementFailedLogin(ctx context.Context, id pgtype.UUID) (int32, error)
+	ListUsers(ctx context.Context, arg ListUsersParams) ([]ListUsersRow, error)
+	ListUsersSummary(ctx context.Context) ([]ListUsersSummaryRow, error)
 	LockAccount(ctx context.Context, arg LockAccountParams) error
 	ResetFailedLoginAndTouchLastLogin(ctx context.Context, id pgtype.UUID) error
+	ResetUserPassword(ctx context.Context, arg ResetUserPasswordParams) error
+	SetUserActiveStatus(ctx context.Context, arg SetUserActiveStatusParams) (SetUserActiveStatusRow, error)
 	TouchSessionLastSeen(ctx context.Context, id pgtype.UUID) error
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

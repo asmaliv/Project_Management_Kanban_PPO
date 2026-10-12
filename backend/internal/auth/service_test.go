@@ -218,6 +218,32 @@ func (m *mockStore) UpdatePassword(ctx context.Context, arg db.UpdatePasswordPar
 	return nil
 }
 
+func (m *mockStore) CountUsers(ctx context.Context) (int64, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return int64(len(m.users)), nil
+}
+
+func (m *mockStore) ListUsers(ctx context.Context, arg db.ListUsersParams) ([]db.ListUsersRow, error) {
+	return nil, nil
+}
+
+func (m *mockStore) ListUsersSummary(ctx context.Context) ([]db.ListUsersSummaryRow, error) {
+	return nil, nil
+}
+
+func (m *mockStore) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.UpdateUserRow, error) {
+	return db.UpdateUserRow{}, nil
+}
+
+func (m *mockStore) SetUserActiveStatus(ctx context.Context, arg db.SetUserActiveStatusParams) (db.SetUserActiveStatusRow, error) {
+	return db.SetUserActiveStatusRow{}, nil
+}
+
+func (m *mockStore) ResetUserPassword(ctx context.Context, arg db.ResetUserPasswordParams) error {
+	return nil
+}
+
 func setupTestService(t *testing.T) (*Service, *mockStore) {
 	t.Helper()
 	store := newMockStore()
