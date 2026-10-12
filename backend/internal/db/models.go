@@ -56,6 +56,21 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 	return string(ns.UserRole), nil
 }
 
+type AuditLog struct {
+	ID         int64              `json:"id"`
+	OccurredAt pgtype.Timestamptz `json:"occurred_at"`
+	ActorID    pgtype.UUID        `json:"actor_id"`
+	ActorRole  NullUserRole       `json:"actor_role"`
+	Action     string             `json:"action"`
+	EntityType string             `json:"entity_type"`
+	EntityID   string             `json:"entity_id"`
+	ProjectID  pgtype.UUID        `json:"project_id"`
+	Before     []byte             `json:"before"`
+	After      []byte             `json:"after"`
+	Ip         string             `json:"ip"`
+	RequestID  string             `json:"request_id"`
+}
+
 type Session struct {
 	ID         pgtype.UUID        `json:"id"`
 	UserID     pgtype.UUID        `json:"user_id"`
