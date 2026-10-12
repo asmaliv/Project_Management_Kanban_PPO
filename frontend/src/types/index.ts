@@ -8,17 +8,36 @@ export type UserRole =
 export interface User {
   id: string
   email: string
-  fullName: string
+  full_name: string
   role: UserRole
-  isActive: boolean
-  mustChangePassword: boolean
-  createdAt: string
-  updatedAt: string
+  must_change_password: boolean
+  created_at: string
+  updated_at: string
 }
 
-export interface ApiResponse<T> {
+/** Standard backend response envelope (matches httpapi.ApiResponse). */
+export interface ApiResponse<T = unknown> {
+  success: boolean
   data?: T
-  error?: string
+  error?: ApiError
+  meta?: Pagination
+}
+
+export interface ApiError {
+  code: string
+  message: string
+  fields?: Record<string, string>
+}
+
+export interface Pagination {
+  page: number
+  page_size: number
+  total: number
+}
+
+export interface AuthData {
+  user: User
+  csrf_token: string
 }
 
 export interface HealthCheckResponse {
