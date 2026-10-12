@@ -1,4 +1,12 @@
-import type { ApiResponse, AuthData } from '../types'
+import type {
+  ApiResponse,
+  AuthData,
+  CreateUserPayload,
+  Pagination,
+  UpdateUserPayload,
+  UserDetail,
+  UserSummary,
+} from '../types'
 
 const CSRF_HEADER = 'X-CSRF-Token'
 
@@ -117,5 +125,84 @@ export async function apiChangePassword(
       new_password: newPassword,
       confirm_password: confirmPassword,
     }),
+  })
+}
+
+// ─── Users API ────────────────────────────────────────────────────────
+
+
+export async function apiListUsers(
+  page = 1,
+  pageSize = 20,
+): Promise<{ users: UserDetail[]; meta?: Pagination }> {
+  const res = await apiClient<UserDetail[]>(`/api/v1/users?page=${page}&page_size=${pageSize}`)
+  return {
+    users: res.data || [],
+    meta: res.meta,
+  }
+}
+
+export async function apiListUsersSummary(): Promise<UserSummary[]> {
+  const res = await apiClient<UserSummary[]>('/api/v1/users')
+  return res.data || []
+}
+
+export async function apiCreateUser(
+  payload: CreateUserPayload,
+): Promise<UserDetail> {
+  const res = await apiClient<UserDetail>('/api/v1/users', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  return res.data as UserDetail
+}
+
+export async function apiGetUser(id: string): Promise<UserDetail> {
+  const res = await apiClient<UserDetail>(`/api/v1/users/${id}`)
+  return res.data as UserDetail
+}
+
+export async function apiUpdateUser(
+  id: string,
+  payload: UpdateUserPayload,
+): Promise<UserDetail> {
+  const res = await apiClient<UserDetail>(`/api/v1/users/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+  return res.data as UserDetail
+}
+
+export async function apiDeactivateUser(id: string): Promise<UserDetail> {
+  const res = await apiClient<UserDetail>(`/api/v1/users/${id}/deactivate`, {
+    method: 'POST',
+  })
+  return res.data as UserDetail
+}
+
+export async function apiActivateUser(id: string): Promise<UserDetail> {
+  const res = await apiClient<UserDetail>(`/api/v1/users/${id}/activate`, {
+    method: 'POST',
+  })
+  return res.data as UserDetail
+}
+
+export async function apiSetUserActiveStatus(
+  id: string,
+  isActive: boolean,
+): Promise<UserDetail> {
+  if (isActive) {
+    return apiActivateUser(id)
+  }
+  return apiDeactivateUser(id)
+}
+
+export async function apiResetPassword(
+  id: string,
+  temporaryPassword: string,
+): Promise<void> {
+  await apiClient(`/api/v1/users/${id}/reset-password`, {
+    method: 'POST',
+    body: JSON.stringify({ temporary_password: temporaryPassword }),
   })
 }

@@ -6,6 +6,7 @@ import ChangePasswordPage from './features/auth/ChangePasswordPage'
 import AppLayout from './components/layout/AppLayout'
 import DashboardPage from './features/dashboard/DashboardPage'
 import PlaceholderPage from './features/placeholder/PlaceholderPage'
+import UsersPage from './features/users/UsersPage'
 
 export default function App() {
   return (
@@ -26,7 +27,12 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               <Route path="/" element={<DashboardPage />} />
-              <Route path="/users" element={<PlaceholderPage />} />
+
+              {/* Admin-only module: User Management & RBAC */}
+              <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                <Route path="/users" element={<UsersPage />} />
+              </Route>
+
               <Route path="/projects" element={<PlaceholderPage />} />
               <Route path="/team-tasks" element={<PlaceholderPage />} />
               <Route path="/my-tasks" element={<PlaceholderPage />} />

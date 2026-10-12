@@ -15,6 +15,31 @@ export interface User {
   updated_at: string
 }
 
+export interface UserDetail extends User {
+  is_active: boolean
+  failed_login_count: number
+  locked_until?: string | null
+  last_login_at?: string | null
+}
+
+export interface UserSummary {
+  id: string
+  full_name: string
+  role: UserRole
+}
+
+export interface CreateUserPayload {
+  email: string
+  full_name: string
+  role: UserRole
+  temporary_password: string
+}
+
+export interface UpdateUserPayload {
+  full_name: string
+  role: UserRole
+}
+
 /** Standard backend response envelope (matches httpapi.ApiResponse). */
 export interface ApiResponse<T = unknown> {
   success: boolean
