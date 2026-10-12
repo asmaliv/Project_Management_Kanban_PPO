@@ -5,22 +5,46 @@ import (
 	"net/http"
 )
 
-// Response is the standard API response envelope.
-type Response struct {
-	Data  any    `json:"data,omitempty"`
-	Error string `json:"error,omitempty"`
+// Standard response envelope matching docs/API.md
+type ApiResponse struct {
+	Success bool        `json:"success"`
+	Data    any         `json:"data,omitempty"`
+	Error   *ApiError   `json:"error,omitempty"`
+	Meta    *Pagination `json:"meta,omitempty"`
 }
 
-// JSON writes a JSON response with the given status code.
+type ApiError struct {
+	Code    string            `json:"code"`
+	Message string            `json:"message"`
+	Fields  map[string]string `json:"fields,omitempty"`
+}
+
+type Pagination struct {
+	Page     int `json:"page"`
+	PageSize int `json:"page_size"`
+	Total    int `json:"total"`
+}
+
+// JSON sends a successful JSON response with HTTP status code.
 func JSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(Response{Data: data})
+	_ = json.NewEncoder(w).Encode(ApiResponse{
+		Success: true,
+		Data:    data,
+	})
 }
 
-// Error writes a JSON error response with the given status code and message.
-func Error(w http.ResponseWriter, status int, msg string) {
+// ErrorJSON sends a structured JSON error response.
+func ErrorJSON(w http.ResponseWriter, status int, code, message string, fields map[string]string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(Response{Error: msg})
+	_ = json.NewEncoder(w).Encode(ApiResponse{
+		Success: false,
+		Error: &ApiError{
+			Code:    code,
+			Message: message,
+			Fields:  fields,
+		},
+	})
 }
