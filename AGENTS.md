@@ -22,9 +22,8 @@ Baca file berikut sebelum mengubah kode (urutan ini):
 4. `docs/SECURITY.md` — aturan keamanan dan **matriks RBAC**
 5. `docs/DATABASE.md` dan `docs/API.md` — jika menyentuh data atau endpoint
 6. `docs/CODE_STYLE.md` — gaya kode
-7. `docs/DESIGN_SYSTEM.md` — jika menyentuh UI
-8. `docs/APP_FLOW.md` — jika membuat layar atau alur
-9. `docs/IMPLEMENTATION_PLAN.md` dan `docs/TESTING.md` — untuk tahu phase aktif dan cara verifikasi
+7. `docs/APP_FLOW.md` — jika membuat layar atau alur
+8. `docs/IMPLEMENTATION_PLAN.md` dan `docs/TESTING.md` — untuk tahu phase aktif dan cara verifikasi
 
 Lalu periksa kode yang sudah ada sebelum membuat file/komponen/pola baru.
 

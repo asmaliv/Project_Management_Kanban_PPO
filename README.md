@@ -4,7 +4,44 @@ Aplikasi web Project Management Kanban Board (Go + React) dengan role: Admin, Pr
 
 > Proyek Internal PPO
 
-## Dokumen Perencanaan
+## 📊 Status Implementasi
+
+### ✅ Phase 0: Setup & Pondasi (Selesai)
+- Database, chi backend, Vite frontend, CI checklist
+
+### ✅ Phase 1: Autentikasi & Sesi (Selesai)  
+- Argon2id, cookie HttpOnly, CSRF token, login lockout, ganti password
+
+### ✅ Phase 2: Manajemen User & RBAC (Selesai)
+- Kelola pengguna, matriks izin 5 role, form tambah user
+
+### ✅ Phase 3: Audit Trail (Selesai) ✨
+- Tabel audit_logs dengan trigger append-only
+- Service audit log dalam transaksi yang sama dengan perubahan data
+- Catat login sukses/gagal, lockout, logout, perubahan role
+- GET /audit-logs dengan filter (Audit & Admin only)
+- **Tidak pernah mencatat password, hash, atau token**
+
+### 🔄 Next: Phase 4 - Proyek, Member, dan Kolom
+- CRUD proyek (PM), arsip, transfer owner (Admin)
+- Kelola member dan kolom papan
+- Audit log untuk semua aksi
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend:** Go 1.24+ · chi router · PostgreSQL 16+ · sqlc · golang-migrate
+- **Frontend:** React 18 · TypeScript · Vite · Tailwind CSS · TanStack Query
+- **Security:** Argon2id · HttpOnly cookies · CSRF protection · Rate limiting
+- **Audit:** Append-only audit_logs dengan trigger database
+
+## 🤖 AI Skills Active
+
+- **Ponytail** - Simplest working code, -53% code, -41% time
+- **Graphify** - Knowledge graph, 390 nodes, 986 edges, 14 communities
+
+## 📚 Dokumen Perencanaan
 
 | File | Pertanyaan yang dijawab |
 |---|---|
@@ -16,11 +53,9 @@ Aplikasi web Project Management Kanban Board (Go + React) dengan role: Admin, Pr
 | `docs/DATABASE.md` | Bagaimana data dimodelkan? |
 | `docs/API.md` | Bagaimana frontend dan backend berkomunikasi? |
 | `docs/CODE_STYLE.md` | Seperti apa kode di repo ini? |
-| `docs/DESIGN_SYSTEM.md` | Seperti apa tampilannya? |
 | `docs/APP_FLOW.md` | Bagaimana user berpindah antar layar? |
 | `docs/IMPLEMENTATION_PLAN.md` | Dalam urutan apa kita membangun? |
 | `docs/TESTING.md` | Bagaimana membuktikan semuanya benar? |
-| `docs/GUIDE_VIBE_CODING.md` | Langkah demi langkah membangun semuanya (untuk junior) |
 
 ## Cara Memulai dengan AI Agent
 
@@ -49,7 +84,7 @@ Setelah selesai, jalankan pengecekan Verify dan laporkan mana yang benar-benar
 dijalankan dan mana yang belum diverifikasi.
 ```
 
-## Cara Menjalankan Lokal
+## 🚀 Cara Menjalankan Lokal
 
 ### 1. Database (PostgreSQL 16)
 ```bash
@@ -70,6 +105,23 @@ npm install
 npm run dev
 ```
 Aplikasi web berjalan di `http://localhost:5173`. Request `/healthz` dan `/api` otomatis diproxy ke backend.
+
+## 🔍 Explore Architecture
+
+Gunakan Graphify untuk memahami codebase:
+```bash
+# Query graph
+python -m graphify query "how does authentication work?"
+
+# Find connections
+python -m graphify path "Service" "AuditLog"
+
+# Explain component
+python -m graphify explain "SessionManager"
+
+# Open interactive visualization
+start graphify-out/graph.html
+```
 
 ## Alur Kerja Git
 
