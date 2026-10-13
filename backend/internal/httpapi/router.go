@@ -8,12 +8,15 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"ppo-kanban/internal/auditlog"
 	"ppo-kanban/internal/auth"
+	"ppo-kanban/internal/db"
 )
 
 type RouterParams struct {
 	Logger        *slog.Logger
 	AuthService   *auth.Service
+	AuditService  *auditlog.Service
 	SessionSecret string
 	CookieSecure  bool
 }
@@ -57,6 +60,18 @@ func NewRouter(params RouterParams) *chi.Mux {
 					// Change password requires active session and CSRF token
 					r.With(RequireCSRF(params.SessionSecret)).Post("/change-password", authHandler.HandleChangePassword)
 				})
+			})
+		}
+		
+		// Audit logs endpoint (admin and audit roles only)
+		if params.AuditService != nil {
+			auditHandler := NewAuditLogHandler(params.AuditService)
+
+			r.Group(func(r chi.Router) {
+				r.Use(RequireAuth)
+				r.Use(RequireRoles(db.UserRoleAdmin, db.UserRoleAudit))
+
+				r.Get("/audit-logs", auditHandler.HandleListAuditLogs)
 			})
 		}
 	})

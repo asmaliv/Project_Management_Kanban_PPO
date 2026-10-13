@@ -21,6 +21,8 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	IncrementFailedLogin(ctx context.Context, id pgtype.UUID) (int32, error)
+	InsertAuditLog(ctx context.Context, arg InsertAuditLogParams) (AuditLog, error)
+	ListAuditLogs(ctx context.Context, arg ListAuditLogsParams) ([]AuditLog, error)
 	LockAccount(ctx context.Context, arg LockAccountParams) error
 	ResetFailedLoginAndTouchLastLogin(ctx context.Context, id pgtype.UUID) error
 	TouchSessionLastSeen(ctx context.Context, id pgtype.UUID) error

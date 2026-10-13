@@ -206,12 +206,24 @@ func (m *httpMockStore) UpdatePassword(ctx context.Context, arg db.UpdatePasswor
 	return nil
 }
 
+// InsertAuditLog is a no-op for tests
+func (m *httpMockStore) InsertAuditLog(ctx context.Context, arg db.InsertAuditLogParams) (db.AuditLog, error) {
+	return db.AuditLog{}, nil
+}
+
+// ListAuditLogs is a no-op for tests
+func (m *httpMockStore) ListAuditLogs(ctx context.Context, arg db.ListAuditLogsParams) ([]db.AuditLog, error) {
+	return []db.AuditLog{}, nil
+}
+
 func setupTestServer(t *testing.T) (http.Handler, *auth.Service, *httpMockStore, string) {
 	t.Helper()
 	secret := "test-secret-key-at-least-32-chars-long"
 	store := newHTTPMockStore()
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	authSvc := auth.NewService(store, secret, logger)
+	
+	// For tests, pass nil for audit service
+	authSvc := auth.NewService(store, secret, logger, nil)
 
 	router := NewRouter(RouterParams{
 		Logger:        logger,
@@ -296,7 +308,7 @@ func TestAuthEndpoints_VerifyChecklist(t *testing.T) {
 
 	t.Run("Request tulis tanpa CSRF token -> ditolak (403)", func(t *testing.T) {
 		// First login
-		loginRes, err := authSvc.Login(ctx, "auditor@bank.local", rawPassword, "127.0.0.1", "test-agent")
+		loginRes, err := authSvc.Login(ctx, "auditor@bank.local", rawPassword, "127.0.0.1", "test-agent", "test-request-id")
 		if err != nil {
 			t.Fatalf("login failed: %v", err)
 		}

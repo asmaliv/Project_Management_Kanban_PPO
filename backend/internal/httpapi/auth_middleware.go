@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"ppo-kanban/internal/auth"
+	"ppo-kanban/internal/db"
 )
 
 type contextKey string
@@ -80,4 +81,35 @@ func GetSessionInfo(ctx context.Context) *auth.SessionAuthInfo {
 		return nil
 	}
 	return info
+}
+
+// RequireRoles enforces that the authenticated user has one of the allowed roles.
+// Returns 403 if the user's role is not in the allowed list.
+// Must be used after RequireAuth middleware.
+func RequireRoles(allowedRoles ...db.UserRole) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			authInfo := GetSessionInfo(r.Context())
+			if authInfo == nil {
+				ErrorJSON(w, http.StatusUnauthorized, "UNAUTHENTICATED", "Sesi tidak valid atau telah berakhir.", nil)
+				return
+			}
+
+			userRole := db.UserRole(authInfo.User.Role)
+			allowed := false
+			for _, role := range allowedRoles {
+				if userRole == role {
+					allowed = true
+					break
+				}
+			}
+
+			if !allowed {
+				ErrorJSON(w, http.StatusForbidden, "FORBIDDEN", "Anda tidak memiliki izin untuk mengakses resource ini.", nil)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }
