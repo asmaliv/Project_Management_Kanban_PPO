@@ -55,6 +55,50 @@ func (ns NullProjectStatus) Value() (driver.Value, error) {
 	return string(ns.ProjectStatus), nil
 }
 
+type TaskPriority string
+
+const (
+	TaskPriorityLow      TaskPriority = "low"
+	TaskPriorityMedium   TaskPriority = "medium"
+	TaskPriorityHigh     TaskPriority = "high"
+	TaskPriorityCritical TaskPriority = "critical"
+)
+
+func (e *TaskPriority) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = TaskPriority(s)
+	case string:
+		*e = TaskPriority(s)
+	default:
+		return fmt.Errorf("unsupported scan type for TaskPriority: %T", src)
+	}
+	return nil
+}
+
+type NullTaskPriority struct {
+	TaskPriority TaskPriority `json:"task_priority"`
+	Valid        bool         `json:"valid"` // Valid is true if TaskPriority is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullTaskPriority) Scan(value interface{}) error {
+	if value == nil {
+		ns.TaskPriority, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.TaskPriority.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullTaskPriority) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.TaskPriority), nil
+}
+
 type UserRole string
 
 const (
@@ -156,6 +200,34 @@ type Session struct {
 	ExpiresAt  pgtype.Timestamptz `json:"expires_at"`
 	Ip         pgtype.Text        `json:"ip"`
 	UserAgent  pgtype.Text        `json:"user_agent"`
+}
+
+type Task struct {
+	ID              pgtype.UUID        `json:"id"`
+	ProjectID       pgtype.UUID        `json:"project_id"`
+	ColumnID        pgtype.UUID        `json:"column_id"`
+	Title           string             `json:"title"`
+	Description     string             `json:"description"`
+	Priority        TaskPriority       `json:"priority"`
+	AssigneeID      pgtype.UUID        `json:"assignee_id"`
+	ReporterID      pgtype.UUID        `json:"reporter_id"`
+	DueDate         pgtype.Date        `json:"due_date"`
+	ProgressPercent int32              `json:"progress_percent"`
+	Position        int32              `json:"position"`
+	Labels          []string           `json:"labels"`
+	Version         int32              `json:"version"`
+	CompletedAt     pgtype.Timestamptz `json:"completed_at"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type TaskComment struct {
+	ID        pgtype.UUID        `json:"id"`
+	TaskID    pgtype.UUID        `json:"task_id"`
+	AuthorID  pgtype.UUID        `json:"author_id"`
+	Body      string             `json:"body"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type User struct {
