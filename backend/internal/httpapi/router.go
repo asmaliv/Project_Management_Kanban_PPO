@@ -12,6 +12,7 @@ import (
 	"ppo-kanban/internal/auth"
 	"ppo-kanban/internal/db"
 	"ppo-kanban/internal/project"
+	"ppo-kanban/internal/task"
 )
 
 type RouterParams struct {
@@ -19,6 +20,7 @@ type RouterParams struct {
 	AuthService    *auth.Service
 	AuditService   *auditlog.Service
 	ProjectService *project.Service
+	TaskService    *task.Service
 	SessionSecret  string
 	CookieSecure   bool
 }
@@ -111,6 +113,37 @@ func NewRouter(params RouterParams) *chi.Mux {
 					r.Patch("/", projectHandler.HandleUpdateColumn)
 					r.Put("/", projectHandler.HandleUpdateColumn)
 					r.Delete("/", projectHandler.HandleDeleteColumn)
+				})
+			})
+		}
+
+		// Tasks and Comments endpoints
+		if params.TaskService != nil {
+			taskHandler := NewTaskHandler(params.TaskService)
+
+			r.Group(func(r chi.Router) {
+				r.Use(RequireAuth)
+
+				// Cross-project filtered tasks
+				r.Get("/tasks", taskHandler.HandleListTasks)
+
+				// Project tasks: GET /projects/{id}/tasks, POST /projects/{id}/tasks
+				r.Route("/projects/{id}/tasks", func(r chi.Router) {
+					r.Get("/", taskHandler.HandleListBoardTasks)
+					r.Post("/", taskHandler.HandleCreateTask)
+				})
+
+				// Task operations: GET /tasks/{id}, PATCH /tasks/{id}, POST /tasks/{id}/move, DELETE /tasks/{id}
+				r.Route("/tasks/{id}", func(r chi.Router) {
+					r.Get("/", taskHandler.HandleGetTask)
+					r.Patch("/", taskHandler.HandleUpdateTask)
+					r.Put("/", taskHandler.HandleUpdateTask)
+					r.Post("/move", taskHandler.HandleMoveTask)
+					r.Delete("/", taskHandler.HandleDeleteTask)
+
+					// Comments
+					r.Get("/comments", taskHandler.HandleListComments)
+					r.Post("/comments", taskHandler.HandleCreateComment)
 				})
 			})
 		}
