@@ -60,8 +60,8 @@ Skill ada di `.agents/skills/`. Dokumen di `docs/` selalu menang atas skill mana
 
 - `ppo-endpoint-checklist`: wajib dijalankan setiap membuat atau mengubah endpoint, sebelum menyatakan pekerjaan selesai.
 - `ponytail` (**ACTIVE**): pilih solusi paling sederhana. The best code is the code never written. Tetapi jangan pernah melewati validasi input, RBAC, audit log, atau aturan di `docs/SECURITY.md`. Levels: lite, full (default), ultra.
-- `graphify` (setup pending): sebelum membuat rencana untuk phase baru, gunakan `graphify query "<pertanyaan>"` untuk memahami kode yang sudah ada. Graph bisa usang; jika kode banyak berubah, rebuild dengan `/graphify .`. Lihat `.agents/SKILLS_SETUP.md` untuk instalasi.
-- `ui-ux-pro-max` (setup pending): design intelligence untuk UI/UX profesional. Lihat `.agents/SKILLS_SETUP.md` untuk instalasi.
+- `graphify` (**ACTIVE**): sebelum membuat rencana untuk phase baru, gunakan `graphify query "<pertanyaan>"` untuk memahami kode yang sudah ada. Graph bisa usang; jika kode banyak berubah, rebuild dengan `graphify .`. Lihat `.agents/SKILLS_SETUP.md` untuk detail.
+- `ui-ux-pro-max` (**ACTIVE**): design intelligence untuk UI/UX profesional — 79 styles, 192 color palettes, 74 font pairings, 119 UX guidelines. Gunakan saat membuat atau me-review komponen frontend. Search: `python .agents/skills/ui-ux-pro-max/scripts/search.py "<query>" --domain <domain>`. Lihat `.agents/SKILLS_SETUP.md` untuk detail.
 - Skill atau tool pihak ketiga tidak boleh menambah dependency atau mengubah struktur proyek tanpa persetujuan eksplisit.
 
 ## Commands
