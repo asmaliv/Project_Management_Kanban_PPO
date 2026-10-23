@@ -13,11 +13,16 @@ import (
 type Querier interface {
 	AddProjectMember(ctx context.Context, arg AddProjectMemberParams) error
 	ArchiveProject(ctx context.Context, id pgtype.UUID) (Project, error)
+	CountActiveTasksInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error)
 	CountProjectMembers(ctx context.Context, projectID pgtype.UUID) (int64, error)
+	CountTaskComments(ctx context.Context, taskID pgtype.UUID) (int32, error)
+	CountTasksByProjectsFiltered(ctx context.Context, arg CountTasksByProjectsFilteredParams) (int64, error)
 	CountUsersByEmail(ctx context.Context, email string) (int64, error)
 	CreateBoardColumn(ctx context.Context, arg CreateBoardColumnParams) (BoardColumn, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
+	CreateTask(ctx context.Context, arg CreateTaskParams) (Task, error)
+	CreateTaskComment(ctx context.Context, arg CreateTaskCommentParams) (TaskComment, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteBoardColumn(ctx context.Context, id pgtype.UUID) error
 	DeleteExpiredSessions(ctx context.Context) error
@@ -28,6 +33,8 @@ type Querier interface {
 	GetProjectByID(ctx context.Context, id pgtype.UUID) (Project, error)
 	GetProjectByIDIncludeDeleted(ctx context.Context, id pgtype.UUID) (Project, error)
 	GetSessionWithUser(ctx context.Context, tokenHash string) (GetSessionWithUserRow, error)
+	GetTaskByID(ctx context.Context, id pgtype.UUID) (Task, error)
+	GetTaskByIDWithDetails(ctx context.Context, id pgtype.UUID) (GetTaskByIDWithDetailsRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	IncrementFailedLogin(ctx context.Context, id pgtype.UUID) (int32, error)
@@ -39,16 +46,28 @@ type Querier interface {
 	ListProjectMembers(ctx context.Context, projectID pgtype.UUID) ([]ListProjectMembersRow, error)
 	ListProjectsByMember(ctx context.Context, userID pgtype.UUID) ([]Project, error)
 	ListProjectsByOwner(ctx context.Context, ownerID pgtype.UUID) ([]Project, error)
+	ListTaskComments(ctx context.Context, taskID pgtype.UUID) ([]ListTaskCommentsRow, error)
+	ListTasksByColumn(ctx context.Context, columnID pgtype.UUID) ([]ListTasksByColumnRow, error)
+	ListTasksByProject(ctx context.Context, projectID pgtype.UUID) ([]ListTasksByProjectRow, error)
+	ListTasksByProjectsFiltered(ctx context.Context, arg ListTasksByProjectsFilteredParams) ([]ListTasksByProjectsFilteredRow, error)
 	LockAccount(ctx context.Context, arg LockAccountParams) error
 	MaxColumnPosition(ctx context.Context, projectID pgtype.UUID) (int32, error)
+	MaxTaskPositionInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error)
 	NextProjectCode(ctx context.Context) (string, error)
 	RemoveProjectMember(ctx context.Context, arg RemoveProjectMemberParams) error
 	ResetFailedLoginAndTouchLastLogin(ctx context.Context, id pgtype.UUID) error
+	ShiftTasksBetweenPositionsDown(ctx context.Context, arg ShiftTasksBetweenPositionsDownParams) error
+	ShiftTasksBetweenPositionsUp(ctx context.Context, arg ShiftTasksBetweenPositionsUpParams) error
+	ShiftTasksDownInColumn(ctx context.Context, arg ShiftTasksDownInColumnParams) error
+	ShiftTasksUpInColumn(ctx context.Context, arg ShiftTasksUpInColumnParams) error
+	SoftDeleteTask(ctx context.Context, id pgtype.UUID) (Task, error)
 	TouchSessionLastSeen(ctx context.Context, id pgtype.UUID) error
 	TransferProjectOwner(ctx context.Context, arg TransferProjectOwnerParams) (Project, error)
 	UpdateBoardColumn(ctx context.Context, arg UpdateBoardColumnParams) (BoardColumn, error)
 	UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error
 	UpdateProject(ctx context.Context, arg UpdateProjectParams) (Project, error)
+	UpdateTask(ctx context.Context, arg UpdateTaskParams) (Task, error)
+	UpdateTaskPositionAndColumn(ctx context.Context, arg UpdateTaskPositionAndColumnParams) (Task, error)
 }
 
 var _ Querier = (*Queries)(nil)

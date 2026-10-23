@@ -14,6 +14,7 @@ import EditProjectModal from './EditProjectModal'
 import TransferOwnerModal from './TransferOwnerModal'
 import AddMemberModal from './AddMemberModal'
 import ColumnModal from './ColumnModal'
+import KanbanBoard from '../tasks/KanbanBoard'
 
 const STATUS_CONFIG: Record<
   ProjectStatus,
@@ -49,7 +50,7 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null)
   const [columns, setColumns] = useState<BoardColumn[]>([])
   const [members, setMembers] = useState<ProjectMember[]>([])
-  const [activeTab, setActiveTab] = useState<'columns' | 'members' | 'info'>('columns')
+  const [activeTab, setActiveTab] = useState<'board' | 'columns' | 'members' | 'info'>('board')
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -65,10 +66,13 @@ export default function ProjectDetailPage() {
 
   const isOwner = user?.id === project?.owner_id
   const isPM = user?.role === 'project_manager'
+  const isTL = user?.role === 'team_leader'
+  const isMember = members.some((m) => m.id === user?.id)
   const isAdmin = user?.role === 'admin'
   const isArchived = project?.status === 'archived'
 
   const canManageProject = isPM && isOwner && !isArchived
+  const canWriteTasks = !isArchived && ((isPM && isOwner) || (isTL && isMember))
 
   const loadData = useCallback(async () => {
     if (!id) return
@@ -318,17 +322,18 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="border-b border-slate-200 flex items-center gap-6">
+      <div className="border-b border-slate-200 flex items-center gap-6 overflow-x-auto">
         {[
-          { id: 'columns', label: 'Kolom Papan Kanban', count: columns.length },
+          { id: 'board', label: 'Papan Kanban' },
+          { id: 'columns', label: 'Pengaturan Kolom', count: columns.length },
           { id: 'members', label: 'Anggota Tim (Members)', count: members.length },
           { id: 'info', label: 'Informasi Lengkap' },
         ].map((tab) => (
           <button
             key={tab.id}
             type="button"
-            onClick={() => setActiveTab(tab.id as 'columns' | 'members' | 'info')}
-            className={`pb-3 text-sm font-semibold transition-all relative flex items-center gap-2 ${
+            onClick={() => setActiveTab(tab.id as 'board' | 'columns' | 'members' | 'info')}
+            className={`pb-3 text-sm font-semibold transition-all relative flex items-center gap-2 whitespace-nowrap ${
               activeTab === tab.id
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-slate-500 hover:text-slate-800'
@@ -350,7 +355,20 @@ export default function ProjectDetailPage() {
         ))}
       </div>
 
-      {/* Tab 1: Kolom Papan Kanban */}
+      {/* Tab: Papan Kanban */}
+      {activeTab === 'board' && (
+        <KanbanBoard
+          projectId={project.id}
+          columns={columns}
+          members={members}
+          ownerName={isOwner ? (user?.full_name || 'Project Manager') : 'Project Manager'}
+          ownerId={project.owner_id}
+          isPM={isPM && isOwner && !isArchived}
+          canWrite={canWriteTasks}
+        />
+      )}
+
+      {/* Tab: Kolom Papan Kanban */}
       {activeTab === 'columns' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
