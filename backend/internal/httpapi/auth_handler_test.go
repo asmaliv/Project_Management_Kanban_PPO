@@ -216,6 +216,30 @@ func (m *httpMockStore) ListAuditLogs(ctx context.Context, arg db.ListAuditLogsP
 	return []db.AuditLog{}, nil
 }
 
+// Phase 4 Querier stubs for auth tests
+func (m *httpMockStore) AddProjectMember(ctx context.Context, arg db.AddProjectMemberParams) error { return nil }
+func (m *httpMockStore) ArchiveProject(ctx context.Context, id pgtype.UUID) (db.Project, error) { return db.Project{}, nil }
+func (m *httpMockStore) CountProjectMembers(ctx context.Context, projectID pgtype.UUID) (int64, error) { return 0, nil }
+func (m *httpMockStore) CreateBoardColumn(ctx context.Context, arg db.CreateBoardColumnParams) (db.BoardColumn, error) { return db.BoardColumn{}, nil }
+func (m *httpMockStore) CreateProject(ctx context.Context, arg db.CreateProjectParams) (db.Project, error) { return db.Project{}, nil }
+func (m *httpMockStore) DeleteBoardColumn(ctx context.Context, id pgtype.UUID) error { return nil }
+func (m *httpMockStore) GetBoardColumnByID(ctx context.Context, id pgtype.UUID) (db.BoardColumn, error) { return db.BoardColumn{}, nil }
+func (m *httpMockStore) GetDoneColumn(ctx context.Context, projectID pgtype.UUID) (db.BoardColumn, error) { return db.BoardColumn{}, nil }
+func (m *httpMockStore) GetProjectByID(ctx context.Context, id pgtype.UUID) (db.Project, error) { return db.Project{}, nil }
+func (m *httpMockStore) GetProjectByIDIncludeDeleted(ctx context.Context, id pgtype.UUID) (db.Project, error) { return db.Project{}, nil }
+func (m *httpMockStore) IsProjectMember(ctx context.Context, arg db.IsProjectMemberParams) (bool, error) { return false, nil }
+func (m *httpMockStore) ListAllProjects(ctx context.Context) ([]db.Project, error) { return nil, nil }
+func (m *httpMockStore) ListBoardColumns(ctx context.Context, projectID pgtype.UUID) ([]db.BoardColumn, error) { return nil, nil }
+func (m *httpMockStore) ListProjectMembers(ctx context.Context, projectID pgtype.UUID) ([]db.ListProjectMembersRow, error) { return nil, nil }
+func (m *httpMockStore) ListProjectsByMember(ctx context.Context, userID pgtype.UUID) ([]db.Project, error) { return nil, nil }
+func (m *httpMockStore) ListProjectsByOwner(ctx context.Context, ownerID pgtype.UUID) ([]db.Project, error) { return nil, nil }
+func (m *httpMockStore) MaxColumnPosition(ctx context.Context, projectID pgtype.UUID) (int32, error) { return 0, nil }
+func (m *httpMockStore) NextProjectCode(ctx context.Context) (string, error) { return "PRJ-0001", nil }
+func (m *httpMockStore) RemoveProjectMember(ctx context.Context, arg db.RemoveProjectMemberParams) error { return nil }
+func (m *httpMockStore) TransferProjectOwner(ctx context.Context, arg db.TransferProjectOwnerParams) (db.Project, error) { return db.Project{}, nil }
+func (m *httpMockStore) UpdateBoardColumn(ctx context.Context, arg db.UpdateBoardColumnParams) (db.BoardColumn, error) { return db.BoardColumn{}, nil }
+func (m *httpMockStore) UpdateProject(ctx context.Context, arg db.UpdateProjectParams) (db.Project, error) { return db.Project{}, nil }
+
 func setupTestServer(t *testing.T) (http.Handler, *auth.Service, *httpMockStore, string) {
 	t.Helper()
 	secret := "test-secret-key-at-least-32-chars-long"

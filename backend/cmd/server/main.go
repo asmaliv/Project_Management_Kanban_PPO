@@ -15,6 +15,7 @@ import (
 	"ppo-kanban/internal/config"
 	"ppo-kanban/internal/db"
 	"ppo-kanban/internal/httpapi"
+	"ppo-kanban/internal/project"
 )
 
 func main() {
@@ -62,13 +63,15 @@ func main() {
 	}
 
 	authService := auth.NewService(queries, cfg.SessionSecret, logger, auditService)
+	projectService := project.NewService(dbPool, queries, auditService, logger)
 
 	router := httpapi.NewRouter(httpapi.RouterParams{
-		Logger:        logger,
-		AuthService:   authService,
-		AuditService:  auditService,
-		SessionSecret: cfg.SessionSecret,
-		CookieSecure:  cfg.CookieSecure,
+		Logger:         logger,
+		AuthService:    authService,
+		AuditService:   auditService,
+		ProjectService: projectService,
+		SessionSecret:  cfg.SessionSecret,
+		CookieSecure:   cfg.CookieSecure,
 	})
 
 	addr := fmt.Sprintf(":%d", cfg.Port)
