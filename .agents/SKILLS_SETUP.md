@@ -49,30 +49,31 @@
 ---
 
 ### 🎨 UI-UX Pro Max
-**Status:** Requires manual installation  
+**Status:** ✅ INSTALLED & ACTIVE  
 **Repository:** https://github.com/nextlevelbuilder/ui-ux-pro-max-skill  
 **Purpose:** Design intelligence for professional UI/UX - consistent, accessible, beautiful interfaces
 
-**Installation Steps:**
-```powershell
-# 1. Clone repository to skills folder
-cd .agents/skills
-git clone https://github.com/nextlevelbuilder/ui-ux-pro-max-skill ui-ux-pro-max
-
-# 2. The skill will be auto-discovered
-```
+**Installation Summary:**
+- ✅ Cloned to `.agents/skills/ui-ux-pro-max`
+- ✅ CLI installer ran: `npx ui-ux-pro-max-cli init --ai antigravity`
+- ✅ Skills generated: `ui-ux-pro-max`, `design`, `design-system`, `ui-styling`, `brand`, `banner-design`, `slides`
 
 **What You Get:**
-- Design system intelligence (colors, typography, spacing)
-- Accessibility best practices (WCAG AA compliance)
-- Component consistency enforcement
-- Responsive design patterns
-- Dark mode support
+- 79 UI styles (glassmorphism, minimalism, brutalism, dll)
+- 192 color palettes dengan reasoning profiles
+- 74 font pairings (Google Fonts)
+- 119 UX guidelines + anti-patterns
+- 25 chart types & library recommendations
+- WCAG AA accessibility compliance
+- 22 tech stacks termasuk React, Next.js, Tailwind
 
-**Usage After Install:**
-- Automatically active when building UI components
-- Enforces design tokens and consistency
-- Suggests improvements for accessibility
+**Usage:**
+- Otomatis aktif saat membangun komponen UI
+- Search design data via Python script:
+  ```bash
+  python .agents/skills/ui-ux-pro-max/scripts/search.py "<query>" --domain <domain>
+  ```
+- Domain: `style`, `color`, `typography`, `ux`, `chart`, `icons`, `react`, `gsap`
 
 ---
 
@@ -118,9 +119,9 @@ This is a **Go + PostgreSQL + React** project for a Kanban board with 5 roles.
 
 ## Next Steps
 
-1. ✅ **Ponytail is active now** - try being "lazy" in your requests
-2. For **Graphify**: Install Python and run commands above
-3. For **UI-UX Pro Max**: Clone the repository when ready to build frontend
+1. ✅ **Ponytail** — active now
+2. ✅ **Graphify** — installed & active (390 nodes, 986 edges)
+3. ✅ **UI-UX Pro Max** — installed & active (7 skills, Python required for search)
 
 ---
 
