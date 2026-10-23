@@ -121,16 +121,16 @@ Verify:
 
 ---
 
-## Phase 5 — Task & Papan Kanban
+## Phase 5 — Task & Papan Kanban (Selesai ✅)
 
 Tasks:
-- Migrasi `tasks`, `task_comments`
-- CRUD task, optimistic locking (`version`), soft delete
-- Endpoint `move` dengan transaksi penyusunan posisi, WIP limit, aturan maker-checker
-- Endpoint `GET /tasks` (lintas proyek, filter, paginasi) yang dibatasi sesuai izin role
-- Komentar task
-- UI papan: kolom, kartu, drawer detail, drag-and-drop + menu "Pindahkan ke…"
-- Audit log untuk semua aksi
+- [x] Migrasi `tasks`, `task_comments`
+- [x] CRUD task, optimistic locking (`version`), soft delete
+- [x] Endpoint `move` dengan transaksi penyusunan posisi, WIP limit, aturan maker-checker
+- [x] Endpoint `GET /tasks` (lintas proyek, filter, paginasi) yang dibatasi sesuai izin role
+- [x] Komentar task
+- [x] UI papan: kolom, kartu, drawer detail, drag-and-drop + menu "Pindahkan ke…"
+- [x] Audit log untuk semua aksi
 
 Dependencies: Phase 4.
 
@@ -138,11 +138,11 @@ Deliverable:
 - Tim dapat bekerja di papan Kanban dengan aturan persetujuan PM.
 
 Verify:
-- Team Leader tidak bisa memindahkan ke/dari Done (API dan UI).
-- Pemindahan bersamaan oleh dua user → satu berhasil, satu 409; urutan tetap konsisten.
-- Refresh tidak menghilangkan perubahan.
-- WIP limit ditegakkan.
-- Alternatif keyboard untuk memindah task berfungsi.
+- [x] Team Leader tidak bisa memindahkan ke/dari Done (API dan UI).
+- [x] Pemindahan bersamaan oleh dua user → satu berhasil, satu 409; urutan tetap konsisten.
+- [x] Refresh tidak menghilangkan perubahan.
+- [x] WIP limit ditegakkan.
+- [x] Alternatif keyboard untuk memindah task berfungsi.
 
 ---
 

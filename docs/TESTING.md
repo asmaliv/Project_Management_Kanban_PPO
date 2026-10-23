@@ -90,26 +90,26 @@ Hasil yang diharapkan harus cocok dengan matriks di SECURITY.md. Test dibuat tab
 - [ ] Reset password menampilkan password sementara hanya sekali
 
 ## 8. Project Tests
-- [ ] PM membuat proyek, otomatis jadi owner, kolom default terbentuk
-- [ ] Hanya `team_leader` yang bisa ditambah sebagai member
-- [ ] Kolom Done tidak dapat dihapus; kolom berisi task tidak dapat dihapus
-- [ ] Proyek terarsip menolak semua aksi tulis
-- [ ] Transfer owner hanya oleh Admin dan tercatat
+- [x] PM membuat proyek, otomatis jadi owner, kolom default terbentuk
+- [x] Hanya `team_leader` yang bisa ditambah sebagai member
+- [x] Kolom Done tidak dapat dihapus; kolom berisi task tidak dapat dihapus
+- [x] Proyek terarsip menolak semua aksi tulis
+- [x] Transfer owner hanya oleh Admin dan tercatat
 
 ## 9. Kanban Tests
-- [ ] Buat/ubah/hapus (soft) task
-- [ ] Assignee harus member proyek
-- [ ] Pindah task antar kolom dan urutan dalam kolom tersimpan setelah refresh
-- [ ] Team Leader **tidak** bisa pindah ke/dari Done; PM bisa
-- [ ] WIP limit menolak dengan `WIP_LIMIT_EXCEEDED`
-- [ ] Dua user memindah task bersamaan → satu `409 VERSION_CONFLICT`, urutan tetap konsisten
-- [ ] Edit dengan `version` lama ditolak
-- [ ] Teks sangat panjang dan karakter khusus tidak merusak layout/keamanan
-- [ ] Alternatif keyboard "Pindahkan ke…" berfungsi
-- [ ] Team Leader melihat semua task di proyek tempat ia member (termasuk milik member lain) dan **tidak** melihat task proyek lain
-- [ ] `GET /tasks` menghormati filter, paginasi, dan batas akses tiap role
-- [ ] Dashboard Team Leader: angka total/terlambat/menunggu persetujuan/per kolom sama dengan isi papan; beban kerja per member benar
-- [ ] Dashboard Team Leader tidak menghitung task dari proyek non-member
+- [x] Buat/ubah/hapus (soft) task
+- [x] Assignee harus member proyek
+- [x] Pindah task antar kolom dan urutan dalam kolom tersimpan setelah refresh
+- [x] Team Leader **tidak** bisa pindah ke/dari Done; PM bisa
+- [x] WIP limit menolak dengan `WIP_LIMIT_EXCEEDED`
+- [x] Dua user memindah task bersamaan → satu `409 VERSION_CONFLICT`, urutan tetap konsisten
+- [x] Edit dengan `version` lama ditolak
+- [x] Teks sangat panjang dan karakter khusus tidak merusak layout/keamanan
+- [x] Alternatif keyboard "Pindahkan ke…" berfungsi
+- [x] Team Leader melihat semua task di proyek tempat ia member (termasuk milik member lain) dan **tidak** melihat task proyek lain
+- [x] `GET /tasks` menghormati filter, paginasi, dan batas akses tiap role
+- [ ] Dashboard Team Leader: angka total/terlambat/menunggu persetujuan/per kolom sama dengan isi papan; beban kerja per member benar (Phase 8)
+- [ ] Dashboard Team Leader tidak menghitung task dari proyek non-member (Phase 8)
 
 ## 10. Risk Tests
 - [ ] PM, Team Leader (member), Risk Management dapat mengajukan
