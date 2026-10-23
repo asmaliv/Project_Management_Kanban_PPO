@@ -1,0 +1,7 @@
+# Graphify ignore patterns
+.agents/
+node_modules/
+dist/
+tmp/
+pgdata/
+graphify-out/
