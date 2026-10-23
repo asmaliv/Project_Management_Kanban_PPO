@@ -6,6 +6,8 @@ import ChangePasswordPage from './features/auth/ChangePasswordPage'
 import AppLayout from './components/layout/AppLayout'
 import DashboardPage from './features/dashboard/DashboardPage'
 import PlaceholderPage from './features/placeholder/PlaceholderPage'
+import ProjectListPage from './features/projects/ProjectListPage'
+import ProjectDetailPage from './features/projects/ProjectDetailPage'
 
 export default function App() {
   return (
@@ -27,7 +29,8 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/users" element={<PlaceholderPage />} />
-              <Route path="/projects" element={<PlaceholderPage />} />
+              <Route path="/projects" element={<ProjectListPage />} />
+              <Route path="/projects/:id" element={<ProjectDetailPage />} />
               <Route path="/team-tasks" element={<PlaceholderPage />} />
               <Route path="/my-tasks" element={<PlaceholderPage />} />
               <Route path="/risks" element={<PlaceholderPage />} />

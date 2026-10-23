@@ -228,6 +228,30 @@ func (m *mockStore) ListAuditLogs(ctx context.Context, arg db.ListAuditLogsParam
 	return []db.AuditLog{}, nil
 }
 
+// Phase 4 Querier stubs for auth tests
+func (m *mockStore) AddProjectMember(ctx context.Context, arg db.AddProjectMemberParams) error { return nil }
+func (m *mockStore) ArchiveProject(ctx context.Context, id pgtype.UUID) (db.Project, error) { return db.Project{}, nil }
+func (m *mockStore) CountProjectMembers(ctx context.Context, projectID pgtype.UUID) (int64, error) { return 0, nil }
+func (m *mockStore) CreateBoardColumn(ctx context.Context, arg db.CreateBoardColumnParams) (db.BoardColumn, error) { return db.BoardColumn{}, nil }
+func (m *mockStore) CreateProject(ctx context.Context, arg db.CreateProjectParams) (db.Project, error) { return db.Project{}, nil }
+func (m *mockStore) DeleteBoardColumn(ctx context.Context, id pgtype.UUID) error { return nil }
+func (m *mockStore) GetBoardColumnByID(ctx context.Context, id pgtype.UUID) (db.BoardColumn, error) { return db.BoardColumn{}, nil }
+func (m *mockStore) GetDoneColumn(ctx context.Context, projectID pgtype.UUID) (db.BoardColumn, error) { return db.BoardColumn{}, nil }
+func (m *mockStore) GetProjectByID(ctx context.Context, id pgtype.UUID) (db.Project, error) { return db.Project{}, nil }
+func (m *mockStore) GetProjectByIDIncludeDeleted(ctx context.Context, id pgtype.UUID) (db.Project, error) { return db.Project{}, nil }
+func (m *mockStore) IsProjectMember(ctx context.Context, arg db.IsProjectMemberParams) (bool, error) { return false, nil }
+func (m *mockStore) ListAllProjects(ctx context.Context) ([]db.Project, error) { return nil, nil }
+func (m *mockStore) ListBoardColumns(ctx context.Context, projectID pgtype.UUID) ([]db.BoardColumn, error) { return nil, nil }
+func (m *mockStore) ListProjectMembers(ctx context.Context, projectID pgtype.UUID) ([]db.ListProjectMembersRow, error) { return nil, nil }
+func (m *mockStore) ListProjectsByMember(ctx context.Context, userID pgtype.UUID) ([]db.Project, error) { return nil, nil }
+func (m *mockStore) ListProjectsByOwner(ctx context.Context, ownerID pgtype.UUID) ([]db.Project, error) { return nil, nil }
+func (m *mockStore) MaxColumnPosition(ctx context.Context, projectID pgtype.UUID) (int32, error) { return 0, nil }
+func (m *mockStore) NextProjectCode(ctx context.Context) (string, error) { return "PRJ-0001", nil }
+func (m *mockStore) RemoveProjectMember(ctx context.Context, arg db.RemoveProjectMemberParams) error { return nil }
+func (m *mockStore) TransferProjectOwner(ctx context.Context, arg db.TransferProjectOwnerParams) (db.Project, error) { return db.Project{}, nil }
+func (m *mockStore) UpdateBoardColumn(ctx context.Context, arg db.UpdateBoardColumnParams) (db.BoardColumn, error) { return db.BoardColumn{}, nil }
+func (m *mockStore) UpdateProject(ctx context.Context, arg db.UpdateProjectParams) (db.Project, error) { return db.Project{}, nil }
+
 func setupTestService(t *testing.T) (*Service, *mockStore) {
 	t.Helper()
 	store := newMockStore()

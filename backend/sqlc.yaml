@@ -5,6 +5,7 @@ sql:
     schema: 
       - "migrations/000001_create_users_and_sessions.up.sql"
       - "migrations/000002_create_audit_logs.up.sql"
+      - "migrations/000003_create_projects_members_columns.up.sql"
     gen:
       go:
         package: "db"

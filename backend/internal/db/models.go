@@ -11,6 +11,50 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type ProjectStatus string
+
+const (
+	ProjectStatusActive    ProjectStatus = "active"
+	ProjectStatusOnHold    ProjectStatus = "on_hold"
+	ProjectStatusCompleted ProjectStatus = "completed"
+	ProjectStatusArchived  ProjectStatus = "archived"
+)
+
+func (e *ProjectStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ProjectStatus(s)
+	case string:
+		*e = ProjectStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ProjectStatus: %T", src)
+	}
+	return nil
+}
+
+type NullProjectStatus struct {
+	ProjectStatus ProjectStatus `json:"project_status"`
+	Valid         bool          `json:"valid"` // Valid is true if ProjectStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullProjectStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ProjectStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ProjectStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullProjectStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ProjectStatus), nil
+}
+
 type UserRole string
 
 const (
@@ -69,6 +113,38 @@ type AuditLog struct {
 	After      []byte             `json:"after"`
 	Ip         string             `json:"ip"`
 	RequestID  string             `json:"request_id"`
+}
+
+type BoardColumn struct {
+	ID           pgtype.UUID        `json:"id"`
+	ProjectID    pgtype.UUID        `json:"project_id"`
+	Name         string             `json:"name"`
+	Position     int32              `json:"position"`
+	IsDoneColumn bool               `json:"is_done_column"`
+	WipLimit     pgtype.Int4        `json:"wip_limit"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+type Project struct {
+	ID          pgtype.UUID        `json:"id"`
+	Code        string             `json:"code"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Status      ProjectStatus      `json:"status"`
+	OwnerID     pgtype.UUID        `json:"owner_id"`
+	StartDate   pgtype.Date        `json:"start_date"`
+	EndDate     pgtype.Date        `json:"end_date"`
+	CreatedBy   pgtype.UUID        `json:"created_by"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
+}
+
+type ProjectMember struct {
+	ProjectID pgtype.UUID        `json:"project_id"`
+	UserID    pgtype.UUID        `json:"user_id"`
+	AddedBy   pgtype.UUID        `json:"added_by"`
+	AddedAt   pgtype.Timestamptz `json:"added_at"`
 }
 
 type Session struct {

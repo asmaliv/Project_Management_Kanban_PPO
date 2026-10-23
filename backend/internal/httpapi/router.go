@@ -11,14 +11,16 @@ import (
 	"ppo-kanban/internal/auditlog"
 	"ppo-kanban/internal/auth"
 	"ppo-kanban/internal/db"
+	"ppo-kanban/internal/project"
 )
 
 type RouterParams struct {
-	Logger        *slog.Logger
-	AuthService   *auth.Service
-	AuditService  *auditlog.Service
-	SessionSecret string
-	CookieSecure  bool
+	Logger         *slog.Logger
+	AuthService    *auth.Service
+	AuditService   *auditlog.Service
+	ProjectService *project.Service
+	SessionSecret  string
+	CookieSecure   bool
 }
 
 // NewRouter creates and configures the chi router with global middleware and API endpoints.
@@ -72,6 +74,44 @@ func NewRouter(params RouterParams) *chi.Mux {
 				r.Use(RequireRoles(db.UserRoleAdmin, db.UserRoleAudit))
 
 				r.Get("/audit-logs", auditHandler.HandleListAuditLogs)
+			})
+		}
+
+		// Project, Member, and Board Column endpoints
+		if params.ProjectService != nil {
+			projectHandler := NewProjectHandler(params.ProjectService)
+
+			r.Group(func(r chi.Router) {
+				r.Use(RequireAuth)
+
+				// Projects
+				r.Get("/projects", projectHandler.HandleListProjects)
+				r.With(RequireRoles(db.UserRoleProjectManager)).Post("/projects", projectHandler.HandleCreateProject)
+
+				r.Route("/projects/{id}", func(r chi.Router) {
+					r.Get("/", projectHandler.HandleGetProject)
+					r.Patch("/", projectHandler.HandleUpdateProject)
+					r.Put("/", projectHandler.HandleUpdateProject)
+					r.Post("/archive", projectHandler.HandleArchiveProject)
+					r.With(RequireRoles(db.UserRoleAdmin)).Post("/transfer-owner", projectHandler.HandleTransferOwner)
+
+					// Members
+					r.Get("/members", projectHandler.HandleListMembers)
+					r.Post("/members", projectHandler.HandleAddMember)
+					r.Delete("/members/{userId}", projectHandler.HandleRemoveMember)
+
+					// Columns on project
+					r.Get("/columns", projectHandler.HandleListColumns)
+					r.Get("/board", projectHandler.HandleListColumns) // alias for board view
+					r.Post("/columns", projectHandler.HandleCreateColumn)
+				})
+
+				// Columns standalone routes
+				r.Route("/columns/{columnId}", func(r chi.Router) {
+					r.Patch("/", projectHandler.HandleUpdateColumn)
+					r.Put("/", projectHandler.HandleUpdateColumn)
+					r.Delete("/", projectHandler.HandleDeleteColumn)
+				})
 			})
 		}
 	})
