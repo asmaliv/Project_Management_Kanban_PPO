@@ -30,15 +30,26 @@ Aplikasi web Project Management Kanban Board (Go + React) dengan role: Admin, Pr
 - Transfer owner eksklusif Admin ke sesama PM; kelola member khusus role Team Leader
 - Isolasi visibilitas antar-PM dan Team Leader (anti-enumeration 404)
 - Audit log terintegrasi pada setiap aksi tulis proyek, kolom, dan member
-- UI: Halaman Daftar Proyek & Detail Proyek (Papan Kanban, Anggota Tim, Metadata)
+- UI: Halaman Daftar Proyek & Detail Proyek (Papan Kanban, Pengaturan Kolom, Anggota Tim, Metadata)
 
-### 🔄 Next: Phase 5 - Task & Papan Kanban
-- Migrasi `tasks` dan `task_comments`
-- CRUD task, optimistic locking (`version`), soft delete
-- Endpoint `move` dengan transaksi posisi, WIP limit, aturan maker-checker
-- Endpoint `GET /tasks` (lintas proyek, filter, paginasi) dibatasi sesuai matriks RBAC
-- UI papan: kartu task, drawer detail, filter alur kerja, drag-and-drop
-- Audit log untuk semua aksi task
+### ✅ Phase 5: Task & Papan Kanban (Selesai) ✨
+- Migrasi tabel `tasks` dan `task_comments` (Foreign keys, cascade soft-delete, index komposit)
+- Optimistic locking berbasis integer `version` (mencegah conflict saat edit/move paralel → 409 `VERSION_CONFLICT`)
+- Penegakan WIP Limit pada kolom Kanban (tolak task baru/pindah kolom jika penuh → 409 `WIP_LIMIT_EXCEEDED`)
+- Maker-Checker Rule: Hanya PM pemilik proyek yang dapat memindahkan task ke/dari kolom Done (`is_done_column = true`), Team Leader ditolak (403 `FORBIDDEN`)
+- Soft delete task (`deleted_at`) khusus PM pemilik proyek
+- Kolom komentar task dengan jejak audit log otomatis
+- Endpoint `GET /tasks` lintas proyek dengan filter (`project_id`, `assignee_id`, `column_id`, `overdue`, `mine`, `search`) dan isolasi data sesuai hak akses RBAC
+- Frontend Kanban Board: Drag-and-drop responsif + accessible keyboard quick move menu "Pindahkan ke...", drawer detail task, modal task baru, indikator prioritas & progress bar
+- Audit trail mencatat seluruh mutasi task (`task.create`, `task.update`, `task.move`, `task.delete`, `task.comment`)
+
+### 🔄 Next: Phase 6 - Risk Management
+- Migrasi tabel `risks`
+- Ajukan risiko (PM, Team Leader, Risk Management); penilaian dan penutupan eksklusif Risk Management
+- Skor (likelihood × impact) dan level (Low/Medium/High/Critical) dihitung server
+- High/Critical wajib memiliki rencana mitigasi sebelum ditutup
+- Halaman Risk Register, summary heatmap, dan tautan risiko ke task pada papan Kanban
+- Audit log untuk setiap mutasi risiko
 
 ---
 
