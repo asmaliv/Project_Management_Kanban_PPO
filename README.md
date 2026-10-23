@@ -15,24 +15,37 @@ Aplikasi web Project Management Kanban Board (Go + React) dengan role: Admin, Pr
 ### ✅ Phase 2: Manajemen User & RBAC (Selesai)
 - Kelola pengguna, matriks izin 5 role, form tambah user
 
-### ✅ Phase 3: Audit Trail (Selesai) ✨
+### ✅ Phase 3: Audit Trail (Selesai)
 - Tabel audit_logs dengan trigger append-only
 - Service audit log dalam transaksi yang sama dengan perubahan data
 - Catat login sukses/gagal, lockout, logout, perubahan role
 - GET /audit-logs dengan filter (Audit & Admin only)
 - **Tidak pernah mencatat password, hash, atau token**
 
-### 🔄 Next: Phase 4 - Proyek, Member, dan Kolom
-- CRUD proyek (PM), arsip, transfer owner (Admin)
-- Kelola member dan kolom papan
-- Audit log untuk semua aksi
+### ✅ Phase 4: Proyek, Member, dan Kolom (Selesai) ✨
+- CRUD proyek (PM) dengan kode auto-increment unik (`PRJ-XXXX`)
+- Pembuatan 5 kolom default otomatis (*Backlog*, *To Do*, *In Progress*, *In Review*, *Done*)
+- Proteksi kolom Done (tidak bisa dihapus & hanya satu per proyek)
+- Proyek terarsip (*archived*) menjadi *read-only* (seluruh aksi tulis ditolak)
+- Transfer owner eksklusif Admin ke sesama PM; kelola member khusus role Team Leader
+- Isolasi visibilitas antar-PM dan Team Leader (anti-enumeration 404)
+- Audit log terintegrasi pada setiap aksi tulis proyek, kolom, dan member
+- UI: Halaman Daftar Proyek & Detail Proyek (Papan Kanban, Anggota Tim, Metadata)
+
+### 🔄 Next: Phase 5 - Task & Papan Kanban
+- Migrasi `tasks` dan `task_comments`
+- CRUD task, optimistic locking (`version`), soft delete
+- Endpoint `move` dengan transaksi posisi, WIP limit, aturan maker-checker
+- Endpoint `GET /tasks` (lintas proyek, filter, paginasi) dibatasi sesuai matriks RBAC
+- UI papan: kartu task, drawer detail, filter alur kerja, drag-and-drop
+- Audit log untuk semua aksi task
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Backend:** Go 1.24+ · chi router · PostgreSQL 16+ · sqlc · golang-migrate
-- **Frontend:** React 18 · TypeScript · Vite · Tailwind CSS · TanStack Query
+- **Frontend:** React 19 · TypeScript · Vite · Tailwind CSS
 - **Security:** Argon2id · HttpOnly cookies · CSRF protection · Rate limiting
 - **Audit:** Append-only audit_logs dengan trigger database
 
@@ -40,6 +53,7 @@ Aplikasi web Project Management Kanban Board (Go + React) dengan role: Admin, Pr
 
 - **Ponytail** - Simplest working code, -53% code, -41% time
 - **Graphify** - Knowledge graph, 390 nodes, 986 edges, 14 communities
+- **UI-UX Pro Max** - Design intelligence for professional banking UI/UX (semantic color tokens, accessible dialogs, responsive cards)
 
 ## 📚 Dokumen Perencanaan
 
