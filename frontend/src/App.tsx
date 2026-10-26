@@ -8,6 +8,7 @@ import DashboardPage from './features/dashboard/DashboardPage'
 import PlaceholderPage from './features/placeholder/PlaceholderPage'
 import ProjectListPage from './features/projects/ProjectListPage'
 import ProjectDetailPage from './features/projects/ProjectDetailPage'
+import RiskRegisterPage from './features/risks/RiskRegisterPage'
 
 export default function App() {
   return (
@@ -33,7 +34,7 @@ export default function App() {
               <Route path="/projects/:id" element={<ProjectDetailPage />} />
               <Route path="/team-tasks" element={<PlaceholderPage />} />
               <Route path="/my-tasks" element={<PlaceholderPage />} />
-              <Route path="/risks" element={<PlaceholderPage />} />
+              <Route path="/risks" element={<RiskRegisterPage />} />
               <Route path="/findings" element={<PlaceholderPage />} />
               <Route path="/audit-trail" element={<PlaceholderPage />} />
             </Route>

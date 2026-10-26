@@ -12,6 +12,7 @@ import (
 	"ppo-kanban/internal/auth"
 	"ppo-kanban/internal/db"
 	"ppo-kanban/internal/project"
+	"ppo-kanban/internal/risk"
 	"ppo-kanban/internal/task"
 )
 
@@ -21,6 +22,7 @@ type RouterParams struct {
 	AuditService   *auditlog.Service
 	ProjectService *project.Service
 	TaskService    *task.Service
+	RiskService    *risk.Service
 	SessionSecret  string
 	CookieSecure   bool
 }
@@ -144,6 +146,28 @@ func NewRouter(params RouterParams) *chi.Mux {
 					// Comments
 					r.Get("/comments", taskHandler.HandleListComments)
 					r.Post("/comments", taskHandler.HandleCreateComment)
+				})
+			})
+		}
+
+		// Risks endpoints
+		if params.RiskService != nil {
+			riskHandler := NewRiskHandler(params.RiskService)
+
+			r.Group(func(r chi.Router) {
+				r.Use(RequireAuth)
+
+				r.Get("/risks", riskHandler.HandleListRisks)
+				r.Post("/risks", riskHandler.HandleCreateRisk)
+				r.Get("/risks/summary", riskHandler.HandleGetRiskSummary)
+				r.Get("/risks/task-counts", riskHandler.HandleGetTaskRiskCounts)
+
+				r.Route("/risks/{id}", func(r chi.Router) {
+					r.Get("/", riskHandler.HandleGetRisk)
+					r.Patch("/", riskHandler.HandleUpdateRisk)
+					r.Put("/", riskHandler.HandleUpdateRisk)
+					r.Post("/assess", riskHandler.HandleAssessRisk)
+					r.Post("/close", riskHandler.HandleCloseRisk)
 				})
 			})
 		}

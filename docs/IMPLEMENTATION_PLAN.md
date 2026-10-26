@@ -146,15 +146,15 @@ Verify:
 
 ---
 
-## Phase 6 — Risk Management
+## Phase 6 — Risk Management (Selesai ✅)
 
 Tasks:
-- Migrasi `risks`
-- Ajukan risiko (PM, Team Leader, Risk Management); nilai/tutup (Risk Management saja)
-- Skor dan level dihitung server; aturan mitigasi untuk High/Critical
-- Tautan risiko ke proyek/task; indikator risiko di kartu task
-- Halaman Risk Register + heatmap dan `GET /risks/summary`
-- Audit log
+- [x] Migrasi `risks`
+- [x] Ajukan risiko (PM, Team Leader, Risk Management); nilai/tutup (Risk Management saja)
+- [x] Skor dan level dihitung server; aturan mitigasi untuk High/Critical
+- [x] Tautan risiko ke proyek/task; indikator risiko di kartu task
+- [x] Halaman Risk Register + heatmap dan `GET /risks/summary`
+- [x] Audit log
 
 Dependencies: Phase 5.
 
@@ -162,10 +162,10 @@ Deliverable:
 - Risiko tercatat, dinilai, dipantau, dan terhubung ke pekerjaan.
 
 Verify:
-- Skor dan level tidak bisa dimanipulasi dari client.
-- Hanya Risk Management yang bisa menilai/menutup.
-- High/Critical tanpa mitigasi tidak dapat ditutup.
-- Team Leader hanya melihat risiko proyek tempat dia member.
+- [x] Skor dan level tidak bisa dimanipulasi dari client.
+- [x] Hanya Risk Management yang bisa menilai/menutup.
+- [x] High/Critical tanpa mitigasi tidak dapat ditutup.
+- [x] Team Leader hanya melihat risiko proyek tempat dia member.
 
 ---
 

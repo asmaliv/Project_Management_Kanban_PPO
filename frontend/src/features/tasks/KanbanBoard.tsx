@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import type { Task, CreateTaskPayload, UpdateTaskPayload } from './types'
 import type { BoardColumn, ProjectMember } from '../projects/types'
 import {
@@ -11,6 +11,8 @@ import {
 import TaskCard from './TaskCard'
 import CreateTaskModal from './CreateTaskModal'
 import TaskDetailDrawer from './TaskDetailDrawer'
+import { fetchRisks } from '../risks/api'
+import type { Risk } from '../risks/types'
 
 interface KanbanBoardProps {
   projectId: string
@@ -32,6 +34,7 @@ export default function KanbanBoard({
   canWrite,
 }: KanbanBoardProps) {
   const [tasks, setTasks] = useState<Task[]>([])
+  const [projectRisks, setProjectRisks] = useState<Risk[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [boardError, setBoardError] = useState<string | null>(null)
   const [boardSuccess, setBoardSuccess] = useState<string | null>(null)
@@ -62,9 +65,30 @@ export default function KanbanBoard({
     }
   }, [projectId])
 
+  const loadRisks = useCallback(async () => {
+    try {
+      const res = await fetchRisks({ project_id: projectId })
+      setProjectRisks(res.risks)
+    } catch {
+      // silently ignore risk fetch failure
+    }
+  }, [projectId])
+
   useEffect(() => {
     void loadTasks()
-  }, [loadTasks])
+    void loadRisks()
+  }, [loadTasks, loadRisks])
+
+  const risksByTaskId = useMemo(() => {
+    const map: Record<string, Risk[]> = {}
+    projectRisks.forEach((r) => {
+      if (r.task_id) {
+        if (!map[r.task_id]) map[r.task_id] = []
+        map[r.task_id].push(r)
+      }
+    })
+    return map
+  }, [projectRisks])
 
   // Move handler
   const handleMoveTask = async (
@@ -355,6 +379,7 @@ export default function KanbanBoard({
                       currentColumn={column}
                       canMove={canWrite}
                       isPM={isPM}
+                      linkedRisks={risksByTaskId[t.id] || []}
                       onTaskClick={handleCardClick}
                       onMoveTask={handleMoveTask}
                     />
@@ -396,6 +421,7 @@ export default function KanbanBoard({
           ownerId={ownerId}
           onUpdateTask={handleUpdateTask}
           onDeleteTask={isPM ? handleDeleteTask : undefined}
+          onRiskChanged={loadRisks}
         />
       )}
     </div>
