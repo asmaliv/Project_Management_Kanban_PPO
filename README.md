@@ -43,13 +43,31 @@ Aplikasi web Project Management Kanban Board (Go + React) dengan role: Admin, Pr
 - Frontend Kanban Board: Drag-and-drop responsif + accessible keyboard quick move menu "Pindahkan ke...", drawer detail task, modal task baru, indikator prioritas & progress bar
 - Audit trail mencatat seluruh mutasi task (`task.create`, `task.update`, `task.move`, `task.delete`, `task.comment`)
 
-### 🔄 Next: Phase 6 - Risk Management
-- Migrasi tabel `risks`
-- Ajukan risiko (PM, Team Leader, Risk Management); penilaian dan penutupan eksklusif Risk Management
-- Skor (likelihood × impact) dan level (Low/Medium/High/Critical) dihitung server
-- High/Critical wajib memiliki rencana mitigasi sebelum ditutup
-- Halaman Risk Register, summary heatmap, dan tautan risiko ke task pada papan Kanban
-- Audit log untuk setiap mutasi risiko
+### ✅ Phase 6: Manajemen Risiko / Risk Management (Selesai) ✨
+- Migrasi tabel `risks` dengan kode unik sekuensial (`RSK-XXXX`), foreign key ke project & task, check constraint (likelihood & impact 1-5, status, level)
+- Matriks RBAC ketat:
+  - Ajukan risiko: PM (proyek sendiri), Team Leader (proyek tempat member), Risk Management (semua proyek). Admin & Audit ditolak.
+  - Penilaian risiko (likelihood 1-5, impact 1-5) dan Penutupan risiko: Eksklusif role **Risk Management**.
+  - Rencana mitigasi: PM (proyek sendiri) dan Risk Management.
+- Perhitungan Skor (likelihood × impact) dan Level (Low 1-4, Medium 5-9, High 10-15, Critical 16-25) dihitung secara mutlak di sisi server (anti-manipulasi client).
+- Aturan Penutupan Risiko: Risiko berlevel High atau Critical wajib memiliki rencana mitigasi yang tidak kosong sebelum dapat ditutup.
+- Integrasi Papan Kanban & Task:
+  - Kartu task menampilkan badge indikator risiko terkait beserta level risiko tertinggi.
+  - Drawer detail task menampilkan daftar risiko terhubung lengkap dengan status, level, dan skor.
+  - Form modal penautan / pengajuan risiko baru langsung dari drawer detail task.
+- Frontend Risk Register:
+  - Ringkasan KPI risiko (Total, Terbuka, High/Critical, Belum Dimitigasi).
+  - Papan Matriks Heatmap 5x5 interaktif dengan filter cepat per sel kemungkinan vs dampak.
+  - Tabel Risk Register lengkap dengan filter proyek, status, kategori, level, dan paginasi.
+  - Modal Penilaian Risiko (Probabilitas & Dampak dengan matrix preview interaktif), Modal Update Mitigasi, dan Drawer Detail Risiko.
+- Audit Trail terintegrasi mencatat seluruh mutasi risiko (`risk.create`, `risk.assess`, `risk.mitigate`, `risk.close`).
+
+### 🔄 Next: Phase 7 - Temuan Audit & Dashboard per Role
+- Migrasi tabel `audit_findings`
+- Buat, respons, buka kembali, dan tutup temuan audit sesuai alur status (Audit & PM)
+- Halaman Temuan Audit
+- Ekspor audit trail ke file CSV (eksklusif role Audit, dengan rate limiting)
+- Endpoint `GET /dashboard` dan UI dashboard analitik interaktif untuk kelima role
 
 ---
 
