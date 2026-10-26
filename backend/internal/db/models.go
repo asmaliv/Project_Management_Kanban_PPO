@@ -55,6 +55,141 @@ func (ns NullProjectStatus) Value() (driver.Value, error) {
 	return string(ns.ProjectStatus), nil
 }
 
+type RiskCategory string
+
+const (
+	RiskCategoryOperational RiskCategory = "operational"
+	RiskCategorySchedule    RiskCategory = "schedule"
+	RiskCategoryTechnical   RiskCategory = "technical"
+	RiskCategoryCompliance  RiskCategory = "compliance"
+	RiskCategoryFinancial   RiskCategory = "financial"
+	RiskCategorySecurity    RiskCategory = "security"
+)
+
+func (e *RiskCategory) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = RiskCategory(s)
+	case string:
+		*e = RiskCategory(s)
+	default:
+		return fmt.Errorf("unsupported scan type for RiskCategory: %T", src)
+	}
+	return nil
+}
+
+type NullRiskCategory struct {
+	RiskCategory RiskCategory `json:"risk_category"`
+	Valid        bool         `json:"valid"` // Valid is true if RiskCategory is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullRiskCategory) Scan(value interface{}) error {
+	if value == nil {
+		ns.RiskCategory, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.RiskCategory.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullRiskCategory) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.RiskCategory), nil
+}
+
+type RiskLevel string
+
+const (
+	RiskLevelLow      RiskLevel = "low"
+	RiskLevelMedium   RiskLevel = "medium"
+	RiskLevelHigh     RiskLevel = "high"
+	RiskLevelCritical RiskLevel = "critical"
+)
+
+func (e *RiskLevel) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = RiskLevel(s)
+	case string:
+		*e = RiskLevel(s)
+	default:
+		return fmt.Errorf("unsupported scan type for RiskLevel: %T", src)
+	}
+	return nil
+}
+
+type NullRiskLevel struct {
+	RiskLevel RiskLevel `json:"risk_level"`
+	Valid     bool      `json:"valid"` // Valid is true if RiskLevel is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullRiskLevel) Scan(value interface{}) error {
+	if value == nil {
+		ns.RiskLevel, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.RiskLevel.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullRiskLevel) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.RiskLevel), nil
+}
+
+type RiskStatus string
+
+const (
+	RiskStatusIdentified RiskStatus = "identified"
+	RiskStatusAssessed   RiskStatus = "assessed"
+	RiskStatusMitigating RiskStatus = "mitigating"
+	RiskStatusAccepted   RiskStatus = "accepted"
+	RiskStatusClosed     RiskStatus = "closed"
+)
+
+func (e *RiskStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = RiskStatus(s)
+	case string:
+		*e = RiskStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for RiskStatus: %T", src)
+	}
+	return nil
+}
+
+type NullRiskStatus struct {
+	RiskStatus RiskStatus `json:"risk_status"`
+	Valid      bool       `json:"valid"` // Valid is true if RiskStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullRiskStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.RiskStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.RiskStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullRiskStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.RiskStatus), nil
+}
+
 type TaskPriority string
 
 const (
@@ -189,6 +324,27 @@ type ProjectMember struct {
 	UserID    pgtype.UUID        `json:"user_id"`
 	AddedBy   pgtype.UUID        `json:"added_by"`
 	AddedAt   pgtype.Timestamptz `json:"added_at"`
+}
+
+type Risk struct {
+	ID             pgtype.UUID        `json:"id"`
+	Code           string             `json:"code"`
+	ProjectID      pgtype.UUID        `json:"project_id"`
+	TaskID         pgtype.UUID        `json:"task_id"`
+	Title          string             `json:"title"`
+	Description    string             `json:"description"`
+	Category       RiskCategory       `json:"category"`
+	Likelihood     pgtype.Int4        `json:"likelihood"`
+	Impact         pgtype.Int4        `json:"impact"`
+	Score          pgtype.Int4        `json:"score"`
+	Level          NullRiskLevel      `json:"level"`
+	Status         RiskStatus         `json:"status"`
+	MitigationPlan string             `json:"mitigation_plan"`
+	OwnerID        pgtype.UUID        `json:"owner_id"`
+	RaisedBy       pgtype.UUID        `json:"raised_by"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+	ClosedAt       pgtype.Timestamptz `json:"closed_at"`
 }
 
 type Session struct {
