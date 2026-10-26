@@ -112,12 +112,12 @@ Hasil yang diharapkan harus cocok dengan matriks di SECURITY.md. Test dibuat tab
 - [ ] Dashboard Team Leader tidak menghitung task dari proyek non-member (Phase 8)
 
 ## 10. Risk Tests
-- [ ] PM, Team Leader (member), Risk Management dapat mengajukan
-- [ ] Hanya Risk Management yang dapat menilai/menutup
-- [ ] Skor = likelihood × impact dan level sesuai ambang (1–4, 5–9, 10–15, 16–25)
-- [ ] Client tidak dapat mengirim `score`/`level` sendiri
-- [ ] Tutup High/Critical tanpa mitigasi ditolak
-- [ ] Heatmap sesuai data
+- [x] PM, Team Leader (member), Risk Management dapat mengajukan
+- [x] Hanya Risk Management yang dapat menilai/menutup
+- [x] Skor = likelihood × impact dan level sesuai ambang (1–4, 5–9, 10–15, 16–25)
+- [x] Client tidak dapat mengirim `score`/`level` sendiri
+- [x] Tutup High/Critical tanpa mitigasi ditolak
+- [x] Heatmap sesuai data
 
 ## 11. Audit Finding Tests
 - [ ] Hanya Audit yang membuat, membuka kembali, dan menutup
