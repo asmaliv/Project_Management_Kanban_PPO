@@ -2,6 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react'
 import type { Task, TaskComment, TaskPriority, UpdateTaskPayload } from './types'
 import type { ProjectMember } from '../projects/types'
 import { fetchTaskComments, createTaskComment } from './api'
+import { useAuth } from '../auth/useAuth'
+import { fetchRisks } from '../risks/api'
+import type { Risk, RiskLevel, RiskStatus } from '../risks/types'
+import { CreateRiskModal } from '../risks/CreateRiskModal'
 
 interface TaskDetailDrawerProps {
   task: Task | null
@@ -14,6 +18,7 @@ interface TaskDetailDrawerProps {
   ownerId: string
   onUpdateTask: (taskId: string, payload: UpdateTaskPayload) => Promise<void>
   onDeleteTask?: (taskId: string) => Promise<void>
+  onRiskChanged?: () => void
 }
 
 const PRIORITY_OPTIONS: { value: TaskPriority; label: string }[] = [
@@ -34,13 +39,20 @@ export default function TaskDetailDrawer({
   ownerId,
   onUpdateTask,
   onDeleteTask,
+  onRiskChanged,
 }: TaskDetailDrawerProps) {
+  const { user } = useAuth()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<TaskPriority>('medium')
   const [assigneeId, setAssigneeId] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [progressPercent, setProgressPercent] = useState(0)
+
+  // Linked risks state
+  const [linkedRisks, setLinkedRisks] = useState<Risk[]>([])
+  const [isLoadingRisks, setIsLoadingRisks] = useState(false)
+  const [isCreateRiskModalOpen, setIsCreateRiskModalOpen] = useState(false)
 
   // Comments state
   const [comments, setComments] = useState<TaskComment[]>([])
@@ -81,13 +93,32 @@ export default function TaskDetailDrawer({
     }
   }, [task])
 
+  const loadRisks = useCallback(async () => {
+    if (!task) return
+    try {
+      setIsLoadingRisks(true)
+      const res = await fetchRisks({ task_id: task.id })
+      setLinkedRisks(res.risks)
+    } catch {
+      setLinkedRisks([])
+    } finally {
+      setIsLoadingRisks(false)
+    }
+  }, [task])
+
   useEffect(() => {
     if (isOpen && task) {
       void loadComments()
+      void loadRisks()
     }
-  }, [isOpen, task, loadComments])
+  }, [isOpen, task, loadComments, loadRisks])
 
   if (!isOpen || !task) return null
+
+  const canRaiseRisk =
+    user?.role === 'project_manager' ||
+    user?.role === 'team_leader' ||
+    user?.role === 'risk_management'
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -331,6 +362,105 @@ export default function TaskDetailDrawer({
             )}
           </form>
 
+          {/* Linked Risks Section */}
+          <div className="border-t border-slate-100 pt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>Risiko Terkait ({linkedRisks.length})</span>
+              </h4>
+
+              {canRaiseRisk && (
+                <button
+                  type="button"
+                  onClick={() => setIsCreateRiskModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Ajukan Risiko</span>
+                </button>
+              )}
+            </div>
+
+            {isLoadingRisks ? (
+              <div className="py-4 text-center text-xs text-slate-400">Memuat data risiko...</div>
+            ) : linkedRisks.length === 0 ? (
+              <div className="py-5 text-center text-xs text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                Belum ada risiko yang ditautkan ke task ini.
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {linkedRisks.map((r) => {
+                  const getRiskLevelBadge = (level?: RiskLevel | null) => {
+                    switch (level) {
+                      case 'critical':
+                        return 'bg-rose-50 text-rose-700 border-rose-200'
+                      case 'high':
+                        return 'bg-orange-50 text-orange-700 border-orange-200'
+                      case 'medium':
+                        return 'bg-amber-50 text-amber-700 border-amber-200'
+                      case 'low':
+                        return 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      default:
+                        return 'bg-slate-100 text-slate-700 border-slate-200'
+                    }
+                  }
+
+                  const getRiskStatusBadge = (status: RiskStatus) => {
+                    switch (status) {
+                      case 'identified':
+                        return 'bg-slate-100 text-slate-700 border-slate-200'
+                      case 'assessed':
+                        return 'bg-blue-50 text-blue-700 border-blue-200'
+                      case 'mitigating':
+                        return 'bg-purple-50 text-purple-700 border-purple-200'
+                      case 'accepted':
+                        return 'bg-amber-50 text-amber-700 border-amber-200'
+                      case 'closed':
+                        return 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    }
+                  }
+
+                  return (
+                    <div
+                      key={r.id}
+                      className="p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 transition-colors shadow-2xs space-y-2"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                            {r.code}
+                          </span>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md uppercase border ${getRiskLevelBadge(r.level)}`}>
+                            {r.level || 'identified'}
+                          </span>
+                          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md border ${getRiskStatusBadge(r.status)}`}>
+                            {r.status}
+                          </span>
+                        </div>
+                        {r.score !== null && r.score !== undefined && r.score > 0 && (
+                          <span className="text-xs font-mono font-bold text-slate-600 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
+                            Skor: {r.score}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs font-semibold text-slate-900 line-clamp-1">{r.title}</p>
+                      {r.mitigation_plan && (
+                        <p className="text-[11px] text-slate-500 line-clamp-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                          <strong className="text-slate-700">Mitigasi:</strong> {r.mitigation_plan}
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Activity & Comments Thread */}
           <div className="border-t border-slate-100 pt-6 space-y-4">
             <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -393,6 +523,21 @@ export default function TaskDetailDrawer({
           </div>
         </div>
       </div>
+
+      {/* Create Linked Risk Modal */}
+      {isCreateRiskModalOpen && (
+        <CreateRiskModal
+          isOpen={isCreateRiskModalOpen}
+          onClose={() => setIsCreateRiskModalOpen(false)}
+          initialProjectId={task.project_id}
+          initialTaskId={task.id}
+          onSuccess={(newRisk) => {
+            setLinkedRisks((prev) => [newRisk, ...prev])
+            setIsCreateRiskModalOpen(false)
+            onRiskChanged?.()
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import type { Task, TaskPriority } from './types'
 import type { BoardColumn } from '../projects/types'
+import type { Risk, RiskLevel } from '../risks/types'
 
 interface TaskCardProps {
   task: Task
@@ -8,6 +9,7 @@ interface TaskCardProps {
   currentColumn: BoardColumn
   canMove: boolean
   isPM: boolean
+  linkedRisks?: Risk[]
   onTaskClick: (task: Task) => void
   onMoveTask: (taskId: string, toColumnId: string, position: number, version: number) => Promise<void>
 }
@@ -44,6 +46,7 @@ export default function TaskCard({
   currentColumn,
   canMove,
   isPM,
+  linkedRisks = [],
   onTaskClick,
   onMoveTask,
 }: TaskCardProps) {
@@ -51,6 +54,31 @@ export default function TaskCard({
   const [isMoving, setIsMoving] = useState(false)
 
   const priorityInfo = PRIORITY_CONFIG[task.priority] || PRIORITY_CONFIG.medium
+
+  const maxRiskLevel = useMemo<RiskLevel | null>(() => {
+    if (!linkedRisks || linkedRisks.length === 0) return null
+    const levels = linkedRisks.map((r) => r.level).filter(Boolean) as RiskLevel[]
+    if (levels.includes('critical')) return 'critical'
+    if (levels.includes('high')) return 'high'
+    if (levels.includes('medium')) return 'medium'
+    if (levels.includes('low')) return 'low'
+    return null
+  }, [linkedRisks])
+
+  const riskBadgeClass = useMemo(() => {
+    switch (maxRiskLevel) {
+      case 'critical':
+        return 'bg-rose-50 text-rose-700 border-rose-200'
+      case 'high':
+        return 'bg-orange-50 text-orange-700 border-orange-200'
+      case 'medium':
+        return 'bg-amber-50 text-amber-700 border-amber-200'
+      case 'low':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      default:
+        return 'bg-slate-100 text-slate-700 border-slate-200'
+    }
+  }, [maxRiskLevel])
 
   // Overdue check
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), [])
@@ -93,12 +121,27 @@ export default function TaskCard({
     >
       {/* Top row: Priority & Quick Move Menu */}
       <div className="flex items-center justify-between gap-2 mb-2">
-        <span
-          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border ${priorityInfo.badge}`}
-        >
-          <span className={`w-1.5 h-1.5 rounded-full ${priorityInfo.dot}`} />
-          {priorityInfo.label}
-        </span>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span
+            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border ${priorityInfo.badge}`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${priorityInfo.dot}`} />
+            {priorityInfo.label}
+          </span>
+
+          {/* Linked Risks Indicator Badge */}
+          {linkedRisks.length > 0 && (
+            <span
+              title={`${linkedRisks.length} Risiko terkait (Level tertinggi: ${maxRiskLevel})`}
+              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-semibold border ${riskBadgeClass}`}
+            >
+              <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>{linkedRisks.length} Risiko</span>
+            </span>
+          )}
+        </div>
 
         {/* Maker-checker Done Column Lock Badge */}
         {isLockedByMakerChecker && (
