@@ -59,10 +59,10 @@ SET likelihood      = $2,
     level           = $4,
     status          = CASE 
                         WHEN status = 'closed' THEN 'closed'::risk_status
-                        WHEN LENGTH(TRIM(COALESCE($5, mitigation_plan))) > 0 THEN 'mitigating'::risk_status
+                        WHEN LENGTH(TRIM(COALESCE(sqlc.narg('mitigation_plan')::text, mitigation_plan))) > 0 THEN 'mitigating'::risk_status
                         ELSE 'assessed'::risk_status
                       END,
-    mitigation_plan = COALESCE($5, mitigation_plan),
+    mitigation_plan = COALESCE(sqlc.narg('mitigation_plan')::text, mitigation_plan),
     updated_at      = NOW()
 WHERE id = $1
 RETURNING *;

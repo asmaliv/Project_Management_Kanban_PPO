@@ -18,21 +18,21 @@ SET likelihood      = $2,
     level           = $4,
     status          = CASE 
                         WHEN status = 'closed' THEN 'closed'::risk_status
-                        WHEN LENGTH(TRIM(COALESCE($5, mitigation_plan))) > 0 THEN 'mitigating'::risk_status
+                        WHEN LENGTH(TRIM(COALESCE($5::text, mitigation_plan))) > 0 THEN 'mitigating'::risk_status
                         ELSE 'assessed'::risk_status
                       END,
-    mitigation_plan = COALESCE($5, mitigation_plan),
+    mitigation_plan = COALESCE($5::text, mitigation_plan),
     updated_at      = NOW()
 WHERE id = $1
 RETURNING id, code, project_id, task_id, title, description, category, likelihood, impact, score, level, status, mitigation_plan, owner_id, raised_by, created_at, updated_at, closed_at
 `
 
 type AssessRiskParams struct {
-	ID         pgtype.UUID   `json:"id"`
-	Likelihood pgtype.Int4   `json:"likelihood"`
-	Impact     pgtype.Int4   `json:"impact"`
-	Level      NullRiskLevel `json:"level"`
-	Column5    interface{}   `json:"column_5"`
+	ID             pgtype.UUID   `json:"id"`
+	Likelihood     pgtype.Int4   `json:"likelihood"`
+	Impact         pgtype.Int4   `json:"impact"`
+	Level          NullRiskLevel `json:"level"`
+	MitigationPlan pgtype.Text   `json:"mitigation_plan"`
 }
 
 func (q *Queries) AssessRisk(ctx context.Context, arg AssessRiskParams) (Risk, error) {
@@ -41,7 +41,7 @@ func (q *Queries) AssessRisk(ctx context.Context, arg AssessRiskParams) (Risk, e
 		arg.Likelihood,
 		arg.Impact,
 		arg.Level,
-		arg.Column5,
+		arg.MitigationPlan,
 	)
 	var i Risk
 	err := row.Scan(
