@@ -16,6 +16,7 @@ import (
 	"ppo-kanban/internal/db"
 	"ppo-kanban/internal/httpapi"
 	"ppo-kanban/internal/project"
+	"ppo-kanban/internal/risk"
 	"ppo-kanban/internal/task"
 )
 
@@ -66,6 +67,7 @@ func main() {
 	authService := auth.NewService(queries, cfg.SessionSecret, logger, auditService)
 	projectService := project.NewService(dbPool, queries, auditService, logger)
 	taskService := task.NewService(dbPool, queries, auditService, logger)
+	riskService := risk.NewService(dbPool, queries, auditService, logger)
 
 	router := httpapi.NewRouter(httpapi.RouterParams{
 		Logger:         logger,
@@ -73,6 +75,7 @@ func main() {
 		AuditService:   auditService,
 		ProjectService: projectService,
 		TaskService:    taskService,
+		RiskService:    riskService,
 		SessionSecret:  cfg.SessionSecret,
 		CookieSecure:   cfg.CookieSecure,
 	})
