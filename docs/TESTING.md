@@ -108,8 +108,8 @@ Hasil yang diharapkan harus cocok dengan matriks di SECURITY.md. Test dibuat tab
 - [x] Alternatif keyboard "Pindahkan ke…" berfungsi
 - [x] Team Leader melihat semua task di proyek tempat ia member (termasuk milik member lain) dan **tidak** melihat task proyek lain
 - [x] `GET /tasks` menghormati filter, paginasi, dan batas akses tiap role
-- [ ] Dashboard Team Leader: angka total/terlambat/menunggu persetujuan/per kolom sama dengan isi papan; beban kerja per member benar (Phase 8)
-- [ ] Dashboard Team Leader tidak menghitung task dari proyek non-member (Phase 8)
+- [x] Dashboard Team Leader: angka total/terlambat/menunggu persetujuan/per kolom sama dengan isi papan; beban kerja per member benar
+- [x] Dashboard Team Leader tidak menghitung task dari proyek non-member
 
 ## 10. Risk Tests
 - [x] PM, Team Leader (member), Risk Management dapat mengajukan
@@ -120,18 +120,18 @@ Hasil yang diharapkan harus cocok dengan matriks di SECURITY.md. Test dibuat tab
 - [x] Heatmap sesuai data
 
 ## 11. Audit Finding Tests
-- [ ] Hanya Audit yang membuat, membuka kembali, dan menutup
-- [ ] Hanya PM owner yang merespons
-- [ ] Status tidak dapat dilompati (`open → closed` langsung ditolak)
-- [ ] Temuan hanya terlihat oleh role/proyek yang berhak
+- [x] Hanya Audit yang membuat, membuka kembali, dan menutup
+- [x] Hanya PM owner yang merespons
+- [x] Status tidak dapat dilompati (`open → closed` langsung ditolak)
+- [x] Temuan hanya terlihat oleh role/proyek yang berhak
 
 ## 12. Audit Trail Tests
-- [ ] Setiap aksi tulis menghasilkan baris audit log
-- [ ] `UPDATE`/`DELETE` langsung ke `audit_logs` gagal (trigger)
-- [ ] Jika penulisan audit log gagal, perubahan data ikut dibatalkan
-- [ ] Hanya Audit dan Admin dapat membaca; hanya Audit dapat ekspor
-- [ ] Filter (waktu, actor, entitas, aksi) memberi hasil benar
-- [ ] CSV dan log tidak memuat password, hash, atau token
+- [x] Setiap aksi tulis menghasilkan baris audit log
+- [x] `UPDATE`/`DELETE` langsung ke `audit_logs` gagal (trigger)
+- [x] Jika penulisan audit log gagal, perubahan data ikut dibatalkan
+- [x] Hanya Audit dan Admin dapat membaca; hanya Audit dapat ekspor
+- [x] Filter (waktu, actor, entitas, aksi) memberi hasil benar
+- [x] CSV dan log tidak memuat password, hash, atau token
 
 ## 13. Responsive Checks
 

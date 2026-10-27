@@ -169,16 +169,16 @@ Verify:
 
 ---
 
-## Phase 7 — Temuan Audit & Dashboard per Role
+## Phase 7 — Temuan Audit & Dashboard per Role (Selesai ✅)
 
 Tasks:
-- Migrasi `audit_findings`
-- Buat/respons/buka kembali/tutup temuan sesuai alur status
-- Halaman Temuan Audit
-- Ekspor audit trail CSV (Audit saja, rate limited)
-- `GET /dashboard` dan UI dashboard untuk kelima role
-- Dashboard Team Leader: Ringkasan Tim (total, terlambat, menunggu persetujuan, task per kolom, beban kerja per member) + tab Tugas Saya
-- Halaman "Tugas Tim" untuk Team Leader (memakai `GET /tasks`)
+- [x] Migrasi `audit_findings`
+- [x] Buat/respons/buka kembali/tutup temuan sesuai alur status
+- [x] Halaman Temuan Audit
+- [x] Ekspor audit trail CSV (Audit saja, rate limited)
+- [x] `GET /dashboard` dan UI dashboard untuk kelima role
+- [x] Dashboard Team Leader: Ringkasan Tim (total, terlambat, menunggu persetujuan, task per kolom, beban kerja per member) + tab Tugas Saya
+- [x] Halaman "Tugas Tim" untuk Team Leader (memakai `GET /tasks`)
 
 Dependencies: Phase 6.
 
@@ -186,12 +186,12 @@ Deliverable:
 - Siklus temuan audit lengkap dan dashboard bermakna per role.
 
 Verify:
-- Hanya Audit yang membuat/menutup; hanya PM owner yang merespons.
-- Alur status tidak bisa dilompati.
-- Dashboard tiap role hanya memuat data yang boleh dilihat role tersebut.
-- Team Leader melihat task milik member lain di proyek yang sama, tetapi tidak melihat satu pun task di proyek yang bukan miliknya.
-- Angka di dashboard Team Leader sama dengan jumlah task yang tampak di papan.
-- CSV tidak memuat field sensitif.
+- [x] Hanya Audit yang membuat/menutup; hanya PM owner yang merespons.
+- [x] Alur status tidak bisa dilompati.
+- [x] Dashboard tiap role hanya memuat data yang boleh dilihat role tersebut.
+- [x] Team Leader melihat task milik member lain di proyek yang sama, tetapi tidak melihat satu pun task di proyek yang bukan miliknya.
+- [x] Angka di dashboard Team Leader sama dengan jumlah task yang tampak di papan.
+- [x] CSV tidak memuat field sensitif.
 
 ---
 

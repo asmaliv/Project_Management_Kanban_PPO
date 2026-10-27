@@ -62,12 +62,39 @@ Aplikasi web Project Management Kanban Board (Go + React) dengan role: Admin, Pr
   - Modal Penilaian Risiko (Probabilitas & Dampak dengan matrix preview interaktif), Modal Update Mitigasi, dan Drawer Detail Risiko.
 - Audit Trail terintegrasi mencatat seluruh mutasi risiko (`risk.create`, `risk.assess`, `risk.mitigate`, `risk.close`).
 
-### 🔄 Next: Phase 7 - Temuan Audit & Dashboard per Role
-- Migrasi tabel `audit_findings`
-- Buat, respons, buka kembali, dan tutup temuan audit sesuai alur status (Audit & PM)
-- Halaman Temuan Audit
-- Ekspor audit trail ke file CSV (eksklusif role Audit, dengan rate limiting)
-- Endpoint `GET /dashboard` dan UI dashboard analitik interaktif untuk kelima role
+### ✅ Phase 7: Temuan Audit & Dashboard per Role (Selesai) ✨
+- Migrasi skema database tabel `audit_findings` (`000006_create_audit_findings`) dengan auto-code `FND-XXXX`, severity level, status alur audit, dan relasi opsional ke project & task.
+- Siklus Temuan Audit (Audit Finding Lifecycle) dengan penegakan perbankan ketat:
+  - Penerbitan temuan: Eksklusif role **Audit** (status awal: `open`).
+  - Tanggapan manajemen / rencana perbaikan: Eksklusif role **Project Manager** pemilik proyek (status: `open` → `responded`).
+  - Verifikasi dan Penutupan: Eksklusif role **Audit** (status: `responded` → `closed`).
+  - **Larangan bypass alur status:** Status `open` dilarang keras melompat langsung ke `closed` tanpa tanggapan PM.
+  - Pembukaan kembali (*Reopen*): Eksklusif role **Audit** (`responded`/`closed` → `open`) dengan catatan audit.
+  - Visibilitas: Terisolasi otomatis per role di server (Admin, Audit, RM: semua temuan; PM: proyek miliknya; TL: proyek tempat member).
+- Ekspor Audit Trail CSV:
+  - Endpoint `GET /api/v1/audit-logs/export` dengan streaming data CSV.
+  - Hak akses eksklusif role **Audit**.
+  - Rate limiting ketat per-user: maksimal 5 permintaan ekspor per menit (HTTP 429).
+  - Sanitasi kolom: Hanya mengekspor kolom audit log yang aman (ID, Waktu, Aktor, Role, Aksi, Entitas, IP, Request ID) tanpa pernah menyertakan `before`/`after` JSON, rahasia, hash, atau password.
+- Dashboard Analitik per Role (`GET /api/v1/dashboard`):
+  - **Admin**: Metrik pengguna per role, jumlah akun terkunci, akun nonaktif, dan 10 aktivitas sistem terbaru.
+  - **Project Manager**: Jumlah proyek aktif, daftar task terlambat (*overdue*), task menunggu approval (*in review*), dan ringkasan temuan audit terbuka.
+  - **Team Leader**: Metrik tim (total task, terlambat, menunggu persetujuan), distribusi task per kolom papan Kanban, analisis beban kerja aktif per anggota tim (*workload*), daftar task terlambat, dan tab khusus "Tugas Saya".
+  - **Audit**: Ringkasan temuan per keparahan (*Critical, High, Medium, Low*), daftar temuan aktif, dan log aktivitas audit trail.
+  - **Risk Management**: Ringkasan risiko, status mitigasi, dan daftar risiko berlevel Critical & High.
+- Frontend UI Temuan Audit, Audit Trail, & Tugas Tim:
+  - Halaman Temuan Audit (`/findings`): KPI temuan, filter proyek/severity/status/pencarian, modal penerbitan temuan, dan drawer detail temuan dengan progress siklus alur audit serta form tanggapan PM.
+  - Halaman Audit Trail (`/audit-trail`): Filter waktu/entitas/aksi, unduh ekspor CSV, dan modal inspeksi perbandingan data *before vs after*.
+  - Halaman Tugas Tim (`/team-tasks`): Daftar task tim lintas proyek dengan filter keterlambatan, prioritas, pencarian, dan toggle "Hanya Tugas Saya".
+  - Halaman Dashboard (`/`): Tampilan adaptif otomatis untuk masing-masing dari kelima role.
+
+### 🔄 Next: Phase 8 - Production Readiness
+- Header keamanan (CSP, HSTS, X-Frame-Options, X-Content-Type-Options) dan rate limit menyeluruh
+- Review keamanan (SECURITY.md), `govulncheck`, dan `npm audit`
+- Uji responsif (mobile, tablet, desktop) dan aksesibilitas (WCAG AA, navigasi keyboard)
+- Dockerfile multi-stage production (non-root) dan panduan environment deployment
+- Dokumentasi deployment, migrasi, dan prosedur backup/restore
+- Eksekusi menyeluruh verifikasi checklist **TESTING.md**
 
 ---
 
