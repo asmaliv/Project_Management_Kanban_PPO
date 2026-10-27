@@ -126,7 +126,8 @@ Error:
 ### Audit Findings
 | Method | Path | Akses |
 |---|---|---|
-| GET | `/findings` | sesuai matriks; filter `project_id`, `status`, `severity` |
+| GET | `/findings` | sesuai matriks; filter `project_id`, `task_id`, `status`, `severity`, `search`, paginasi |
+| GET | `/findings/summary` | sesuai matriks — agregasi statistik temuan audit per status & severity |
 | POST | `/findings` | audit |
 | GET | `/findings/:id` | sesuai matriks |
 | POST | `/findings/:id/respond` | PM owner |

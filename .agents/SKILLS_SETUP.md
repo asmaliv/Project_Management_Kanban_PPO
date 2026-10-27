@@ -30,7 +30,7 @@
 - ✅ Python 3.12.10 installed
 - ✅ Graphify 0.9.88 installed
 - ✅ Skill registered for Kiro
-- ✅ Graph built (390 nodes, 986 edges, 14 communities)
+- ✅ Graph built (1,954 nodes, 6,933 edges, 134 communities)
 
 **What You Get:**
 - Interactive HTML knowledge graph
@@ -120,7 +120,7 @@ This is a **Go + PostgreSQL + React** project for a Kanban board with 5 roles.
 ## Next Steps
 
 1. ✅ **Ponytail** — active now
-2. ✅ **Graphify** — installed & active (390 nodes, 986 edges)
+2. ✅ **Graphify** — installed & active (1,954 nodes, 6,933 edges, 134 communities)
 3. ✅ **UI-UX Pro Max** — installed & active (7 skills, Python required for search)
 
 ---

@@ -118,6 +118,46 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	return i, err
 }
 
+const getUserStats = `-- name: GetUserStats :one
+SELECT 
+    COUNT(*)::bigint AS total_users,
+    COUNT(*) FILTER (WHERE role = 'admin')::bigint AS admin_count,
+    COUNT(*) FILTER (WHERE role = 'project_manager')::bigint AS pm_count,
+    COUNT(*) FILTER (WHERE role = 'team_leader')::bigint AS tl_count,
+    COUNT(*) FILTER (WHERE role = 'audit')::bigint AS audit_count,
+    COUNT(*) FILTER (WHERE role = 'risk_management')::bigint AS risk_count,
+    COUNT(*) FILTER (WHERE locked_until IS NOT NULL AND locked_until > NOW())::bigint AS locked_count,
+    COUNT(*) FILTER (WHERE is_active = false)::bigint AS inactive_count
+FROM users
+`
+
+type GetUserStatsRow struct {
+	TotalUsers    int64 `json:"total_users"`
+	AdminCount    int64 `json:"admin_count"`
+	PmCount       int64 `json:"pm_count"`
+	TlCount       int64 `json:"tl_count"`
+	AuditCount    int64 `json:"audit_count"`
+	RiskCount     int64 `json:"risk_count"`
+	LockedCount   int64 `json:"locked_count"`
+	InactiveCount int64 `json:"inactive_count"`
+}
+
+func (q *Queries) GetUserStats(ctx context.Context) (GetUserStatsRow, error) {
+	row := q.db.QueryRow(ctx, getUserStats)
+	var i GetUserStatsRow
+	err := row.Scan(
+		&i.TotalUsers,
+		&i.AdminCount,
+		&i.PmCount,
+		&i.TlCount,
+		&i.AuditCount,
+		&i.RiskCount,
+		&i.LockedCount,
+		&i.InactiveCount,
+	)
+	return i, err
+}
+
 const incrementFailedLogin = `-- name: IncrementFailedLogin :one
 UPDATE users
 SET failed_login_count = failed_login_count + 1,
@@ -131,6 +171,56 @@ func (q *Queries) IncrementFailedLogin(ctx context.Context, id pgtype.UUID) (int
 	var failed_login_count int32
 	err := row.Scan(&failed_login_count)
 	return failed_login_count, err
+}
+
+const listUsers = `-- name: ListUsers :many
+SELECT id, email, full_name, role, is_active, must_change_password, locked_until, last_login_at, created_at, updated_at
+FROM users
+ORDER BY created_at ASC
+`
+
+type ListUsersRow struct {
+	ID                 pgtype.UUID        `json:"id"`
+	Email              string             `json:"email"`
+	FullName           string             `json:"full_name"`
+	Role               UserRole           `json:"role"`
+	IsActive           bool               `json:"is_active"`
+	MustChangePassword bool               `json:"must_change_password"`
+	LockedUntil        pgtype.Timestamptz `json:"locked_until"`
+	LastLoginAt        pgtype.Timestamptz `json:"last_login_at"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
+}
+
+func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
+	rows, err := q.db.Query(ctx, listUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUsersRow
+	for rows.Next() {
+		var i ListUsersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.FullName,
+			&i.Role,
+			&i.IsActive,
+			&i.MustChangePassword,
+			&i.LockedUntil,
+			&i.LastLoginAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const lockAccount = `-- name: LockAccount :exec

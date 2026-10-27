@@ -8,6 +8,7 @@ sql:
       - "migrations/000003_create_projects_members_columns.up.sql"
       - "migrations/000004_create_tasks_and_comments.up.sql"
       - "migrations/000005_create_risks.up.sql"
+      - "migrations/000006_create_audit_findings.up.sql"
     gen:
       go:
         package: "db"

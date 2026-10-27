@@ -1,6 +1,8 @@
 package httpapi
 
 import (
+	"encoding/csv"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -91,6 +93,115 @@ func (h *AuditLogHandler) HandleListAuditLogs(w http.ResponseWriter, r *http.Req
 	}
 
 	JSON(w, http.StatusOK, logs)
+}
+
+// HandleExportAuditLogsCSV streams audit logs as a downloadable CSV file.
+// Strictly restricted to audit role. Maximum 5000 records per export.
+func (h *AuditLogHandler) HandleExportAuditLogsCSV(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+
+	filters := auditlog.ListFilters{
+		Limit:  5000,
+		Offset: 0,
+	}
+
+	if actorIDStr := query.Get("actor_id"); actorIDStr != "" {
+		parsed, err := parseUUID(actorIDStr)
+		if err == nil {
+			filters.ActorID = parsed
+		}
+	}
+
+	if action := query.Get("action"); action != "" {
+		filters.Action = pgtype.Text{String: action, Valid: true}
+	}
+
+	if entityType := query.Get("entity_type"); entityType != "" {
+		filters.EntityType = pgtype.Text{String: entityType, Valid: true}
+	}
+
+	if entityIDStr := query.Get("entity_id"); entityIDStr != "" {
+		filters.EntityID = pgtype.Text{String: entityIDStr, Valid: true}
+	}
+
+	if projectIDStr := query.Get("project_id"); projectIDStr != "" {
+		parsed, err := parseUUID(projectIDStr)
+		if err == nil {
+			filters.ProjectID = parsed
+		}
+	}
+
+	if dateFromStr := query.Get("date_from"); dateFromStr != "" {
+		t, err := time.Parse(time.RFC3339, dateFromStr)
+		if err == nil {
+			filters.DateFrom = pgtype.Timestamptz{Time: t, Valid: true}
+		}
+	}
+
+	if dateToStr := query.Get("date_to"); dateToStr != "" {
+		t, err := time.Parse(time.RFC3339, dateToStr)
+		if err == nil {
+			filters.DateTo = pgtype.Timestamptz{Time: t, Valid: true}
+		}
+	}
+
+	logs, err := h.auditService.Read(r.Context(), filters)
+	if err != nil {
+		ErrorJSON(w, http.StatusInternalServerError, "INTERNAL", "Gagal membaca audit log untuk ekspor.", nil)
+		return
+	}
+
+	filename := fmt.Sprintf("audit-trail-%s.csv", time.Now().Format("20060102-150405"))
+	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", filename))
+
+	csvWriter := csv.NewWriter(w)
+	defer csvWriter.Flush()
+
+	// CSV Header (Safe columns only - never include passwords, hashes, tokens, or raw secrets)
+	_ = csvWriter.Write([]string{
+		"ID",
+		"Waktu (UTC)",
+		"Actor ID",
+		"Role",
+		"Aksi",
+		"Tipe Entitas",
+		"ID Entitas",
+		"Project ID",
+		"IP",
+		"Request ID",
+	})
+
+	for _, log := range logs {
+		actorID := ""
+		if log.ActorID.Valid {
+			actorID = uuid.UUID(log.ActorID.Bytes).String()
+		}
+		actorRole := ""
+		if log.ActorRole.Valid {
+			actorRole = string(log.ActorRole.UserRole)
+		}
+		entityID := log.EntityID
+		projectID := ""
+		if log.ProjectID.Valid {
+			projectID = uuid.UUID(log.ProjectID.Bytes).String()
+		}
+		ip := log.Ip
+		reqID := log.RequestID
+
+		_ = csvWriter.Write([]string{
+			strconv.FormatInt(log.ID, 10),
+			log.OccurredAt.Time.UTC().Format(time.RFC3339),
+			actorID,
+			actorRole,
+			log.Action,
+			log.EntityType,
+			entityID,
+			projectID,
+			ip,
+			reqID,
+		})
+	}
 }
 
 // parseUUID is a helper to convert string to pgtype.UUID

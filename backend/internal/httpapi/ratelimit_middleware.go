@@ -97,6 +97,27 @@ func RateLimitLogin() func(http.Handler) http.Handler {
 	}
 }
 
+// RateLimitExport enforces 5 requests per minute per user for audit trail export.
+func RateLimitExport() func(http.Handler) http.Handler {
+	limiter := newIPRateLimiter(5, time.Minute)
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			key := extractIP(r)
+			if session := GetSessionInfo(r.Context()); session != nil && session.User.ID != "" {
+				key = session.User.ID
+			}
+
+			if !limiter.allow(key) {
+				w.Header().Set("Retry-After", "60")
+				ErrorJSON(w, http.StatusTooManyRequests, "RATE_LIMITED", "Batas ekspor audit log tercapai (maksimal 5 kali per menit). Silakan tunggu 1 menit.", nil)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func extractIP(r *http.Request) string {
 	xff := r.Header.Get("X-Forwarded-For")
 	if xff != "" {

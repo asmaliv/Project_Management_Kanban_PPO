@@ -11,6 +11,93 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type FindingSeverity string
+
+const (
+	FindingSeverityLow      FindingSeverity = "low"
+	FindingSeverityMedium   FindingSeverity = "medium"
+	FindingSeverityHigh     FindingSeverity = "high"
+	FindingSeverityCritical FindingSeverity = "critical"
+)
+
+func (e *FindingSeverity) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = FindingSeverity(s)
+	case string:
+		*e = FindingSeverity(s)
+	default:
+		return fmt.Errorf("unsupported scan type for FindingSeverity: %T", src)
+	}
+	return nil
+}
+
+type NullFindingSeverity struct {
+	FindingSeverity FindingSeverity `json:"finding_severity"`
+	Valid           bool            `json:"valid"` // Valid is true if FindingSeverity is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullFindingSeverity) Scan(value interface{}) error {
+	if value == nil {
+		ns.FindingSeverity, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.FindingSeverity.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullFindingSeverity) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.FindingSeverity), nil
+}
+
+type FindingStatus string
+
+const (
+	FindingStatusOpen      FindingStatus = "open"
+	FindingStatusResponded FindingStatus = "responded"
+	FindingStatusClosed    FindingStatus = "closed"
+)
+
+func (e *FindingStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = FindingStatus(s)
+	case string:
+		*e = FindingStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for FindingStatus: %T", src)
+	}
+	return nil
+}
+
+type NullFindingStatus struct {
+	FindingStatus FindingStatus `json:"finding_status"`
+	Valid         bool          `json:"valid"` // Valid is true if FindingStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullFindingStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.FindingStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.FindingStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullFindingStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.FindingStatus), nil
+}
+
 type ProjectStatus string
 
 const (
@@ -277,6 +364,25 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.UserRole), nil
+}
+
+type AuditFinding struct {
+	ID          pgtype.UUID        `json:"id"`
+	Code        string             `json:"code"`
+	ProjectID   pgtype.UUID        `json:"project_id"`
+	TaskID      pgtype.UUID        `json:"task_id"`
+	Title       string             `json:"title"`
+	Description string             `json:"description"`
+	Severity    FindingSeverity    `json:"severity"`
+	Status      FindingStatus      `json:"status"`
+	RaisedBy    pgtype.UUID        `json:"raised_by"`
+	Response    string             `json:"response"`
+	RespondedBy pgtype.UUID        `json:"responded_by"`
+	RespondedAt pgtype.Timestamptz `json:"responded_at"`
+	ClosedBy    pgtype.UUID        `json:"closed_by"`
+	ClosedAt    pgtype.Timestamptz `json:"closed_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
 
 type AuditLog struct {

@@ -9,6 +9,9 @@ import PlaceholderPage from './features/placeholder/PlaceholderPage'
 import ProjectListPage from './features/projects/ProjectListPage'
 import ProjectDetailPage from './features/projects/ProjectDetailPage'
 import RiskRegisterPage from './features/risks/RiskRegisterPage'
+import FindingListPage from './features/findings/FindingListPage'
+import AuditTrailPage from './features/audit/AuditTrailPage'
+import TeamTasksPage from './features/tasks/TeamTasksPage'
 
 export default function App() {
   return (
@@ -32,11 +35,11 @@ export default function App() {
               <Route path="/users" element={<PlaceholderPage />} />
               <Route path="/projects" element={<ProjectListPage />} />
               <Route path="/projects/:id" element={<ProjectDetailPage />} />
-              <Route path="/team-tasks" element={<PlaceholderPage />} />
-              <Route path="/my-tasks" element={<PlaceholderPage />} />
+              <Route path="/team-tasks" element={<TeamTasksPage />} />
+              <Route path="/my-tasks" element={<TeamTasksPage initialMineOnly={true} />} />
               <Route path="/risks" element={<RiskRegisterPage />} />
-              <Route path="/findings" element={<PlaceholderPage />} />
-              <Route path="/audit-trail" element={<PlaceholderPage />} />
+              <Route path="/findings" element={<FindingListPage />} />
+              <Route path="/audit-trail" element={<AuditTrailPage />} />
             </Route>
           </Route>
 
