@@ -11,6 +11,7 @@ import (
 	"ppo-kanban/internal/auditlog"
 	"ppo-kanban/internal/auth"
 	"ppo-kanban/internal/db"
+	"ppo-kanban/internal/finding"
 	"ppo-kanban/internal/project"
 	"ppo-kanban/internal/risk"
 	"ppo-kanban/internal/task"
@@ -23,6 +24,7 @@ type RouterParams struct {
 	ProjectService *project.Service
 	TaskService    *task.Service
 	RiskService    *risk.Service
+	FindingService *finding.Service
 	SessionSecret  string
 	CookieSecure   bool
 }
@@ -75,9 +77,9 @@ func NewRouter(params RouterParams) *chi.Mux {
 
 			r.Group(func(r chi.Router) {
 				r.Use(RequireAuth)
-				r.Use(RequireRoles(db.UserRoleAdmin, db.UserRoleAudit))
 
-				r.Get("/audit-logs", auditHandler.HandleListAuditLogs)
+				r.With(RequireRoles(db.UserRoleAdmin, db.UserRoleAudit)).Get("/audit-logs", auditHandler.HandleListAuditLogs)
+				r.With(RequireRoles(db.UserRoleAudit), RateLimitExport()).Get("/audit-logs/export", auditHandler.HandleExportAuditLogsCSV)
 			})
 		}
 
@@ -168,6 +170,26 @@ func NewRouter(params RouterParams) *chi.Mux {
 					r.Put("/", riskHandler.HandleUpdateRisk)
 					r.Post("/assess", riskHandler.HandleAssessRisk)
 					r.Post("/close", riskHandler.HandleCloseRisk)
+				})
+			})
+		}
+
+		// Audit Findings endpoints
+		if params.FindingService != nil {
+			findingHandler := NewFindingHandler(params.FindingService)
+
+			r.Group(func(r chi.Router) {
+				r.Use(RequireAuth)
+
+				r.Get("/findings", findingHandler.HandleListFindings)
+				r.Post("/findings", findingHandler.HandleCreateFinding)
+				r.Get("/findings/summary", findingHandler.HandleGetFindingSummary)
+
+				r.Route("/findings/{id}", func(r chi.Router) {
+					r.Get("/", findingHandler.HandleGetFinding)
+					r.Post("/respond", findingHandler.HandleRespondFinding)
+					r.Post("/reopen", findingHandler.HandleReopenFinding)
+					r.Post("/close", findingHandler.HandleCloseFinding)
 				})
 			})
 		}
