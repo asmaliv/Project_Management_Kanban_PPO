@@ -393,6 +393,9 @@ func (m *httpFindingMockStore) GetAuditFindingsSummaryStats(ctx context.Context,
 	}, nil
 }
 
+func (m *httpFindingMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
+func (m *httpFindingMockStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
+
 func parseUUIDHelper(s string) pgtype.UUID {
 	u, _ := uuid.Parse(s)
 	return pgtype.UUID{Bytes: u, Valid: true}

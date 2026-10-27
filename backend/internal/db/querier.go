@@ -54,6 +54,7 @@ type Querier interface {
 	GetTaskByIDWithDetails(ctx context.Context, id pgtype.UUID) (GetTaskByIDWithDetailsRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
+	GetUserStats(ctx context.Context) (GetUserStatsRow, error)
 	IncrementFailedLogin(ctx context.Context, id pgtype.UUID) (int32, error)
 	InsertAuditLog(ctx context.Context, arg InsertAuditLogParams) (AuditLog, error)
 	IsProjectMember(ctx context.Context, arg IsProjectMemberParams) (bool, error)
@@ -69,6 +70,7 @@ type Querier interface {
 	ListTasksByColumn(ctx context.Context, columnID pgtype.UUID) ([]ListTasksByColumnRow, error)
 	ListTasksByProject(ctx context.Context, projectID pgtype.UUID) ([]ListTasksByProjectRow, error)
 	ListTasksByProjectsFiltered(ctx context.Context, arg ListTasksByProjectsFilteredParams) ([]ListTasksByProjectsFilteredRow, error)
+	ListUsers(ctx context.Context) ([]ListUsersRow, error)
 	LockAccount(ctx context.Context, arg LockAccountParams) error
 	MaxColumnPosition(ctx context.Context, projectID pgtype.UUID) (int32, error)
 	MaxTaskPositionInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error)

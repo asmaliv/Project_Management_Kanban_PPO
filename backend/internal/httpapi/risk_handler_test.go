@@ -573,6 +573,8 @@ func (m *httpRiskMockStore) GetNextFindingCode(ctx context.Context) (string, err
 func (m *httpRiskMockStore) ListAuditFindingsFiltered(ctx context.Context, arg db.ListAuditFindingsFilteredParams) ([]db.ListAuditFindingsFilteredRow, error) { return nil, nil }
 func (m *httpRiskMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
 func (m *httpRiskMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *httpRiskMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
+func (m *httpRiskMockStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
 
 // ─── HTTP Setup Helper ───────────────────────────────────────────────────────
 

@@ -532,6 +532,8 @@ func (m *riskMockStore) GetNextFindingCode(ctx context.Context) (string, error) 
 func (m *riskMockStore) ListAuditFindingsFiltered(ctx context.Context, arg db.ListAuditFindingsFilteredParams) ([]db.ListAuditFindingsFilteredRow, error) { return nil, nil }
 func (m *riskMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
 func (m *riskMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *riskMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
+func (m *riskMockStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 

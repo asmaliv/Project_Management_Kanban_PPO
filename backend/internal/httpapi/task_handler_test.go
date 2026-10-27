@@ -590,6 +590,8 @@ func (m *taskMockStore) GetNextFindingCode(ctx context.Context) (string, error) 
 func (m *taskMockStore) ListAuditFindingsFiltered(ctx context.Context, arg db.ListAuditFindingsFilteredParams) ([]db.ListAuditFindingsFilteredRow, error) { return nil, nil }
 func (m *taskMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
 func (m *taskMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *taskMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
+func (m *taskMockStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
 
 // ─── HTTP Test Setup Helper ──────────────────────────────────────────────────
 

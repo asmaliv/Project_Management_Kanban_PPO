@@ -45,3 +45,21 @@ WHERE id = $1;
 
 -- name: CountUsersByEmail :one
 SELECT COUNT(*) FROM users WHERE email = $1;
+
+-- name: ListUsers :many
+SELECT id, email, full_name, role, is_active, must_change_password, locked_until, last_login_at, created_at, updated_at
+FROM users
+ORDER BY created_at ASC;
+
+-- name: GetUserStats :one
+SELECT 
+    COUNT(*)::bigint AS total_users,
+    COUNT(*) FILTER (WHERE role = 'admin')::bigint AS admin_count,
+    COUNT(*) FILTER (WHERE role = 'project_manager')::bigint AS pm_count,
+    COUNT(*) FILTER (WHERE role = 'team_leader')::bigint AS tl_count,
+    COUNT(*) FILTER (WHERE role = 'audit')::bigint AS audit_count,
+    COUNT(*) FILTER (WHERE role = 'risk_management')::bigint AS risk_count,
+    COUNT(*) FILTER (WHERE locked_until IS NOT NULL AND locked_until > NOW())::bigint AS locked_count,
+    COUNT(*) FILTER (WHERE is_active = false)::bigint AS inactive_count
+FROM users;
+

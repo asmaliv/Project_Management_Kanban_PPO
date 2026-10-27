@@ -73,6 +73,7 @@ func main() {
 
 	router := httpapi.NewRouter(httpapi.RouterParams{
 		Logger:         logger,
+		Queries:        queries,
 		AuthService:    authService,
 		AuditService:   auditService,
 		ProjectService: projectService,

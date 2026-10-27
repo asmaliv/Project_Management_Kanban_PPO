@@ -19,6 +19,7 @@ import (
 
 type RouterParams struct {
 	Logger         *slog.Logger
+	Queries        db.Querier
 	AuthService    *auth.Service
 	AuditService   *auditlog.Service
 	ProjectService *project.Service
@@ -193,6 +194,18 @@ func NewRouter(params RouterParams) *chi.Mux {
 				})
 			})
 		}
+
+		// Role-scoped Dashboard endpoint
+		dashboardHandler := NewDashboardHandler(
+			params.Queries,
+			params.AuthService,
+			params.ProjectService,
+			params.TaskService,
+			params.RiskService,
+			params.FindingService,
+			params.AuditService,
+		)
+		r.With(RequireAuth).Get("/dashboard", dashboardHandler.HandleGetDashboard)
 	})
 
 	return r
