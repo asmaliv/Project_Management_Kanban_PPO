@@ -456,6 +456,18 @@ func (m *projectMockStore) ListRisksFiltered(ctx context.Context, arg db.ListRis
 func (m *projectMockStore) UpdateRiskByRiskManagement(ctx context.Context, arg db.UpdateRiskByRiskManagementParams) (db.Risk, error) { return db.Risk{}, nil }
 func (m *projectMockStore) UpdateRiskMitigationPlan(ctx context.Context, arg db.UpdateRiskMitigationPlanParams) (db.Risk, error) { return db.Risk{}, nil }
 
+// Phase 7 Querier stubs
+func (m *projectMockStore) CloseAuditFinding(ctx context.Context, arg db.CloseAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *projectMockStore) CountAuditFindingsFiltered(ctx context.Context, arg db.CountAuditFindingsFilteredParams) (int64, error) { return 0, nil }
+func (m *projectMockStore) CreateAuditFinding(ctx context.Context, arg db.CreateAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *projectMockStore) GetAuditFindingByID(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *projectMockStore) GetAuditFindingByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetAuditFindingByIDWithDetailsRow, error) { return db.GetAuditFindingByIDWithDetailsRow{}, nil }
+func (m *projectMockStore) GetAuditFindingsSummaryStats(ctx context.Context, arg db.GetAuditFindingsSummaryStatsParams) (db.GetAuditFindingsSummaryStatsRow, error) { return db.GetAuditFindingsSummaryStatsRow{}, nil }
+func (m *projectMockStore) GetNextFindingCode(ctx context.Context) (string, error) { return "FND-0001", nil }
+func (m *projectMockStore) ListAuditFindingsFiltered(ctx context.Context, arg db.ListAuditFindingsFilteredParams) ([]db.ListAuditFindingsFilteredRow, error) { return nil, nil }
+func (m *projectMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *projectMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+
 // ─── HTTP Test Setup ──────────────────────────────────────────────────────────
 
 func setupProjectTestServer(t *testing.T) (http.Handler, *projectMockStore, *auth.Service, string) {

@@ -14,14 +14,17 @@ type Querier interface {
 	AddProjectMember(ctx context.Context, arg AddProjectMemberParams) error
 	ArchiveProject(ctx context.Context, id pgtype.UUID) (Project, error)
 	AssessRisk(ctx context.Context, arg AssessRiskParams) (Risk, error)
+	CloseAuditFinding(ctx context.Context, arg CloseAuditFindingParams) (AuditFinding, error)
 	CloseRisk(ctx context.Context, id pgtype.UUID) (Risk, error)
 	CountActiveTasksInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error)
+	CountAuditFindingsFiltered(ctx context.Context, arg CountAuditFindingsFilteredParams) (int64, error)
 	CountProjectMembers(ctx context.Context, projectID pgtype.UUID) (int64, error)
 	CountRisksByTaskIDs(ctx context.Context, taskIds []pgtype.UUID) ([]CountRisksByTaskIDsRow, error)
 	CountRisksFiltered(ctx context.Context, arg CountRisksFilteredParams) (int64, error)
 	CountTaskComments(ctx context.Context, taskID pgtype.UUID) (int32, error)
 	CountTasksByProjectsFiltered(ctx context.Context, arg CountTasksByProjectsFilteredParams) (int64, error)
 	CountUsersByEmail(ctx context.Context, email string) (int64, error)
+	CreateAuditFinding(ctx context.Context, arg CreateAuditFindingParams) (AuditFinding, error)
 	CreateBoardColumn(ctx context.Context, arg CreateBoardColumnParams) (BoardColumn, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
 	CreateRisk(ctx context.Context, arg CreateRiskParams) (Risk, error)
@@ -33,8 +36,12 @@ type Querier interface {
 	DeleteExpiredSessions(ctx context.Context) error
 	DeleteSessionByTokenHash(ctx context.Context, tokenHash string) error
 	DeleteSessionsByUserID(ctx context.Context, userID pgtype.UUID) error
+	GetAuditFindingByID(ctx context.Context, id pgtype.UUID) (AuditFinding, error)
+	GetAuditFindingByIDWithDetails(ctx context.Context, id pgtype.UUID) (GetAuditFindingByIDWithDetailsRow, error)
+	GetAuditFindingsSummaryStats(ctx context.Context, arg GetAuditFindingsSummaryStatsParams) (GetAuditFindingsSummaryStatsRow, error)
 	GetBoardColumnByID(ctx context.Context, id pgtype.UUID) (BoardColumn, error)
 	GetDoneColumn(ctx context.Context, projectID pgtype.UUID) (BoardColumn, error)
+	GetNextFindingCode(ctx context.Context) (string, error)
 	GetNextRiskCode(ctx context.Context) (string, error)
 	GetProjectByID(ctx context.Context, id pgtype.UUID) (Project, error)
 	GetProjectByIDIncludeDeleted(ctx context.Context, id pgtype.UUID) (Project, error)
@@ -51,6 +58,7 @@ type Querier interface {
 	InsertAuditLog(ctx context.Context, arg InsertAuditLogParams) (AuditLog, error)
 	IsProjectMember(ctx context.Context, arg IsProjectMemberParams) (bool, error)
 	ListAllProjects(ctx context.Context) ([]Project, error)
+	ListAuditFindingsFiltered(ctx context.Context, arg ListAuditFindingsFilteredParams) ([]ListAuditFindingsFilteredRow, error)
 	ListAuditLogs(ctx context.Context, arg ListAuditLogsParams) ([]AuditLog, error)
 	ListBoardColumns(ctx context.Context, projectID pgtype.UUID) ([]BoardColumn, error)
 	ListProjectMembers(ctx context.Context, projectID pgtype.UUID) ([]ListProjectMembersRow, error)
@@ -66,7 +74,9 @@ type Querier interface {
 	MaxTaskPositionInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error)
 	NextProjectCode(ctx context.Context) (string, error)
 	RemoveProjectMember(ctx context.Context, arg RemoveProjectMemberParams) error
+	ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (AuditFinding, error)
 	ResetFailedLoginAndTouchLastLogin(ctx context.Context, id pgtype.UUID) error
+	RespondAuditFinding(ctx context.Context, arg RespondAuditFindingParams) (AuditFinding, error)
 	ShiftTasksBetweenPositionsDown(ctx context.Context, arg ShiftTasksBetweenPositionsDownParams) error
 	ShiftTasksBetweenPositionsUp(ctx context.Context, arg ShiftTasksBetweenPositionsUpParams) error
 	ShiftTasksDownInColumn(ctx context.Context, arg ShiftTasksDownInColumnParams) error

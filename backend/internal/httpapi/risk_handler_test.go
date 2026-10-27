@@ -562,6 +562,18 @@ func (m *httpRiskMockStore) CountRisksByTaskIDs(ctx context.Context, taskIds []p
 	return res, nil
 }
 
+// Phase 7 Querier stubs
+func (m *httpRiskMockStore) CloseAuditFinding(ctx context.Context, arg db.CloseAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *httpRiskMockStore) CountAuditFindingsFiltered(ctx context.Context, arg db.CountAuditFindingsFilteredParams) (int64, error) { return 0, nil }
+func (m *httpRiskMockStore) CreateAuditFinding(ctx context.Context, arg db.CreateAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *httpRiskMockStore) GetAuditFindingByID(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *httpRiskMockStore) GetAuditFindingByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetAuditFindingByIDWithDetailsRow, error) { return db.GetAuditFindingByIDWithDetailsRow{}, nil }
+func (m *httpRiskMockStore) GetAuditFindingsSummaryStats(ctx context.Context, arg db.GetAuditFindingsSummaryStatsParams) (db.GetAuditFindingsSummaryStatsRow, error) { return db.GetAuditFindingsSummaryStatsRow{}, nil }
+func (m *httpRiskMockStore) GetNextFindingCode(ctx context.Context) (string, error) { return "FND-0001", nil }
+func (m *httpRiskMockStore) ListAuditFindingsFiltered(ctx context.Context, arg db.ListAuditFindingsFilteredParams) ([]db.ListAuditFindingsFilteredRow, error) { return nil, nil }
+func (m *httpRiskMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+func (m *httpRiskMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
+
 // ─── HTTP Setup Helper ───────────────────────────────────────────────────────
 
 func setupRiskHTTPServer(t *testing.T) (http.Handler, *httpRiskMockStore, *auth.Service, string) {
