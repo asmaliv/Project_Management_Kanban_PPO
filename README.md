@@ -108,7 +108,7 @@ Aplikasi web Project Management Kanban Board (Go + React) dengan role: Admin, Pr
 ## 🤖 AI Skills Active
 
 - **Ponytail** - Simplest working code, -53% code, -41% time
-- **Graphify** - Knowledge graph, 390 nodes, 986 edges, 14 communities
+- **Graphify** - Knowledge graph, 1,954 nodes, 6,933 edges, 134 communities
 - **UI-UX Pro Max** - Design intelligence for professional banking UI/UX (semantic color tokens, accessible dialogs, responsive cards)
 
 ## 📚 Dokumen Perencanaan
