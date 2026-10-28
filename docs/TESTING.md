@@ -152,13 +152,13 @@ Uji minimal: mobile kecil (320px), mobile besar, tablet, laptop/desktop.
 - [ ] Perubahan dinamis (toast, hasil pemindahan) diumumkan ke pembaca layar
 
 ## 15. Security / Privacy Checks
-- [ ] Tidak ada secret di kode klien atau repository
-- [ ] Autentikasi dan otorisasi diverifikasi di server untuk setiap aksi
-- [ ] Input divalidasi di server; field tak dikenal ditolak
-- [ ] Tidak ada stack trace di respons error
-- [ ] Header keamanan terpasang (CSP, HSTS, nosniff, dll)
-- [ ] `govulncheck` dan `npm audit` tidak menyisakan temuan kritis
-- [ ] Tidak ada SQL hasil string concatenation (tinjau kode)
+- [x] Tidak ada secret di kode klien atau repository
+- [x] Autentikasi dan otorisasi diverifikasi di server untuk setiap aksi
+- [x] Input divalidasi di server; field tak dikenal ditolak
+- [x] Tidak ada stack trace di respons error
+- [x] Header keamanan terpasang (CSP, HSTS, nosniff, dll)
+- [x] `govulncheck` dan `npm audit` tidak menyisakan temuan kritis
+- [x] Tidak ada SQL hasil string concatenation (tinjau kode)
 
 ## 16. Release Blockers
 

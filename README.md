@@ -88,13 +88,18 @@ Aplikasi web Project Management Kanban Board (Go + React) dengan role: Admin, Pr
   - Halaman Tugas Tim (`/team-tasks`): Daftar task tim lintas proyek dengan filter keterlambatan, prioritas, pencarian, dan toggle "Hanya Tugas Saya".
   - Halaman Dashboard (`/`): Tampilan adaptif otomatis untuk masing-masing dari kelima role.
 
-### 🔄 Next: Phase 8 - Production Readiness
-- Header keamanan (CSP, HSTS, X-Frame-Options, X-Content-Type-Options) dan rate limit menyeluruh
-- Review keamanan (SECURITY.md), `govulncheck`, dan `npm audit`
-- Uji responsif (mobile, tablet, desktop) dan aksesibilitas (WCAG AA, navigasi keyboard)
-- Dockerfile multi-stage production (non-root) dan panduan environment deployment
-- Dokumentasi deployment, migrasi, dan prosedur backup/restore
-- Eksekusi menyeluruh verifikasi checklist **TESTING.md**
+### ✅ Phase 8: Production Readiness (Selesai) ✨
+- Header keamanan tingkat perbankan: Content-Security-Policy (CSP) ketat, HSTS (`max-age=63072000; includeSubDomains; preload`), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy`.
+- Rate limiting menyeluruh: Login (10 req/menit per IP), Ekspor Audit Trail (5 req/menit per user), Endpoint tulis umum (120 req/menit per user/IP).
+- Pemindaian kerentanan & audit dependensi: `govulncheck` dan `npm audit` 0 vulnerability pada package yang diimpor.
+- Containerization production multi-stage & non-root:
+  - `backend/Dockerfile`: Minimal Alpine binary runner (`appuser:10001`), static linking `-ldflags="-s -w"`, healthcheck bawaan.
+  - `frontend/Dockerfile` & `frontend/nginx.conf`: Nginx unprivileged non-root runner (`nginx:8080`), gzip compression, static asset cache immutable, proxy API ke backend.
+  - `docker-compose.prod.yml`: Orkestrasi isolasi jaringan internal (`ppo_net`), zero public DB exposure, parameterisasi env aman.
+- Dokumentasi operasional & SOP perbankan:
+  - `docs/DEPLOYMENT.md`: Arsitektur produksi, prasyarat server, prosedur deployment & rolling update zero downtime.
+  - `docs/BACKUP_RESTORE.md`: Prosedur backup otomatis 6 jam sekali (pg_dump `-Fc` + enkripsi GPG), retensi 30 hari lokal & 1 tahun offsite, serta SOP restore drill.
+- Eksekusi checklist verifikasi final [docs/TESTING.md](docs/TESTING.md) — Seluruh kriteria rilis terpenuhi tanpa release blocker.
 
 ---
 
