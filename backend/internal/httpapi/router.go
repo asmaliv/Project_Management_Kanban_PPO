@@ -52,6 +52,8 @@ func NewRouter(params RouterParams) *chi.Mux {
 
 	// API v1 routes
 	r.Route("/api/v1", func(r chi.Router) {
+		r.Use(RateLimitGeneralWrite())
+
 		if params.AuthService != nil {
 			authHandler := NewAuthHandler(params.AuthService, params.SessionSecret, params.CookieSecure)
 
@@ -213,6 +215,9 @@ func NewRouter(params RouterParams) *chi.Mux {
 
 // requestLogger logs each request with structured fields.
 func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
+	if logger == nil {
+		logger = slog.Default()
+	}
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
@@ -231,12 +236,17 @@ func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 	}
 }
 
-// securityHeaders adds baseline security headers to every response.
+// securityHeaders adds enterprise security headers to every response per SECURITY.md.
 func securityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("X-Frame-Options", "DENY")
-		w.Header().Set("Referrer-Policy", "no-referrer")
+		h := w.Header()
+		h.Set("X-Content-Type-Options", "nosniff")
+		h.Set("X-Frame-Options", "DENY")
+		h.Set("Referrer-Policy", "no-referrer")
+		h.Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+		h.Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
+		h.Set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")
+		h.Set("X-Permitted-Cross-Domain-Policies", "none")
 
 		next.ServeHTTP(w, r)
 	})

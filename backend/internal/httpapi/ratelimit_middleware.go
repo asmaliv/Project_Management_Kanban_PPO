@@ -118,6 +118,32 @@ func RateLimitExport() func(http.Handler) http.Handler {
 	}
 }
 
+// RateLimitGeneralWrite enforces 120 write requests per minute per user or IP per SECURITY.md.
+func RateLimitGeneralWrite() func(http.Handler) http.Handler {
+	limiter := newIPRateLimiter(120, time.Minute)
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == http.MethodGet || r.Method == http.MethodHead || r.Method == http.MethodOptions {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			key := extractIP(r)
+			if session := GetSessionInfo(r.Context()); session != nil && session.User.ID != "" {
+				key = session.User.ID
+			}
+
+			if !limiter.allow(key) {
+				w.Header().Set("Retry-After", "60")
+				ErrorJSON(w, http.StatusTooManyRequests, "RATE_LIMITED", "Batas request tercapai (maksimal 120 request per menit). Silakan tunggu 1 menit.", nil)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func extractIP(r *http.Request) string {
 	xff := r.Header.Get("X-Forwarded-For")
 	if xff != "" {

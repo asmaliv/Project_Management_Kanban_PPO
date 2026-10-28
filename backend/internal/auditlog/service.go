@@ -42,6 +42,10 @@ type LogParams struct {
 // Log writes an audit log entry. Must be called within the same transaction
 // as the audited action when applicable.
 func (s *Service) Log(ctx context.Context, params LogParams) error {
+	if s == nil || s.store == nil {
+		return nil
+	}
+
 	var beforeJSON, afterJSON []byte
 	var err error
 
@@ -89,6 +93,10 @@ func (s *Service) Log(ctx context.Context, params LogParams) error {
 // Read retrieves audit logs with the given filters.
 // Only accessible by admin and audit roles (enforced at handler layer).
 func (s *Service) Read(ctx context.Context, filters ListFilters) ([]db.AuditLog, error) {
+	if s == nil || s.store == nil {
+		return []db.AuditLog{}, nil
+	}
+
 	logs, err := s.store.List(ctx, filters)
 	if err != nil {
 		return nil, fmt.Errorf("list audit logs: %w", err)
