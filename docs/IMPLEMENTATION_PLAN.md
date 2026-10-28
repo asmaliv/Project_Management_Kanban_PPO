@@ -195,15 +195,15 @@ Verify:
 
 ---
 
-## Phase 8 — Production Readiness
+## Phase 8 — Production Readiness (Selesai ✅)
 
 Tasks:
-- Header keamanan (CSP, HSTS, dll) dan rate limit menyeluruh
-- Review keamanan (SECURITY.md), `govulncheck`, `npm audit`
-- Uji responsif dan aksesibilitas
-- Dockerfile (non-root), konfigurasi environment production
-- Dokumentasi deployment dan prosedur backup/restore
-- Jalankan seluruh **TESTING.md**
+- [x] Header keamanan (CSP, HSTS, dll) dan rate limit menyeluruh
+- [x] Review keamanan (SECURITY.md), `govulncheck`, `npm audit`
+- [x] Uji responsif dan aksesibilitas
+- [x] Dockerfile (non-root), konfigurasi environment production
+- [x] Dokumentasi deployment dan prosedur backup/restore
+- [x] Jalankan seluruh **TESTING.md**
 
 Dependencies: Phase 7.
 
@@ -211,7 +211,7 @@ Deliverable:
 - MVP siap rilis.
 
 Verify:
-- Seluruh checklist TESTING.md lulus; tidak ada Release Blocker.
+- [x] Seluruh checklist TESTING.md lulus; tidak ada Release Blocker.
 
 ---
 

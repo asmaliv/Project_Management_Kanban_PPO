@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { createRisk } from './api'
 import { fetchProjects } from '../projects/api'
 import { fetchProjectTasks } from '../tasks/api'
@@ -40,12 +40,34 @@ export const CreateRiskModal: React.FC<CreateRiskModalProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const loadTasks = useCallback(async (projId: string) => {
+    try {
+      const taskList = await fetchProjectTasks(projId)
+      setTasks(taskList)
+    } catch {
+      setTasks([])
+    }
+  }, [])
+
+  const loadProjects = useCallback(async () => {
+    try {
+      const data = await fetchProjects()
+      setProjects(data.filter((p) => p.status !== 'archived'))
+      if (!selectedProjectId && data.length > 0) {
+        setSelectedProjectId(data[0].id)
+        void loadTasks(data[0].id)
+      }
+    } catch {
+      // Ignore
+    }
+  }, [loadTasks, selectedProjectId])
+
   useEffect(() => {
     if (isOpen) {
-      loadProjects()
+      void loadProjects()
       if (initialProjectId) {
         setSelectedProjectId(initialProjectId)
-        loadTasks(initialProjectId)
+        void loadTasks(initialProjectId)
       }
       if (initialTaskId) {
         setSelectedTaskId(initialTaskId)
@@ -58,29 +80,7 @@ export const CreateRiskModal: React.FC<CreateRiskModalProps> = ({
       if (!initialProjectId) setSelectedProjectId('')
       if (!initialTaskId) setSelectedTaskId('')
     }
-  }, [isOpen, initialProjectId, initialTaskId])
-
-  const loadProjects = async () => {
-    try {
-      const data = await fetchProjects()
-      setProjects(data.filter((p) => p.status !== 'archived'))
-      if (!selectedProjectId && data.length > 0) {
-        setSelectedProjectId(data[0].id)
-        loadTasks(data[0].id)
-      }
-    } catch {
-      // Ignore
-    }
-  }
-
-  const loadTasks = async (projId: string) => {
-    try {
-      const taskList = await fetchProjectTasks(projId)
-      setTasks(taskList)
-    } catch {
-      setTasks([])
-    }
-  }
+  }, [isOpen, initialProjectId, initialTaskId, loadProjects, loadTasks])
 
   const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const pId = e.target.value

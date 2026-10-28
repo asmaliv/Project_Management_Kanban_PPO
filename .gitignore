@@ -2,10 +2,13 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 
 # Go
 backend/bin/
 backend/tmp/
+backend/.gotmp/
+.gotmp/
 *.test
 *.out
 coverage.out

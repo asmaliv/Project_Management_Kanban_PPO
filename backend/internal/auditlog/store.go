@@ -35,6 +35,9 @@ type InsertParams struct {
 // Insert writes an audit log entry. Caller must ensure this is called within
 // the same transaction as the audited action.
 func (s *Store) Insert(ctx context.Context, params InsertParams) error {
+	if s == nil || s.queries == nil {
+		return nil
+	}
 	_, err := s.queries.InsertAuditLog(ctx, db.InsertAuditLogParams{
 		ActorID:    params.ActorID,
 		ActorRole:  params.ActorRole,
@@ -65,6 +68,9 @@ type ListFilters struct {
 
 // List retrieves audit logs matching the given filters.
 func (s *Store) List(ctx context.Context, filters ListFilters) ([]db.AuditLog, error) {
+	if s == nil || s.queries == nil {
+		return []db.AuditLog{}, nil
+	}
 	return s.queries.ListAuditLogs(ctx, db.ListAuditLogsParams{
 		Limit:      filters.Limit,
 		Offset:     filters.Offset,
