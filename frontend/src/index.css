@@ -54,20 +54,20 @@
 }
 
 .theme-neobrutalism {
-  --background: #FEFCE8;
+  --background: #F9FAFB;
   --surface: #FFFFFF;
-  --surface-muted: #FDE047;
-  --border: #000000;
-  --text: #000000;
-  --text-muted: #3F3F46;
-  --primary: #DDD6FE;
-  --primary-hover: #C4B5FD;
-  --primary-soft: #86EFAC;
-  --success: #86EFAC;
-  --warning: #FDE047;
-  --danger: #FDA4AF;
-  --info: #BAE6FD;
-  --focus-ring: #000000;
+  --surface-muted: #F3F4F6;
+  --border: #E5E7EB;
+  --text: #111827;
+  --text-muted: #6B7280;
+  --primary: #FACC15;
+  --primary-hover: #EAB308;
+  --primary-soft: #FEF9C3;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --info: #3B82F6;
+  --focus-ring: #FACC15;
 }
 
 body {
@@ -103,13 +103,6 @@ body {
   border-color: var(--border) !important;
 }
 
-.theme-neobrutalism .rounded-lg,
-.theme-neobrutalism .rounded-xl,
-.theme-neobrutalism .rounded-2xl,
-.theme-neobrutalism .rounded-3xl {
-  border-radius: 0.375rem !important;
-}
-
 .theme-neobrutalism .bg-white,
 .theme-neobrutalism .bg-slate-50,
 .theme-neobrutalism .bg-slate-100 {
@@ -119,8 +112,8 @@ body {
 .theme-neobrutalism .border-border,
 .theme-neobrutalism .border-slate-200,
 .theme-neobrutalism .border-slate-300 {
-  border-color: #000 !important;
-  border-width: 2px !important;
+  border-color: var(--border) !important;
+  border-width: 1px !important;
 }
 
 .theme-neobrutalism .shadow-sm,
@@ -128,15 +121,17 @@ body {
 .theme-neobrutalism .shadow-lg,
 .theme-neobrutalism .shadow-xs,
 .theme-neobrutalism .shadow-2xs {
-  box-shadow: 4px 4px 0 0 #000 !important;
+  box-shadow: 0 1px 2px rgb(17 24 39 / 0.04), 0 4px 12px rgb(17 24 39 / 0.04) !important;
 }
 
-.theme-neobrutalism button:not([aria-label='Close']):hover,
-.theme-neobrutalism a:hover {
-  transform: translate(2px, 2px);
+.theme-neobrutalism .bg-primary {
+  color: var(--text) !important;
 }
 
-.theme-neobrutalism button:not([aria-label='Close']):active,
-.theme-neobrutalism a:active {
-  box-shadow: 2px 2px 0 0 #000 !important;
+.theme-neobrutalism .bg-slate-200 {
+  background-color: var(--surface-muted) !important;
+}
+
+.theme-neobrutalism .border-slate-200\/90 {
+  border-color: var(--border) !important;
 }
