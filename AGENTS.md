@@ -106,10 +106,10 @@ npm run test
 ## Git Workflow Rules
 
 ### 1. Branching
-- Jangan pernah commit atau push langsung ke `main`.
-- Satu fitur/task = satu branch: `feat/<nama-singkat>`, `fix/<nama-singkat>`, `docs/<nama-singkat>`.
-- Buat branch dengan: `git checkout -b <nama-branch>`.
-- Merge ke `main` dilakukan manual oleh user, bukan agent.
+- Untuk request, enhancement, follow-up, revisi, atau perubahan apa pun yang diminta user, gunakan branch `main` secara langsung.
+- Commit dan push perubahan request user langsung ke `origin/main`; jangan membuat branch baru untuk request tersebut.
+- Periksa branch aktif sebelum mengubah kode dan pastikan berada di `main`.
+- Branch lain hanya boleh digunakan jika user memintanya secara eksplisit.
 
 ### 2. Commit Kecil dan Logis
 - Satu commit = satu perubahan logis. Jangan gabungkan perubahan yang tidak berkaitan.
