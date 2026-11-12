@@ -87,7 +87,7 @@ type createProjectReq struct {
 	EndDate     *string `json:"end_date"`
 }
 
-// HandleCreateProject handles project creation. Only project_manager role.
+// HandleCreateProject handles project creation for internal roles.
 func (h *ProjectHandler) HandleCreateProject(w http.ResponseWriter, r *http.Request) {
 	actor, ok := h.actor(r)
 	if !ok {
@@ -170,7 +170,7 @@ type updateProjectReq struct {
 	EndDate     *string `json:"end_date"`
 }
 
-// HandleUpdateProject updates project metadata. Only PM owner.
+// HandleUpdateProject updates project metadata within the actor's project scope.
 func (h *ProjectHandler) HandleUpdateProject(w http.ResponseWriter, r *http.Request) {
 	actor, ok := h.actor(r)
 	if !ok {
@@ -236,7 +236,7 @@ func (h *ProjectHandler) HandleUpdateProject(w http.ResponseWriter, r *http.Requ
 	JSON(w, http.StatusOK, p)
 }
 
-// HandleArchiveProject archives a project. Only PM owner.
+// HandleArchiveProject archives a project within the actor's project scope.
 func (h *ProjectHandler) HandleArchiveProject(w http.ResponseWriter, r *http.Request) {
 	actor, ok := h.actor(r)
 	if !ok {
@@ -326,7 +326,7 @@ type addMemberReq struct {
 	UserID string `json:"user_id"`
 }
 
-// HandleAddMember adds a team leader to the project. Only PM owner.
+// HandleAddMember adds a team leader to the project within the actor's project scope.
 func (h *ProjectHandler) HandleAddMember(w http.ResponseWriter, r *http.Request) {
 	actor, ok := h.actor(r)
 	if !ok {
@@ -359,7 +359,7 @@ func (h *ProjectHandler) HandleAddMember(w http.ResponseWriter, r *http.Request)
 	JSON(w, http.StatusCreated, map[string]string{"message": "Member berhasil ditambahkan."})
 }
 
-// HandleRemoveMember removes a member from the project. Only PM owner.
+// HandleRemoveMember removes a member from the project within the actor's project scope.
 func (h *ProjectHandler) HandleRemoveMember(w http.ResponseWriter, r *http.Request) {
 	actor, ok := h.actor(r)
 	if !ok {
@@ -419,7 +419,7 @@ type createColumnReq struct {
 	WipLimit     *int32 `json:"wip_limit"`
 }
 
-// HandleCreateColumn creates a new column for a project board. Only PM owner.
+// HandleCreateColumn creates a new column for a project board within the actor's project scope.
 func (h *ProjectHandler) HandleCreateColumn(w http.ResponseWriter, r *http.Request) {
 	actor, ok := h.actor(r)
 	if !ok {
@@ -465,7 +465,7 @@ type updateColumnReq struct {
 	WipLimit *int32 `json:"wip_limit"`
 }
 
-// HandleUpdateColumn updates a column's name, position, or WIP limit. Only PM owner.
+// HandleUpdateColumn updates a column's name, position, or WIP limit within the actor's project scope.
 func (h *ProjectHandler) HandleUpdateColumn(w http.ResponseWriter, r *http.Request) {
 	actor, ok := h.actor(r)
 	if !ok {

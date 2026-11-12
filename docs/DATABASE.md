@@ -39,7 +39,7 @@ Akun aplikasi.
 ### projects
 - `id`, `code` (unik, mis. `PRJ-0001`), `name`, `description`
 - `status` — enum `project_status`: `active`, `on_hold`, `completed`, `archived`
-- `owner_id` → users.id (harus berrole `project_manager`)
+- `owner_id` → users.id (dapat berasal dari role internal mana pun)
 - `start_date`, `end_date`
 - `created_by` → users.id
 - `created_at`, `updated_at`, `deleted_at`

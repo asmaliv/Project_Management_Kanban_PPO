@@ -565,34 +565,82 @@ func (m *taskMockStore) UpdateTaskPositionAndColumn(ctx context.Context, arg db.
 }
 
 // Phase 6 Querier stubs
-func (m *taskMockStore) AssessRisk(ctx context.Context, arg db.AssessRiskParams) (db.Risk, error) { return db.Risk{}, nil }
-func (m *taskMockStore) CloseRisk(ctx context.Context, id pgtype.UUID) (db.Risk, error) { return db.Risk{}, nil }
-func (m *taskMockStore) CountRisksByTaskIDs(ctx context.Context, taskIds []pgtype.UUID) ([]db.CountRisksByTaskIDsRow, error) { return nil, nil }
-func (m *taskMockStore) CountRisksFiltered(ctx context.Context, arg db.CountRisksFilteredParams) (int64, error) { return 0, nil }
-func (m *taskMockStore) CreateRisk(ctx context.Context, arg db.CreateRiskParams) (db.Risk, error) { return db.Risk{}, nil }
+func (m *taskMockStore) AssessRisk(ctx context.Context, arg db.AssessRiskParams) (db.Risk, error) {
+	return db.Risk{}, nil
+}
+func (m *taskMockStore) CloseRisk(ctx context.Context, id pgtype.UUID) (db.Risk, error) {
+	return db.Risk{}, nil
+}
+func (m *taskMockStore) CountRisksByTaskIDs(ctx context.Context, taskIds []pgtype.UUID) ([]db.CountRisksByTaskIDsRow, error) {
+	return nil, nil
+}
+func (m *taskMockStore) CountRisksFiltered(ctx context.Context, arg db.CountRisksFilteredParams) (int64, error) {
+	return 0, nil
+}
+func (m *taskMockStore) CreateRisk(ctx context.Context, arg db.CreateRiskParams) (db.Risk, error) {
+	return db.Risk{}, nil
+}
 func (m *taskMockStore) GetNextRiskCode(ctx context.Context) (string, error) { return "RSK-0001", nil }
-func (m *taskMockStore) GetRiskByID(ctx context.Context, id pgtype.UUID) (db.Risk, error) { return db.Risk{}, nil }
-func (m *taskMockStore) GetRiskByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetRiskByIDWithDetailsRow, error) { return db.GetRiskByIDWithDetailsRow{}, nil }
-func (m *taskMockStore) GetRisksHeatmapCounts(ctx context.Context, arg db.GetRisksHeatmapCountsParams) ([]db.GetRisksHeatmapCountsRow, error) { return nil, nil }
-func (m *taskMockStore) GetRisksSummaryStats(ctx context.Context, arg db.GetRisksSummaryStatsParams) (db.GetRisksSummaryStatsRow, error) { return db.GetRisksSummaryStatsRow{}, nil }
-func (m *taskMockStore) ListRisksFiltered(ctx context.Context, arg db.ListRisksFilteredParams) ([]db.ListRisksFilteredRow, error) { return nil, nil }
-func (m *taskMockStore) UpdateRiskByRiskManagement(ctx context.Context, arg db.UpdateRiskByRiskManagementParams) (db.Risk, error) { return db.Risk{}, nil }
-func (m *taskMockStore) UpdateRiskMitigationPlan(ctx context.Context, arg db.UpdateRiskMitigationPlanParams) (db.Risk, error) { return db.Risk{}, nil }
+func (m *taskMockStore) GetRiskByID(ctx context.Context, id pgtype.UUID) (db.Risk, error) {
+	return db.Risk{}, nil
+}
+func (m *taskMockStore) GetRiskByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetRiskByIDWithDetailsRow, error) {
+	return db.GetRiskByIDWithDetailsRow{}, nil
+}
+func (m *taskMockStore) GetRisksHeatmapCounts(ctx context.Context, arg db.GetRisksHeatmapCountsParams) ([]db.GetRisksHeatmapCountsRow, error) {
+	return nil, nil
+}
+func (m *taskMockStore) GetRisksSummaryStats(ctx context.Context, arg db.GetRisksSummaryStatsParams) (db.GetRisksSummaryStatsRow, error) {
+	return db.GetRisksSummaryStatsRow{}, nil
+}
+func (m *taskMockStore) ListRisksFiltered(ctx context.Context, arg db.ListRisksFilteredParams) ([]db.ListRisksFilteredRow, error) {
+	return nil, nil
+}
+func (m *taskMockStore) UpdateRiskByRiskManagement(ctx context.Context, arg db.UpdateRiskByRiskManagementParams) (db.Risk, error) {
+	return db.Risk{}, nil
+}
+func (m *taskMockStore) UpdateRiskMitigationPlan(ctx context.Context, arg db.UpdateRiskMitigationPlanParams) (db.Risk, error) {
+	return db.Risk{}, nil
+}
 
 // Phase 7 Querier stubs
-func (m *taskMockStore) CloseAuditFinding(ctx context.Context, arg db.CloseAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
-func (m *taskMockStore) CountAuditFindingsFiltered(ctx context.Context, arg db.CountAuditFindingsFilteredParams) (int64, error) { return 0, nil }
-func (m *taskMockStore) CreateAuditFinding(ctx context.Context, arg db.CreateAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
-func (m *taskMockStore) GetAuditFindingByID(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
-func (m *taskMockStore) GetAuditFindingByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetAuditFindingByIDWithDetailsRow, error) { return db.GetAuditFindingByIDWithDetailsRow{}, nil }
-func (m *taskMockStore) GetAuditFindingsSummaryStats(ctx context.Context, arg db.GetAuditFindingsSummaryStatsParams) (db.GetAuditFindingsSummaryStatsRow, error) { return db.GetAuditFindingsSummaryStatsRow{}, nil }
-func (m *taskMockStore) GetNextFindingCode(ctx context.Context) (string, error) { return "FND-0001", nil }
-func (m *taskMockStore) ListAuditFindingsFiltered(ctx context.Context, arg db.ListAuditFindingsFilteredParams) ([]db.ListAuditFindingsFilteredRow, error) { return nil, nil }
-func (m *taskMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
-func (m *taskMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
-func (m *taskMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
+func (m *taskMockStore) CloseAuditFinding(ctx context.Context, arg db.CloseAuditFindingParams) (db.AuditFinding, error) {
+	return db.AuditFinding{}, nil
+}
+func (m *taskMockStore) CountAuditFindingsFiltered(ctx context.Context, arg db.CountAuditFindingsFilteredParams) (int64, error) {
+	return 0, nil
+}
+func (m *taskMockStore) CreateAuditFinding(ctx context.Context, arg db.CreateAuditFindingParams) (db.AuditFinding, error) {
+	return db.AuditFinding{}, nil
+}
+func (m *taskMockStore) GetAuditFindingByID(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) {
+	return db.AuditFinding{}, nil
+}
+func (m *taskMockStore) GetAuditFindingByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetAuditFindingByIDWithDetailsRow, error) {
+	return db.GetAuditFindingByIDWithDetailsRow{}, nil
+}
+func (m *taskMockStore) GetAuditFindingsSummaryStats(ctx context.Context, arg db.GetAuditFindingsSummaryStatsParams) (db.GetAuditFindingsSummaryStatsRow, error) {
+	return db.GetAuditFindingsSummaryStatsRow{}, nil
+}
+func (m *taskMockStore) GetNextFindingCode(ctx context.Context) (string, error) {
+	return "FND-0001", nil
+}
+func (m *taskMockStore) ListAuditFindingsFiltered(ctx context.Context, arg db.ListAuditFindingsFilteredParams) ([]db.ListAuditFindingsFilteredRow, error) {
+	return nil, nil
+}
+func (m *taskMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) {
+	return db.AuditFinding{}, nil
+}
+func (m *taskMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) {
+	return db.AuditFinding{}, nil
+}
+func (m *taskMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) {
+	return db.GetUserStatsRow{}, nil
+}
 func (m *taskMockStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
-func (m *taskMockStore) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.ListUsersRow, error) { return db.ListUsersRow{}, nil }
+func (m *taskMockStore) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.ListUsersRow, error) {
+	return db.ListUsersRow{}, nil
+}
 func (m *taskMockStore) DeleteUser(ctx context.Context, id pgtype.UUID) error { return nil }
 
 // ─── HTTP Test Setup Helper ──────────────────────────────────────────────────
@@ -706,13 +754,13 @@ func TestHTTP_CreateTask_RBAC(t *testing.T) {
 		t.Errorf("expected 201 for TL member, got %d: %s", rec.Code, rec.Body.String())
 	}
 
-	// 4. Audit Role -> 403 Forbidden
+	// 4. Audit Role -> 201 Created
 	req = httptest.NewRequest(http.MethodPost, url, bytes.NewReader(reqBody))
 	addSessionCookie(req, auditToken)
 	rec = httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusForbidden {
-		t.Errorf("expected 403 for Audit role, got %d", rec.Code)
+	if rec.Code != http.StatusCreated {
+		t.Errorf("expected 201 for Audit role, got %d", rec.Code)
 	}
 }
 
@@ -761,22 +809,22 @@ func TestHTTP_MoveTask_MakerChecker(t *testing.T) {
 	doneColID := uuid.UUID(colDone.ID.Bytes).String()
 	moveBody := []byte(fmt.Sprintf(`{"to_column_id":"%s","position":1,"version":1}`, doneColID))
 
-	// 1. Team Leader attempts to move task to Done -> 403 Forbidden
+	// 1. Team Leader can move task to Done -> 200 OK
 	req := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(moveBody))
 	addSessionCookie(req, tlToken)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusForbidden {
-		t.Errorf("expected 403 for TL moving to Done, got %d: %s", rec.Code, rec.Body.String())
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected 200 for TL moving to Done, got %d: %s", rec.Code, rec.Body.String())
 	}
 
-	// 2. Project Manager moves task to Done -> 200 OK
+	// 2. Project Manager receives a stale version after the TL move -> 409 Conflict
 	req = httptest.NewRequest(http.MethodPost, url, bytes.NewReader(moveBody))
 	addSessionCookie(req, pmToken)
 	rec = httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
-	if rec.Code != http.StatusOK {
-		t.Errorf("expected 200 for PM moving to Done, got %d: %s", rec.Code, rec.Body.String())
+	if rec.Code != http.StatusConflict {
+		t.Errorf("expected 409 for stale PM move, got %d: %s", rec.Code, rec.Body.String())
 	}
 
 	// 3. Stale version (attempting with version: 1 after it changed to 2) -> 409 Conflict

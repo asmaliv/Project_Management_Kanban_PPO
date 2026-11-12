@@ -40,7 +40,9 @@ export default function ProjectListPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-  const isProjectManager = user?.role === 'project_manager'
+  const canCreateProject = Boolean(
+    user && ['project_manager', 'team_leader', 'risk_management', 'audit', 'admin'].includes(user.role),
+  )
 
   const loadProjects = useCallback(async () => {
     try {
@@ -92,7 +94,7 @@ export default function ProjectListPage() {
           </p>
         </div>
 
-        {isProjectManager && (
+        {canCreateProject && (
           <button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
@@ -201,7 +203,7 @@ export default function ProjectListPage() {
                 : 'Belum ada proyek yang dibuat atau ditugaskan kepada Anda.'}
             </p>
           </div>
-          {isProjectManager && !searchQuery && statusFilter === 'all' && (
+          {canCreateProject && !searchQuery && statusFilter === 'all' && (
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(true)}

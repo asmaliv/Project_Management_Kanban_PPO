@@ -137,9 +137,9 @@ func NewService(pool *pgxpool.Pool, queries Store, auditLog *auditlog.Service, l
 
 // ─── Projects ────────────────────────────────────────────────────────────────
 
-// CreateProject creates a new project with default board columns. Only PM role allowed.
+// CreateProject creates a new project with default board columns for any internal role.
 func (s *Service) CreateProject(ctx context.Context, actor ActorInfo, params CreateProjectParams) (ProjectDTO, error) {
-	if actor.Role != db.UserRoleProjectManager {
+	if !isInternalRole(actor.Role) {
 		return ProjectDTO{}, ErrForbidden
 	}
 
@@ -193,6 +193,17 @@ func (s *Service) CreateProject(ctx context.Context, actor ActorInfo, params Cre
 		})
 		if err != nil {
 			return ProjectDTO{}, fmt.Errorf("create default column %q: %w", col.name, err)
+		}
+
+		// Team Leader projects must be visible to their creator through the member-based scope.
+		if actor.Role == db.UserRoleTeamLeader {
+			if err := qtx.AddProjectMember(ctx, db.AddProjectMemberParams{
+				ProjectID: p.ID,
+				UserID:    actorUUID,
+				AddedBy:   actorUUID,
+			}); err != nil {
+				return ProjectDTO{}, fmt.Errorf("add project owner as member: %w", err)
+			}
 		}
 	}
 
@@ -264,7 +275,7 @@ func (s *Service) GetProject(ctx context.Context, actor ActorInfo, projectID str
 	return toProjectDTO(p), nil
 }
 
-// UpdateProject updates project metadata. Only the PM owner can update.
+// UpdateProject updates project metadata within the actor's project scope.
 func (s *Service) UpdateProject(ctx context.Context, actor ActorInfo, projectID string, params UpdateProjectParams) (ProjectDTO, error) {
 	p, err := s.queries.GetProjectByID(ctx, mustParseUUID(projectID))
 	if err != nil {
@@ -274,7 +285,7 @@ func (s *Service) UpdateProject(ctx context.Context, actor ActorInfo, projectID 
 		return ProjectDTO{}, fmt.Errorf("get project: %w", err)
 	}
 
-	if err := s.checkOwnerAccess(actor, p); err != nil {
+	if err := s.checkOwnerAccess(ctx, actor, p); err != nil {
 		return ProjectDTO{}, err
 	}
 	if p.Status == db.ProjectStatusArchived {
@@ -332,7 +343,7 @@ func (s *Service) UpdateProject(ctx context.Context, actor ActorInfo, projectID 
 	return toProjectDTO(updated), nil
 }
 
-// ArchiveProject archives a project. Only the PM owner can archive.
+// ArchiveProject archives a project within the actor's project scope.
 func (s *Service) ArchiveProject(ctx context.Context, actor ActorInfo, projectID string) (ProjectDTO, error) {
 	p, err := s.queries.GetProjectByID(ctx, mustParseUUID(projectID))
 	if err != nil {
@@ -342,7 +353,7 @@ func (s *Service) ArchiveProject(ctx context.Context, actor ActorInfo, projectID
 		return ProjectDTO{}, fmt.Errorf("get project: %w", err)
 	}
 
-	if err := s.checkOwnerAccess(actor, p); err != nil {
+	if err := s.checkOwnerAccess(ctx, actor, p); err != nil {
 		return ProjectDTO{}, err
 	}
 	if p.Status == db.ProjectStatusArchived {
@@ -496,7 +507,7 @@ func (s *Service) ListMembers(ctx context.Context, actor ActorInfo, projectID st
 	return result, nil
 }
 
-// AddMember adds a team_leader user to the project. Only PM owner.
+// AddMember adds a team_leader user within the actor's project scope.
 func (s *Service) AddMember(ctx context.Context, actor ActorInfo, projectID, memberUserID string) error {
 	p, err := s.queries.GetProjectByID(ctx, mustParseUUID(projectID))
 	if err != nil {
@@ -505,7 +516,7 @@ func (s *Service) AddMember(ctx context.Context, actor ActorInfo, projectID, mem
 		}
 		return fmt.Errorf("get project: %w", err)
 	}
-	if err := s.checkOwnerAccess(actor, p); err != nil {
+	if err := s.checkOwnerAccess(ctx, actor, p); err != nil {
 		return err
 	}
 	if p.Status == db.ProjectStatusArchived {
@@ -567,7 +578,7 @@ func (s *Service) AddMember(ctx context.Context, actor ActorInfo, projectID, mem
 	return nil
 }
 
-// RemoveMember removes a member from the project. Only PM owner.
+// RemoveMember removes a member within the actor's project scope.
 func (s *Service) RemoveMember(ctx context.Context, actor ActorInfo, projectID, userID string) error {
 	p, err := s.queries.GetProjectByID(ctx, mustParseUUID(projectID))
 	if err != nil {
@@ -576,7 +587,7 @@ func (s *Service) RemoveMember(ctx context.Context, actor ActorInfo, projectID, 
 		}
 		return fmt.Errorf("get project: %w", err)
 	}
-	if err := s.checkOwnerAccess(actor, p); err != nil {
+	if err := s.checkOwnerAccess(ctx, actor, p); err != nil {
 		return err
 	}
 	if p.Status == db.ProjectStatusArchived {
@@ -651,7 +662,7 @@ func (s *Service) ListColumns(ctx context.Context, actor ActorInfo, projectID st
 	return result, nil
 }
 
-// CreateColumn adds a new column to the board. Only PM owner.
+// CreateColumn adds a new column to the board within the actor's project scope.
 func (s *Service) CreateColumn(ctx context.Context, actor ActorInfo, projectID string, params CreateColumnParams) (ColumnDTO, error) {
 	p, err := s.queries.GetProjectByID(ctx, mustParseUUID(projectID))
 	if err != nil {
@@ -660,7 +671,7 @@ func (s *Service) CreateColumn(ctx context.Context, actor ActorInfo, projectID s
 		}
 		return ColumnDTO{}, fmt.Errorf("get project: %w", err)
 	}
-	if err := s.checkOwnerAccess(actor, p); err != nil {
+	if err := s.checkOwnerAccess(ctx, actor, p); err != nil {
 		return ColumnDTO{}, err
 	}
 	if p.Status == db.ProjectStatusArchived {
@@ -722,7 +733,7 @@ func (s *Service) CreateColumn(ctx context.Context, actor ActorInfo, projectID s
 	return toColumnDTO(col), nil
 }
 
-// UpdateColumn updates a board column's name/position/wip_limit. Only PM owner.
+// UpdateColumn updates a board column within the actor's project scope.
 func (s *Service) UpdateColumn(ctx context.Context, actor ActorInfo, columnID string, params UpdateColumnParams) (ColumnDTO, error) {
 	col, err := s.queries.GetBoardColumnByID(ctx, mustParseUUID(columnID))
 	if err != nil {
@@ -736,7 +747,7 @@ func (s *Service) UpdateColumn(ctx context.Context, actor ActorInfo, columnID st
 	if err != nil {
 		return ColumnDTO{}, fmt.Errorf("get project: %w", err)
 	}
-	if err := s.checkOwnerAccess(actor, p); err != nil {
+	if err := s.checkOwnerAccess(ctx, actor, p); err != nil {
 		return ColumnDTO{}, err
 	}
 	if p.Status == db.ProjectStatusArchived {
@@ -810,7 +821,7 @@ func (s *Service) DeleteColumn(ctx context.Context, actor ActorInfo, columnID st
 	if err != nil {
 		return fmt.Errorf("get project: %w", err)
 	}
-	if err := s.checkOwnerAccess(actor, p); err != nil {
+	if err := s.checkOwnerAccess(ctx, actor, p); err != nil {
 		return err
 	}
 	if p.Status == db.ProjectStatusArchived {
@@ -881,15 +892,37 @@ func (s *Service) checkReadAccess(ctx context.Context, actor ActorInfo, p db.Pro
 	return nil
 }
 
-// checkOwnerAccess enforces write access: only PM owner.
-func (s *Service) checkOwnerAccess(actor ActorInfo, p db.Project) error {
-	if actor.Role != db.UserRoleProjectManager {
+// checkOwnerAccess enforces project write access by role and ownership scope.
+func (s *Service) checkOwnerAccess(ctx context.Context, actor ActorInfo, p db.Project) error {
+	switch actor.Role {
+	case db.UserRoleAdmin, db.UserRoleAudit, db.UserRoleRiskManagement:
+		return nil
+	case db.UserRoleProjectManager:
+		if uuid.UUID(p.OwnerID.Bytes).String() != actor.ID {
+			return ErrProjectNotFound // 404 for cross-PM access
+		}
+	case db.UserRoleTeamLeader:
+		isMember, err := s.queries.IsProjectMember(ctx, db.IsProjectMemberParams{
+			ProjectID: p.ID,
+			UserID:    mustParseUUID(actor.ID),
+		})
+		if err != nil || !isMember {
+			return ErrProjectNotFound
+		}
+		return nil
+	default:
 		return ErrForbidden
 	}
-	if uuid.UUID(p.OwnerID.Bytes).String() != actor.ID {
-		return ErrProjectNotFound // 404 for cross-PM access
-	}
 	return nil
+}
+
+func isInternalRole(role db.UserRole) bool {
+	switch role {
+	case db.UserRoleAdmin, db.UserRoleProjectManager, db.UserRoleTeamLeader, db.UserRoleAudit, db.UserRoleRiskManagement:
+		return true
+	default:
+		return false
+	}
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

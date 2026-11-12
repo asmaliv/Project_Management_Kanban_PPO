@@ -100,7 +100,7 @@ Hasil yang diharapkan harus cocok dengan matriks di SECURITY.md. Test dibuat tab
 - [x] Buat/ubah/hapus (soft) task
 - [x] Assignee harus member proyek
 - [x] Pindah task antar kolom dan urutan dalam kolom tersimpan setelah refresh
-- [x] Team Leader **tidak** bisa pindah ke/dari Done; PM bisa
+- [x] Semua role internal dengan akses board dapat memindahkan task ke/dari Done
 - [x] WIP limit menolak dengan `WIP_LIMIT_EXCEEDED`
 - [x] Dua user memindah task bersamaan → satu `409 VERSION_CONFLICT`, urutan tetap konsisten
 - [x] Edit dengan `version` lama ditolak

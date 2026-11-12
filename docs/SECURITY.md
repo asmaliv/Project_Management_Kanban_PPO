@@ -34,16 +34,16 @@ Legenda: `Y` = diizinkan, `R` = read-only, `Own` = hanya proyek yang dimiliki, `
 |---|---|---|---|---|---|
 | Tambah user baru, kelola user, atur role, reset password | Y | - | - | - | - |
 | Lihat daftar user ringkas (id, nama, role) | Y | Y | Asg | Y | Y |
-| Buat proyek | - | Y | - | - | - |
-| Ubah / arsipkan proyek | - | Own | - | - | - |
+| Buat proyek | Y | Y | Y | Y | Y |
+| Ubah / arsipkan proyek | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
 | Pindahkan owner proyek | Y | - | - | - | - |
 | Lihat proyek | R (semua) | Own | Asg | R (semua) | R (semua) |
-| Kelola member & kolom papan | - | Own | - | - | - |
-| Buat / ubah task | - | Own | Asg | - | - |
-| Pindah task (selain ke/dari Done) | - | Own | Asg | - | - |
-| Pindah task ke/dari kolom Done | - | Own | - | - | - |
-| Hapus task (soft delete) | - | Own | - | - | - |
-| Komentar pada task | - | Own | Asg | - | - |
+| Kelola member & kolom papan | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
+| Buat / ubah task | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
+| Pindah task (selain ke/dari Done) | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
+| Pindah task ke/dari kolom Done | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
+| Hapus task (soft delete) | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
+| Komentar pada task | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
 | Lihat task & komentar | R (semua) | Own | Asg | R (semua) | R (semua) |
 | Ajukan risiko | - | Own | Asg | - | Y |
 | Nilai, ubah level, tutup risiko | - | - | - | - | Y |
@@ -60,7 +60,7 @@ Catatan visibilitas Team Leader: `Asg` berarti Team Leader melihat **semua task 
 
 Aturan alur tambahan (dipaksakan di service, bukan di UI):
 
-- Task hanya boleh masuk/keluar kolom Done oleh PM owner (maker-checker).
+- Semua role internal dengan akses board dapat memindahkan task masuk/keluar kolom Done.
 - Hanya Audit yang menutup temuan; hanya Risk Management yang menutup risiko.
 - Proyek terarsip read-only untuk semua role.
 

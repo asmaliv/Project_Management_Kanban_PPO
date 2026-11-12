@@ -47,7 +47,7 @@ Izin rinci per role: lihat matriks di **SECURITY.md → bagian RBAC** (satu-satu
 - Ubah data user, nonaktifkan, aktifkan, atur role, reset password.
 
 ### 5.3 Manajemen Proyek
-- PM membuat proyek (kode unik, nama, tanggal, status) dan menjadi owner.
+- Semua role internal dapat membuat proyek (kode unik, nama, tanggal, status) dan menjadi owner.
 - PM menambah Team Leader sebagai member proyek.
 - Admin dapat memindahkan kepemilikan proyek.
 
