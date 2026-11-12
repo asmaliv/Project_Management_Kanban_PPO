@@ -38,16 +38,16 @@ Izin rinci per role: lihat matriks di **SECURITY.md → bagian RBAC** (satu-satu
 ## 5. Core Features (V1)
 
 ### 5.1 Autentikasi
-- Login/logout dengan email + password.
+- Login/logout dengan username internal + password.
 - Penguncian akun setelah gagal login berulang.
 - Wajib ganti password pada login pertama.
 
 ### 5.2 Manajemen User (Admin)
-- **Admin menambah user baru** lewat form "Tambah Pengguna": email, nama lengkap, role (salah satu dari 5), dan password sementara. User baru wajib ganti password saat login pertama.
+- **Admin menambah user baru** lewat form "Tambah Pengguna": username, nama lengkap, role (salah satu dari 5), dan password sementara. User baru wajib ganti password saat login pertama.
 - Ubah data user, nonaktifkan, aktifkan, atur role, reset password.
 
 ### 5.3 Manajemen Proyek
-- PM membuat proyek (kode unik, nama, tanggal, status) dan menjadi owner.
+- Semua role internal dapat membuat proyek (kode unik, nama, tanggal, status) dan menjadi owner.
 - PM menambah Team Leader sebagai member proyek.
 - Admin dapat memindahkan kepemilikan proyek.
 

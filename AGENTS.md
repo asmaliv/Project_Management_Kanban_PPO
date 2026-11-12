@@ -107,8 +107,11 @@ npm run test
 
 ### 1. Branching
 - Jangan pernah commit atau push langsung ke `main`.
-- Satu fitur/task = satu branch: `feat/<nama-singkat>`, `fix/<nama-singkat>`, `docs/<nama-singkat>`.
-- Buat branch dengan: `git checkout -b <nama-branch>`.
+- Untuk enhancement atau perubahan lanjutan dari request user, gunakan **satu branch khusus enhancement yang sama** selama rangkaian perubahan tersebut. Jangan membuat branch baru untuk setiap follow-up, revisi, atau permintaan tambahan dari user.
+- Saat branch enhancement sudah tersedia, lanjutkan semua edit, commit, dan push berikutnya ke branch tersebut. Periksa branch aktif sebelum membuat branch baru.
+- Branch baru hanya boleh dibuat ketika memulai enhancement yang benar-benar baru dan belum memiliki branch enhancement.
+- Format branch enhancement: `enhancement/<nama-singkat>`. Branch `feat/`, `fix/`, atau `docs/` tidak boleh dibuat untuk follow-up enhancement yang sama.
+- Buat branch hanya saat diperlukan dengan: `git checkout -b <nama-branch>`.
 - Merge ke `main` dilakukan manual oleh user, bukan agent.
 
 ### 2. Commit Kecil dan Logis

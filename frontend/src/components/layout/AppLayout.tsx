@@ -2,6 +2,8 @@ import { useState, type ReactNode } from 'react'
 import { Link, useLocation, Outlet } from 'react-router-dom'
 import { useAuth } from '../../features/auth/useAuth'
 import type { UserRole } from '../../types'
+import { type Theme } from '../../context/ThemeContext'
+import { useTheme } from '../../context/useTheme'
 
 interface NavItem {
   label: string
@@ -101,6 +103,35 @@ const ROLE_LABELS: Record<UserRole, { label: string; badge: string }> = {
   risk_management: { label: 'Team Risk', badge: 'bg-rose-100 text-rose-800 border-rose-200' },
 }
 
+const THEME_OPTIONS: Array<{ value: Theme; label: string }> = [
+  { value: 'light', label: '☀️ Light Mode' },
+  { value: 'dark', label: '🌙 Dark Mode' },
+  { value: 'neobrutalism', label: '⚡ Gen Z' },
+]
+
+function ThemeSwitcher() {
+  const { theme, setTheme } = useTheme()
+
+  return (
+    <label className="inline-flex items-center gap-2 text-xs font-medium text-text-muted">
+      <span className="sr-only">Pilih tema tampilan</span>
+      <span aria-hidden="true">Tema</span>
+      <select
+        value={theme}
+        onChange={(event) => setTheme(event.target.value as Theme)}
+        className="cursor-pointer rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-semibold text-text outline-none transition-colors hover:border-primary focus:ring-2 focus:ring-focus-ring/30"
+        aria-label="Pilih tema tampilan"
+      >
+        {THEME_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 export default function AppLayout() {
   const { user, logout } = useAuth()
   const location = useLocation()
@@ -125,6 +156,7 @@ export default function AppLayout() {
       {/* Mobile Header */}
       <header className="md:hidden bg-surface border-b border-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <ThemeSwitcher />
           <div className="w-8 h-8 rounded-lg bg-primary text-white font-bold flex items-center justify-center text-sm shadow">
             P
           </div>
@@ -190,7 +222,7 @@ export default function AppLayout() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-text truncate">{user.full_name}</p>
-              <p className="text-[11px] text-text-muted truncate">{user.email}</p>
+              <p className="text-[11px] text-text-muted truncate">@{user.username}</p>
             </div>
           </div>
           <div className="flex items-center justify-between pt-1">
@@ -222,6 +254,7 @@ export default function AppLayout() {
           </div>
 
           <div className="flex items-center gap-4">
+            <ThemeSwitcher />
             <span
               className={`px-2.5 py-1 text-xs font-medium rounded-full border ${roleInfo.badge}`}
             >

@@ -177,9 +177,9 @@ export default function KanbanBoard({
       const movingTask = tasks.find((t) => t.id === taskId)
       if (!movingTask) return
 
-      // Maker-checker check: moving to Done column requires PM
+      // Board write access is already enforced by the server for every internal role.
       if (targetCol.is_done_column && !isPM) {
-        setBoardError('Hanya Project Manager yang dapat memindahkan task ke kolom Done.')
+        setBoardError('Anda tidak memiliki izin untuk memindahkan task ke kolom Done.')
         return
       }
 

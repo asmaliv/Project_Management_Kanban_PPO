@@ -11,6 +11,28 @@ const ROLE_CONFIG: Record<UserRole, { label: string; badge: string }> = {
   risk_management: { label: 'Team Risk', badge: 'bg-rose-100 text-rose-800 border-rose-200' },
 }
 
+function PasswordToggle({ visible, onToggle }: { visible: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label={visible ? 'Sembunyikan password' : 'Tampilkan password'}
+      onClick={onToggle}
+      className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary rounded-r-lg transition-colors"
+    >
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        {visible ? (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18M10.58 10.58A2 2 0 0012 14a2 2 0 001.42-.58M9.88 4.24A10.9 10.9 0 0112 4c5 0 8.27 4.11 9.5 8a12.7 12.7 0 01-2.02 3.73M6.61 6.61C4.8 7.87 3.57 9.78 2.5 12c1.23 3.89 4.5 8 9.5 8 1.05 0 2.03-.16 2.94-.45" />
+        ) : (
+          <>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.5 12S6 4 12 4s9.5 8 9.5 8-3.5 8-9.5 8-9.5-8-9.5-8z" />
+            <circle cx="12" cy="12" r="2.5" strokeWidth={2} />
+          </>
+        )}
+      </svg>
+    </button>
+  )
+}
+
 export default function UsersManagementPage() {
   const { user: currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
@@ -21,8 +43,10 @@ export default function UsersManagementPage() {
   // Create Modal state
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [createFullName, setCreateFullName] = useState('')
+  const [createUsername, setCreateUsername] = useState('')
   const [createRole, setCreateRole] = useState<UserRole>('project_manager')
   const [createPassword, setCreatePassword] = useState('')
+  const [showCreatePassword, setShowCreatePassword] = useState(false)
   const [createFormError, setCreateFormError] = useState('')
   const [isSubmittingCreate, setIsSubmittingCreate] = useState(false)
 
@@ -31,6 +55,8 @@ export default function UsersManagementPage() {
   const [editFullName, setEditFullName] = useState('')
   const [editRole, setEditRole] = useState<UserRole>('project_manager')
   const [editIsActive, setEditIsActive] = useState(true)
+  const [editPassword, setEditPassword] = useState('')
+  const [showEditPassword, setShowEditPassword] = useState(false)
   const [editFormError, setEditFormError] = useState('')
   const [isSubmittingEdit, setIsSubmittingEdit] = useState(false)
 
@@ -69,6 +95,10 @@ export default function UsersManagementPage() {
       setCreateFormError('Nama lengkap pengguna wajib diisi.')
       return
     }
+    if (!/^[a-z0-9_]{3,50}$/.test(createUsername.trim().toLowerCase())) {
+      setCreateFormError('Username harus 3–50 karakter dan hanya boleh berisi huruf kecil, angka, atau underscore.')
+      return
+    }
     if (createPassword.length < 12) {
       setCreateFormError('Password sementara minimal 12 karakter.')
       return
@@ -77,6 +107,7 @@ export default function UsersManagementPage() {
     try {
       setIsSubmittingCreate(true)
       const newUser = await apiCreateUser({
+        username: createUsername.trim().toLowerCase(),
         full_name: createFullName.trim(),
         role: createRole,
         password: createPassword,
@@ -84,7 +115,9 @@ export default function UsersManagementPage() {
       showNotification(`Pengguna "${newUser.full_name}" berhasil ditambahkan sebagai ${ROLE_CONFIG[createRole].label}.`)
       setIsCreateOpen(false)
       setCreateFullName('')
+      setCreateUsername('')
       setCreatePassword('')
+      setShowCreatePassword(false)
       setCreateRole('project_manager')
       void fetchUsers()
     } catch (err: unknown) {
@@ -104,6 +137,8 @@ export default function UsersManagementPage() {
     setEditFullName(u.full_name)
     setEditRole(u.role)
     setEditIsActive(u.is_active ?? true)
+    setEditPassword('')
+    setShowEditPassword(false)
     setEditFormError('')
   }
 
@@ -117,6 +152,10 @@ export default function UsersManagementPage() {
       setEditFormError('Nama lengkap pengguna tidak boleh kosong.')
       return
     }
+    if (editPassword && editPassword.length < 12) {
+      setEditFormError('Password baru minimal 12 karakter.')
+      return
+    }
 
     try {
       setIsSubmittingEdit(true)
@@ -124,6 +163,7 @@ export default function UsersManagementPage() {
         full_name: editFullName.trim(),
         role: editRole,
         is_active: editIsActive,
+        ...(editPassword ? { password: editPassword } : {}),
       })
       showNotification(`Data pengguna "${updated.full_name}" berhasil diperbarui.`)
       setEditingUser(null)
@@ -252,7 +292,7 @@ export default function UsersManagementPage() {
                                 </span>
                               )}
                             </div>
-                            <div className="text-xs text-text-muted">{u.email}</div>
+                            <div className="text-xs text-text-muted">@{u.username}</div>
                           </div>
                         </div>
                       </td>
@@ -339,6 +379,21 @@ export default function UsersManagementPage() {
             <form onSubmit={handleCreateSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-text mb-1.5">
+                  Username <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  autoComplete="username"
+                  placeholder="Contoh: budi_prasetyo"
+                  value={createUsername}
+                  onChange={(e) => setCreateUsername(e.target.value.toLowerCase())}
+                  className="w-full px-3.5 py-2 text-sm rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-text mb-1.5">
                   Nama Lengkap <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -374,14 +429,18 @@ export default function UsersManagementPage() {
                 <label className="block text-xs font-semibold text-text mb-1.5">
                   Password Sementara (Min 12 Karakter) <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: BankPPO#2026Secure"
-                  value={createPassword}
-                  onChange={(e) => setCreatePassword(e.target.value)}
-                  className="w-full px-3.5 py-2 text-sm rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-mono"
-                />
+                <div className="relative">
+                  <input
+                    type={showCreatePassword ? 'text' : 'password'}
+                    required
+                    autoComplete="new-password"
+                    placeholder="Contoh: BankPPO#2026Secure"
+                    value={createPassword}
+                    onChange={(e) => setCreatePassword(e.target.value)}
+                    className="w-full px-3.5 py-2 pr-11 text-sm rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-mono"
+                  />
+                  <PasswordToggle visible={showCreatePassword} onToggle={() => setShowCreatePassword((visible) => !visible)} />
+                </div>
                 <p className="text-[11px] text-text-muted mt-1">
                   Pengguna akan dipaksa mengganti password ini saat login pertama kali.
                 </p>
@@ -431,14 +490,32 @@ export default function UsersManagementPage() {
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-text mb-1.5">
-                  Email Internal (ID)
+                  Username (ID)
                 </label>
                 <input
                   type="text"
                   disabled
-                  value={editingUser.email}
+                  value={`@${editingUser.username}`}
                   className="w-full px-3.5 py-2 text-sm rounded-lg border border-border bg-slate-50 text-text-muted cursor-not-allowed"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-text mb-1.5">
+                  Reset Password (opsional)
+                </label>
+                <div className="relative">
+                  <input
+                    type={showEditPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    placeholder="Kosongkan jika tidak ingin mengganti"
+                    value={editPassword}
+                    onChange={(e) => setEditPassword(e.target.value)}
+                    className="w-full px-3.5 py-2 pr-11 text-sm rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-mono"
+                  />
+                  <PasswordToggle visible={showEditPassword} onToggle={() => setShowEditPassword((visible) => !visible)} />
+                </div>
+                <p className="text-[11px] text-text-muted mt-1">Minimal 12 karakter. Pengguna akan wajib menggantinya saat login.</p>
               </div>
 
               <div>

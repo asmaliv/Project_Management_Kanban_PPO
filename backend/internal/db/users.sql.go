@@ -69,7 +69,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, email, full_name, password_hash, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at
 FROM users
-WHERE email = $1 LIMIT 1
+WHERE email = $1 OR split_part(email, '@', 1) = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -322,4 +322,3 @@ func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
 }
-

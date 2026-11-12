@@ -10,7 +10,6 @@ var (
 	ErrProjectArchived    = errors.New("proyek sudah diarsipkan, tidak dapat mengubah task")
 	ErrVersionConflict    = errors.New("task sudah diubah oleh pengguna lain. Muat ulang papan.")
 	ErrWIPLimitExceeded   = errors.New("wip limit pada kolom tujuan telah tercapai")
-	ErrMakerCheckerDone   = errors.New("hanya Project Manager yang dapat memindahkan task ke atau dari kolom Done.")
 	ErrAssigneeNotMember  = errors.New("assignee harus merupakan member atau owner proyek")
 	ErrInvalidInput       = errors.New("input tidak valid")
 	ErrCommentBodyEmpty   = errors.New("komentar tidak boleh kosong")

@@ -68,7 +68,7 @@ Hasil yang diharapkan harus cocok dengan matriks di SECURITY.md. Test dibuat tab
 ### Login
 - [ ] Kredensial benar berhasil
 - [ ] Kredensial salah → pesan generik
-- [ ] Email tidak terdaftar → pesan sama dengan password salah
+- [ ] Username tidak terdaftar → pesan sama dengan password salah
 - [ ] 5 gagal berturut-turut → akun terkunci 15 menit
 - [ ] User nonaktif tidak bisa login
 - [ ] Rate limit login memicu `429`
@@ -85,7 +85,7 @@ Hasil yang diharapkan harus cocok dengan matriks di SECURITY.md. Test dibuat tab
 - [ ] Admin dapat menambah user baru dengan setiap dari 5 role; role lain ditolak
 - [ ] User baru dapat login dengan password sementara, lalu **wajib** ganti password
 - [ ] Admin dapat mengubah/nonaktifkan user
-- [ ] Email duplikat ditangani (`409`)
+- [ ] Username duplikat ditangani (`409`)
 - [ ] Admin tidak dapat menonaktifkan/menurunkan role dirinya sendiri
 - [ ] Reset password menampilkan password sementara hanya sekali
 
@@ -100,7 +100,7 @@ Hasil yang diharapkan harus cocok dengan matriks di SECURITY.md. Test dibuat tab
 - [x] Buat/ubah/hapus (soft) task
 - [x] Assignee harus member proyek
 - [x] Pindah task antar kolom dan urutan dalam kolom tersimpan setelah refresh
-- [x] Team Leader **tidak** bisa pindah ke/dari Done; PM bisa
+- [x] Semua role internal dengan akses board dapat memindahkan task ke/dari Done
 - [x] WIP limit menolak dengan `WIP_LIMIT_EXCEEDED`
 - [x] Dua user memindah task bersamaan → satu `409 VERSION_CONFLICT`, urutan tetap konsisten
 - [x] Edit dengan `version` lama ditolak

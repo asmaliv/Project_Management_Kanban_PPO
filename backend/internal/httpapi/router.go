@@ -105,7 +105,13 @@ func NewRouter(params RouterParams) *chi.Mux {
 
 				// Projects
 				r.Get("/projects", projectHandler.HandleListProjects)
-				r.With(RequireRoles(db.UserRoleProjectManager)).Post("/projects", projectHandler.HandleCreateProject)
+				r.With(RequireRoles(
+					db.UserRoleAdmin,
+					db.UserRoleProjectManager,
+					db.UserRoleTeamLeader,
+					db.UserRoleAudit,
+					db.UserRoleRiskManagement,
+				)).Post("/projects", projectHandler.HandleCreateProject)
 
 				r.Route("/projects/{id}", func(r chi.Router) {
 					r.Get("/", projectHandler.HandleGetProject)

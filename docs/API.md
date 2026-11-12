@@ -26,6 +26,14 @@ Mendokumentasikan konvensi dan endpoint API antara frontend dan backend Go.
 - Pembaruan parsial memakai `PATCH`.
 - Pembaruan task wajib menyertakan `version`.
 
+Request login memakai username internal, bukan alamat email:
+
+```json
+{ "username": "admin", "password": "..." }
+```
+
+Server masih menerima `email` sebagai fallback kompatibilitas untuk klien lama.
+
 ## 5. Response Shapes
 
 Sukses:
@@ -87,30 +95,30 @@ Error:
 | Method | Path | Akses |
 |---|---|---|
 | GET | `/projects` | semua role (terfilter sesuai matriks) |
-| POST | `/projects` | project_manager |
+| POST | `/projects` | admin, project_manager, team_leader, audit, risk_management |
 | GET | `/projects/:id` | sesuai matriks |
-| PATCH | `/projects/:id` | PM owner |
-| POST | `/projects/:id/archive` | PM owner |
+| PATCH | `/projects/:id` | admin, audit, risk_management (semua); PM owner; team_leader member |
+| POST | `/projects/:id/archive` | admin, audit, risk_management (semua); PM owner; team_leader member |
 | POST | `/projects/:id/transfer-owner` | admin |
 | GET | `/projects/:id/members` | sesuai matriks |
-| POST | `/projects/:id/members` | PM owner |
-| DELETE | `/projects/:id/members/:userId` | PM owner |
+| POST | `/projects/:id/members` | admin, audit, risk_management (semua); PM owner; team_leader member |
+| DELETE | `/projects/:id/members/:userId` | admin, audit, risk_management (semua); PM owner; team_leader member |
 | GET | `/projects/:id/board` | sesuai matriks — kolom + task |
-| POST | `/projects/:id/columns` | PM owner |
-| PATCH | `/columns/:id` | PM owner |
-| DELETE | `/columns/:id` | PM owner (kolom Done tidak dapat dihapus; kolom berisi task ditolak) |
+| POST | `/projects/:id/columns` | admin, audit, risk_management (semua); PM owner; team_leader member |
+| PATCH | `/columns/:id` | admin, audit, risk_management (semua); PM owner; team_leader member |
+| DELETE | `/columns/:id` | admin, audit, risk_management (semua); PM owner; team_leader member (kolom Done tidak dapat dihapus; kolom berisi task ditolak) |
 
 ### Tasks
 | Method | Path | Akses |
 |---|---|---|
 | GET | `/tasks` | sesuai matriks — daftar task lintas proyek yang boleh dilihat pemanggil; filter `project_id`, `assignee_id`, `column_id`, `overdue`, `mine`; mendukung paginasi |
-| POST | `/projects/:id/tasks` | PM owner, team_leader member |
+| POST | `/projects/:id/tasks` | admin, audit, risk_management (semua); PM owner; team_leader member |
 | GET | `/tasks/:id` | sesuai matriks |
-| PATCH | `/tasks/:id` | PM owner, team_leader member |
-| POST/PATCH | `/tasks/:id/move` | PM owner; team_leader member (kecuali ke/dari Done). `PATCH` adalah alias untuk klien yang memodelkan perpindahan sebagai perubahan status. |
-| DELETE | `/tasks/:id` | PM owner (soft delete) |
+| PATCH | `/tasks/:id` | admin, audit, risk_management (semua); PM owner; team_leader member |
+| POST/PATCH | `/tasks/:id/move` | admin, audit, risk_management (semua); PM owner; team_leader member. `PATCH` adalah alias untuk klien yang memodelkan perpindahan sebagai perubahan status. |
+| DELETE | `/tasks/:id` | admin, audit, risk_management (semua); PM owner; team_leader member (soft delete) |
 | GET | `/tasks/:id/comments` | sesuai matriks |
-| POST | `/tasks/:id/comments` | PM owner, team_leader member |
+| POST | `/tasks/:id/comments` | admin, audit, risk_management (semua); PM owner; team_leader member |
 
 ### Risks
 | Method | Path | Akses |
