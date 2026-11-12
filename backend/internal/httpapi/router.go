@@ -73,7 +73,7 @@ func NewRouter(params RouterParams) *chi.Mux {
 				})
 			})
 		}
-		
+
 		// Audit logs endpoint (admin and audit roles only)
 		if params.AuditService != nil {
 			auditHandler := NewAuditLogHandler(params.AuditService)
@@ -156,6 +156,7 @@ func NewRouter(params RouterParams) *chi.Mux {
 					r.Patch("/", taskHandler.HandleUpdateTask)
 					r.Put("/", taskHandler.HandleUpdateTask)
 					r.Post("/move", taskHandler.HandleMoveTask)
+					r.Patch("/move", taskHandler.HandleMoveTask)
 					r.Delete("/", taskHandler.HandleDeleteTask)
 
 					// Comments

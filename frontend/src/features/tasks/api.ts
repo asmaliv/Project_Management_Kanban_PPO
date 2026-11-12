@@ -69,6 +69,18 @@ export async function moveTask(taskId: string, payload: MoveTaskPayload): Promis
   return res.data
 }
 
+/** PATCH alias for clients that model a move as a status update. */
+export async function updateTaskStatus(taskId: string, payload: MoveTaskPayload): Promise<Task> {
+  const res = await apiClient<Task>(`/api/v1/tasks/${taskId}/move`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+  if (!res.data) {
+    throw new Error('Gagal memperbarui status task')
+  }
+  return res.data
+}
+
 export async function deleteTask(taskId: string): Promise<void> {
   await apiClient(`/api/v1/tasks/${taskId}`, {
     method: 'DELETE',

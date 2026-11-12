@@ -107,7 +107,7 @@ Error:
 | POST | `/projects/:id/tasks` | PM owner, team_leader member |
 | GET | `/tasks/:id` | sesuai matriks |
 | PATCH | `/tasks/:id` | PM owner, team_leader member |
-| POST | `/tasks/:id/move` | PM owner; team_leader member (kecuali ke/dari Done) |
+| POST/PATCH | `/tasks/:id/move` | PM owner; team_leader member (kecuali ke/dari Done). `PATCH` adalah alias untuk klien yang memodelkan perpindahan sebagai perubahan status. |
 | DELETE | `/tasks/:id` | PM owner (soft delete) |
 | GET | `/tasks/:id/comments` | sesuai matriks |
 | POST | `/tasks/:id/comments` | PM owner, team_leader member |
@@ -149,10 +149,11 @@ Untuk `team_leader`, `data` memuat: `totals` (total, terlambat, menunggu persetu
 
 ## 7. Contoh Endpoint
 
-### POST `/api/v1/tasks/:id/move`
+### POST/PATCH `/api/v1/tasks/:id/move`
 Memindahkan task ke kolom/posisi lain.
 
 Auth: wajib. Izin: lihat matriks (Team Leader tidak boleh ke/dari kolom Done).
+Perubahan berhasil menghasilkan audit trail `task.status_changed` dengan posisi/kolom sebelum dan sesudah.
 
 Request:
 
