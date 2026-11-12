@@ -31,6 +31,7 @@ func NewUserHandler(queries db.Querier, auditLog *auditlog.Service) *UserHandler
 
 type UserResponseItem struct {
 	ID                 string      `json:"id"`
+	Username           string      `json:"username"`
 	Email              string      `json:"email"`
 	FullName           string      `json:"full_name"`
 	Role               db.UserRole `json:"role"`
@@ -41,6 +42,7 @@ type UserResponseItem struct {
 }
 
 type CreateUserRequest struct {
+	Username string `json:"username"`
 	FullName string `json:"full_name"`
 	Role     string `json:"role"`
 	Password string `json:"password"`
@@ -50,6 +52,7 @@ type UpdateUserRequest struct {
 	FullName string `json:"full_name"`
 	Role     string `json:"role"`
 	IsActive bool   `json:"is_active"`
+	Password string `json:"password"`
 }
 
 var nonAlphanumericRegex = regexp.MustCompile(`[^a-z0-9]`)
@@ -70,6 +73,10 @@ func generateEmailFromName(name string) string {
 		handle = "user"
 	}
 	return fmt.Sprintf("%s_%d@ppo.bank.co.id", handle, time.Now().Unix()%10000)
+}
+
+func normalizeUsername(username string) string {
+	return strings.ToLower(strings.TrimSpace(username))
 }
 
 func (h *UserHandler) HandleListUsers(w http.ResponseWriter, r *http.Request) {
@@ -95,6 +102,7 @@ func (h *UserHandler) HandleListUsers(w http.ResponseWriter, r *http.Request) {
 
 		result = append(result, UserResponseItem{
 			ID:                 uid,
+			Username:           strings.SplitN(u.Email, "@", 2)[0],
 			Email:              u.Email,
 			FullName:           u.FullName,
 			Role:               u.Role,
@@ -122,12 +130,19 @@ func (h *UserHandler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req.FullName = strings.TrimSpace(req.FullName)
+	req.Username = normalizeUsername(req.Username)
 	req.Role = strings.TrimSpace(req.Role)
 	req.Password = strings.TrimSpace(req.Password)
 
 	fieldErrors := make(map[string]string)
 	if req.FullName == "" {
 		fieldErrors["full_name"] = "Nama pengguna wajib diisi."
+	}
+	if req.Username == "" {
+		req.Username = strings.SplitN(generateEmailFromName(req.FullName), "@", 2)[0]
+	}
+	if !regexp.MustCompile(`^[a-z0-9_]{3,50}$`).MatchString(req.Username) {
+		fieldErrors["username"] = "Username harus 3–50 karakter dan hanya boleh berisi huruf kecil, angka, atau underscore."
 	}
 
 	var userRole db.UserRole
@@ -147,7 +162,7 @@ func (h *UserHandler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := generateEmailFromName(req.FullName)
+	email := req.Username + "@ppo.bank.co.id"
 
 	passwordHash, err := auth.HashPassword(req.Password)
 	if err != nil {
@@ -189,7 +204,7 @@ func (h *UserHandler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 			EntityID:   newUserID,
 			After: map[string]any{
 				"full_name": req.FullName,
-				"email":     email,
+				"username":  req.Username,
 				"role":      string(userRole),
 			},
 			IP:        ip,
@@ -207,6 +222,7 @@ func (h *UserHandler) HandleCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	JSON(w, http.StatusCreated, UserResponseItem{
 		ID:                 newUserID,
+		Username:           strings.SplitN(newUser.Email, "@", 2)[0],
 		Email:              newUser.Email,
 		FullName:           newUser.FullName,
 		Role:               newUser.Role,
@@ -272,6 +288,26 @@ func (h *UserHandler) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if req.Password != "" {
+		if len(req.Password) < 12 {
+			ErrorJSON(w, http.StatusBadRequest, "VALIDATION_FAILED", "Data pengguna tidak valid.", map[string]string{"password": "Password baru minimal 12 karakter."})
+			return
+		}
+		passwordHash, hashErr := auth.HashPassword(req.Password)
+		if hashErr != nil {
+			ErrorJSON(w, http.StatusInternalServerError, "INTERNAL", "Gagal memproses password.", nil)
+			return
+		}
+		if updateErr := h.queries.UpdatePassword(r.Context(), db.UpdatePasswordParams{
+			ID:                 targetUUID,
+			PasswordHash:       passwordHash,
+			MustChangePassword: true,
+		}); updateErr != nil {
+			ErrorJSON(w, http.StatusInternalServerError, "INTERNAL", "Gagal mereset password pengguna.", nil)
+			return
+		}
+	}
+
 	if h.auditLog != nil {
 		ip := extractIP(r)
 		requestID := middleware.GetReqID(r.Context())
@@ -286,9 +322,11 @@ func (h *UserHandler) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 			EntityType: "user",
 			EntityID:   targetUserIDStr,
 			After: map[string]any{
-				"full_name": req.FullName,
-				"role":      string(userRole),
-				"is_active": req.IsActive,
+				"full_name":      req.FullName,
+				"username":       strings.SplitN(updatedUser.Email, "@", 2)[0],
+				"role":           string(userRole),
+				"is_active":      req.IsActive,
+				"password_reset": req.Password != "",
 			},
 			IP:        ip,
 			RequestID: requestID,
@@ -305,6 +343,7 @@ func (h *UserHandler) HandleUpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	JSON(w, http.StatusOK, UserResponseItem{
 		ID:                 targetUserIDStr,
+		Username:           strings.SplitN(updatedUser.Email, "@", 2)[0],
 		Email:              updatedUser.Email,
 		FullName:           updatedUser.FullName,
 		Role:               updatedUser.Role,
@@ -359,8 +398,8 @@ func (h *UserHandler) HandleDeleteUser(w http.ResponseWriter, r *http.Request) {
 			Action:     "user.deleted",
 			EntityType: "user",
 			EntityID:   targetUserIDStr,
-			IP:        ip,
-			RequestID: requestID,
+			IP:         ip,
+			RequestID:  requestID,
 		})
 	}
 

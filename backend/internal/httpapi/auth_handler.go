@@ -26,7 +26,8 @@ func NewAuthHandler(authService *auth.Service, sessionSecret string, cookieSecur
 }
 
 type LoginRequest struct {
-	Email    string `json:"email"`
+	Username string `json:"username"`
+	Email    string `json:"email"` // Legacy clients may still send email.
 	Password string `json:"password"`
 }
 
@@ -44,20 +45,24 @@ func (h *AuthHandler) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fields := make(map[string]string)
-	if req.Email == "" {
-		fields["email"] = "Email wajib diisi."
+	identifier := req.Username
+	if identifier == "" {
+		identifier = req.Email
+	}
+	if identifier == "" {
+		fields["username"] = "Username wajib diisi."
 	}
 	if req.Password == "" {
 		fields["password"] = "Password wajib diisi."
 	}
 	if len(fields) > 0 {
-		ErrorJSON(w, http.StatusBadRequest, "INVALID_INPUT", "Email dan password wajib diisi.", fields)
+		ErrorJSON(w, http.StatusBadRequest, "INVALID_INPUT", "Username dan password wajib diisi.", fields)
 		return
 	}
 
 	ip := extractIP(r)
 	requestID := middleware.GetReqID(r.Context())
-	result, err := h.authService.Login(r.Context(), req.Email, req.Password, ip, r.UserAgent(), requestID)
+	result, err := h.authService.Login(r.Context(), identifier, req.Password, ip, r.UserAgent(), requestID)
 	if err != nil {
 		if errors.Is(err, auth.ErrAccountLocked) {
 			ErrorJSON(w, http.StatusLocked, "ACCOUNT_LOCKED", "Akun terkunci sementara karena terlalu banyak percobaan gagal. Silakan coba lagi setelah 15 menit.", nil)
@@ -154,7 +159,7 @@ func (h *AuthHandler) HandleChangePassword(w http.ResponseWriter, r *http.Reques
 
 	ip := extractIP(r)
 	requestID := middleware.GetReqID(r.Context())
-	
+
 	err := h.authService.ChangePassword(
 		r.Context(),
 		authInfo.RawSessionToken,

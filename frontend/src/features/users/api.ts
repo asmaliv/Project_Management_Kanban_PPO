@@ -2,6 +2,7 @@ import { apiClient } from '../../lib/api'
 import type { User, UserRole } from '../../types'
 
 export interface CreateUserInput {
+  username: string
   full_name: string
   role: UserRole
   password: string
@@ -11,6 +12,7 @@ export interface UpdateUserInput {
   full_name: string
   role: UserRole
   is_active: boolean
+  password?: string
 }
 
 export async function apiListUsers(): Promise<User[]> {

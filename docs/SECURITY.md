@@ -6,8 +6,8 @@ Semua developer dan AI coding agent **wajib** mengikuti aturan ini.
 
 ## 1. Authentication
 
-- Login email + password. Password di-hash dengan **argon2id**; jangan pernah menyimpan atau mencatat password asli.
-- Kebijakan password: minimal 12 karakter, tidak boleh sama dengan email, tolak password umum.
+- Login username internal + password. Password di-hash dengan **argon2id**; jangan pernah menyimpan atau mencatat password asli.
+- Kebijakan password: minimal 12 karakter, tidak boleh sama dengan username, tolak password umum.
 - Lockout: 5 kali gagal berturut-turut → akun terkunci 15 menit. Hitungan direset saat login sukses.
 - Pesan error login generik: "Email atau password salah."
 - Password sementara dari Admin menandai `must_change_password = true`.
@@ -107,7 +107,7 @@ BOOTSTRAP_ADMIN_PASSWORD=
 
 ## 6. Data Protection
 
-- Simpan hanya data yang dibutuhkan (nama, email kerja, role).
+- Simpan hanya data yang dibutuhkan (username, nama, email kerja internal, role).
 - Query hanya lewat sqlc/parameter. **Dilarang** menyusun SQL dengan string concatenation.
 - User database aplikasi dibatasi hak aksesnya; tidak memakai superuser.
 - Backup database terjadwal di production.

@@ -1,7 +1,7 @@
 -- name: GetUserByEmail :one
 SELECT id, email, full_name, password_hash, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at
 FROM users
-WHERE email = $1 LIMIT 1;
+WHERE email = $1 OR split_part(email, '@', 1) = $1 LIMIT 1;
 
 -- name: GetUserByID :one
 SELECT id, email, full_name, password_hash, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at

@@ -190,7 +190,7 @@ export default function AppLayout() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-text truncate">{user.full_name}</p>
-              <p className="text-[11px] text-text-muted truncate">{user.email}</p>
+              <p className="text-[11px] text-text-muted truncate">@{user.username}</p>
             </div>
           </div>
           <div className="flex items-center justify-between pt-1">

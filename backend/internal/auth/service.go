@@ -18,17 +18,18 @@ import (
 
 var (
 	ErrInvalidCredentials     = errors.New("Email atau password salah.")
-	ErrAccountLocked           = errors.New("Akun terkunci sementara, coba lagi nanti.")
-	ErrSessionNotFound         = errors.New("Sesi tidak ditemukan atau sudah berakhir.")
-	ErrSessionExpired          = errors.New("Sesi telah berakhir.")
-	ErrPasswordMismatch        = errors.New("Konfirmasi password baru tidak cocok.")
-	ErrOldPasswordIncorrect    = errors.New("Password lama tidak sesuai.")
-	ErrSameOldNewPassword      = errors.New("Password baru harus berbeda dari password lama.")
-	ErrPasswordChangeRequired  = errors.New("Password wajib diganti sebelum melanjutkan.")
+	ErrAccountLocked          = errors.New("Akun terkunci sementara, coba lagi nanti.")
+	ErrSessionNotFound        = errors.New("Sesi tidak ditemukan atau sudah berakhir.")
+	ErrSessionExpired         = errors.New("Sesi telah berakhir.")
+	ErrPasswordMismatch       = errors.New("Konfirmasi password baru tidak cocok.")
+	ErrOldPasswordIncorrect   = errors.New("Password lama tidak sesuai.")
+	ErrSameOldNewPassword     = errors.New("Password baru harus berbeda dari password lama.")
+	ErrPasswordChangeRequired = errors.New("Password wajib diganti sebelum melanjutkan.")
 )
 
 type UserDTO struct {
 	ID                 string    `json:"id"`
+	Username           string    `json:"username"`
 	Email              string    `json:"email"`
 	FullName           string    `json:"full_name"`
 	Role               string    `json:"role"`
@@ -58,6 +59,13 @@ type Service struct {
 	auditLog      *auditlog.Service
 }
 
+func userUsername(email string) string {
+	if at := strings.IndexByte(email, '@'); at > 0 {
+		return email[:at]
+	}
+	return email
+}
+
 func NewService(queries db.Querier, sessionSecret string, logger *slog.Logger, auditLog *auditlog.Service) *Service {
 	return &Service{
 		queries:       queries,
@@ -67,64 +75,64 @@ func NewService(queries db.Querier, sessionSecret string, logger *slog.Logger, a
 	}
 }
 
-// Login authenticates a user by email and password, handling lockout and sessions.
-func (s *Service) Login(ctx context.Context, email, password, ip, userAgent, requestID string) (*LoginResult, error) {
-	cleanEmail := strings.ToLower(strings.TrimSpace(email))
+// Login authenticates a user by username (or legacy email identifier) and password.
+func (s *Service) Login(ctx context.Context, identifier, password, ip, userAgent, requestID string) (*LoginResult, error) {
+	cleanIdentifier := strings.ToLower(strings.TrimSpace(identifier))
 	now := time.Now().UTC()
 
-	// 1. Fetch user by email
-	user, err := s.queries.GetUserByEmail(ctx, cleanEmail)
+	// 1. Fetch user by username or legacy email identifier
+	user, err := s.queries.GetUserByEmail(ctx, cleanIdentifier)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			// Run a dummy argon2 verify to mitigate timing attacks
 			_, _ = VerifyPassword("dummy-password-to-waste-time", "$argon2id$v=19$m=65536,t=1,p=4$c29tZXNhbHQxMjM0NTY3OA$aGFzaGhhc2hoYXNoaGFzaGhhc2hoYXNoaGFzaGg")
-			
+
 			// Log failed login attempt with no actor
 			if s.auditLog != nil {
 				_ = s.auditLog.Log(ctx, auditlog.LogParams{
 					ActorID:    pgtype.UUID{}, // null UUID
 					ActorRole:  db.NullUserRole{},
-					Action:     "auth.login_failed",
+					Action:     "user.login.failed",
 					EntityType: "user",
 					EntityID:   "",
-					After:      map[string]any{"email": cleanEmail, "reason": "user_not_found"},
+					After:      map[string]any{"username": cleanIdentifier, "reason": "user_not_found"},
 					IP:         ip,
 					RequestID:  requestID,
 				})
 			}
-			
+
 			return nil, ErrInvalidCredentials
 		}
-		return nil, fmt.Errorf("query user by email: %w", err)
+		return nil, fmt.Errorf("query user by username: %w", err)
 	}
 
 	// 2. Inactive account returns generic error per requirements
 	if !user.IsActive {
-		s.logger.Warn("login attempt on inactive account", slog.String("email", cleanEmail))
-		
+		s.logger.Warn("login attempt on inactive account", slog.String("username", cleanIdentifier))
+
 		if s.auditLog != nil {
 			_ = s.auditLog.Log(ctx, auditlog.LogParams{
 				ActorID:    user.ID,
 				ActorRole:  db.NullUserRole{UserRole: user.Role, Valid: true},
-				Action:     "auth.login_failed",
+				Action:     "user.login.failed",
 				EntityType: "user",
 				EntityID:   uuid.UUID(user.ID.Bytes).String(),
-				After:      map[string]any{"email": cleanEmail, "reason": "account_inactive"},
+				After:      map[string]any{"username": cleanIdentifier, "reason": "account_inactive"},
 				IP:         ip,
 				RequestID:  requestID,
 			})
 		}
-		
+
 		return nil, ErrInvalidCredentials
 	}
 
 	// 3. Lockout check (5 failed attempts locks for 15 minutes)
 	if user.LockedUntil.Valid && now.Before(user.LockedUntil.Time) {
 		s.logger.Warn("login attempt on locked account",
-			slog.String("email", cleanEmail),
+			slog.String("username", cleanIdentifier),
 			slog.Time("locked_until", user.LockedUntil.Time),
 		)
-		
+
 		if s.auditLog != nil {
 			_ = s.auditLog.Log(ctx, auditlog.LogParams{
 				ActorID:    user.ID,
@@ -133,14 +141,14 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent, req
 				EntityType: "user",
 				EntityID:   uuid.UUID(user.ID.Bytes).String(),
 				After: map[string]any{
-					"email":        cleanEmail,
+					"username":     cleanIdentifier,
 					"locked_until": user.LockedUntil.Time.Format(time.RFC3339),
 				},
 				IP:        ip,
 				RequestID: requestID,
 			})
 		}
-		
+
 		return nil, ErrAccountLocked
 	}
 
@@ -163,10 +171,10 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent, req
 				},
 			})
 			s.logger.Warn("account locked after 5 failed attempts",
-				slog.String("email", cleanEmail),
+				slog.String("username", cleanIdentifier),
 				slog.Time("locked_until", lockUntil),
 			)
-			
+
 			if s.auditLog != nil {
 				_ = s.auditLog.Log(ctx, auditlog.LogParams{
 					ActorID:    user.ID,
@@ -175,26 +183,26 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent, req
 					EntityType: "user",
 					EntityID:   uuid.UUID(user.ID.Bytes).String(),
 					After: map[string]any{
-						"email":         cleanEmail,
-						"locked_until":  lockUntil.Format(time.RFC3339),
-						"failed_count":  failedCount,
+						"username":     cleanIdentifier,
+						"locked_until": lockUntil.Format(time.RFC3339),
+						"failed_count": failedCount,
 					},
 					IP:        ip,
 					RequestID: requestID,
 				})
 			}
-			
+
 			return nil, ErrAccountLocked
 		}
-		
+
 		if s.auditLog != nil {
 			_ = s.auditLog.Log(ctx, auditlog.LogParams{
 				ActorID:    user.ID,
 				ActorRole:  db.NullUserRole{UserRole: user.Role, Valid: true},
-				Action:     "auth.login_failed",
+				Action:     "user.login.failed",
 				EntityType: "user",
 				EntityID:   uuid.UUID(user.ID.Bytes).String(),
-				After:      map[string]any{"email": cleanEmail, "reason": "wrong_password", "failed_count": failedCount},
+				After:      map[string]any{"username": cleanIdentifier, "reason": "wrong_password", "failed_count": failedCount},
 				IP:         ip,
 				RequestID:  requestID,
 			})
@@ -230,19 +238,19 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent, req
 	csrfToken := GenerateCSRFToken(rawToken, s.sessionSecret)
 	userUUID := uuid.UUID(user.ID.Bytes).String()
 	sessionUUID := uuid.UUID(session.ID.Bytes).String()
-	
+
 	// Log successful login
 	if s.auditLog != nil {
 		_ = s.auditLog.Log(ctx, auditlog.LogParams{
 			ActorID:    user.ID,
 			ActorRole:  db.NullUserRole{UserRole: user.Role, Valid: true},
-			Action:     "auth.login_success",
+			Action:     "user.login.success",
 			EntityType: "session",
 			EntityID:   sessionUUID,
 			After: map[string]any{
-				"user_id": userUUID,
-				"email":   user.Email,
-				"role":    string(user.Role),
+				"user_id":  userUUID,
+				"username": userUsername(user.Email),
+				"role":     string(user.Role),
 			},
 			IP:        ip,
 			RequestID: requestID,
@@ -252,6 +260,7 @@ func (s *Service) Login(ctx context.Context, email, password, ip, userAgent, req
 	return &LoginResult{
 		User: UserDTO{
 			ID:                 userUUID,
+			Username:           userUsername(user.Email),
 			Email:              user.Email,
 			FullName:           user.FullName,
 			Role:               string(user.Role),
@@ -303,6 +312,7 @@ func (s *Service) ValidateSession(ctx context.Context, rawSessionToken string) (
 		TokenHash:       tokenHash,
 		User: UserDTO{
 			ID:                 userUUID,
+			Username:           userUsername(sessionRow.Email),
 			Email:              sessionRow.Email,
 			FullName:           sessionRow.FullName,
 			Role:               string(sessionRow.Role),
@@ -317,16 +327,16 @@ func (s *Service) Logout(ctx context.Context, rawSessionToken, ip, requestID str
 	if rawSessionToken == "" {
 		return nil
 	}
-	
+
 	tokenHash := HashSessionToken(rawSessionToken)
-	
+
 	// Get session info before deletion for audit log
 	sessionRow, err := s.queries.GetSessionWithUser(ctx, tokenHash)
 	if err == nil && s.auditLog != nil {
 		// Log logout
 		userUUID := uuid.UUID(sessionRow.UserID.Bytes).String()
 		sessionUUID := uuid.UUID(sessionRow.SessionID.Bytes).String()
-		
+
 		_ = s.auditLog.Log(ctx, auditlog.LogParams{
 			ActorID:    sessionRow.UserID,
 			ActorRole:  db.NullUserRole{UserRole: sessionRow.Role, Valid: true},
@@ -341,7 +351,7 @@ func (s *Service) Logout(ctx context.Context, rawSessionToken, ip, requestID str
 			RequestID: requestID,
 		})
 	}
-	
+
 	return s.queries.DeleteSessionByTokenHash(ctx, tokenHash)
 }
 
@@ -413,7 +423,7 @@ func (s *Service) ChangePassword(ctx context.Context, rawSessionToken, oldPasswo
 	}
 
 	s.logger.Info("password successfully changed", slog.String("user_id", authInfo.User.ID))
-	
+
 	// Log password change - NEVER include password values
 	if s.auditLog != nil {
 		_ = s.auditLog.Log(ctx, auditlog.LogParams{
@@ -423,13 +433,13 @@ func (s *Service) ChangePassword(ctx context.Context, rawSessionToken, oldPasswo
 			EntityType: "user",
 			EntityID:   authInfo.User.ID,
 			After: map[string]any{
-				"email":                  user.Email,
-				"must_change_password":   false,
+				"email":                user.Email,
+				"must_change_password": false,
 			},
 			IP:        ip,
 			RequestID: requestID,
 		})
 	}
-	
+
 	return nil
 }

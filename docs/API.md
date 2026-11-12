@@ -26,6 +26,14 @@ Mendokumentasikan konvensi dan endpoint API antara frontend dan backend Go.
 - Pembaruan parsial memakai `PATCH`.
 - Pembaruan task wajib menyertakan `version`.
 
+Request login memakai username internal, bukan alamat email:
+
+```json
+{ "username": "admin", "password": "..." }
+```
+
+Server masih menerima `email` sebagai fallback kompatibilitas untuk klien lama.
+
 ## 5. Response Shapes
 
 Sukses:

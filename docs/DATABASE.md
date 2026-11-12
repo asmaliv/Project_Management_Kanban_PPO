@@ -23,6 +23,7 @@ Menjelaskan bagaimana data dimodelkan, dihubungkan, diakses, dan diubah dengan a
 ### users
 Akun aplikasi.
 - `id`, `email` (unik, disimpan huruf kecil), `full_name`
+- Username login adalah prefix sebelum `@` pada email internal (contoh `admin` dari `admin@ppo.bank.co.id`).
 - `password_hash`
 - `role` — enum `user_role`: `admin`, `project_manager`, `team_leader`, `audit`, `risk_management`
 - `is_active`, `must_change_password`
