@@ -22,6 +22,8 @@ type mockStore struct {
 	columns    map[string]db.BoardColumn
 	users      map[string]db.User
 	projectSeq int
+	activeTasks int32
+	purgedColumns map[string]bool
 }
 
 func newMockStore() *mockStore {
@@ -30,6 +32,7 @@ func newMockStore() *mockStore {
 		members:  make(map[string][]string),
 		columns:  make(map[string]db.BoardColumn),
 		users:    make(map[string]db.User),
+		purgedColumns: make(map[string]bool),
 	}
 }
 
@@ -376,7 +379,11 @@ func (m *mockStore) UpdatePassword(ctx context.Context, arg db.UpdatePasswordPar
 	return nil
 }
 func (m *mockStore) CountActiveTasksInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error) {
-	return 0, nil
+	return m.activeTasks, nil
+}
+func (m *mockStore) DeleteSoftDeletedTasksByColumn(ctx context.Context, columnID pgtype.UUID) error {
+	m.purgedColumns[uuid.UUID(columnID.Bytes).String()] = true
+	return nil
 }
 func (m *mockStore) CountTaskComments(ctx context.Context, taskID pgtype.UUID) (int32, error) {
 	return 0, nil
@@ -785,10 +792,22 @@ func TestColumnProtection(t *testing.T) {
 		}
 	})
 
-	t.Run("Non-Done column can be deleted", func(t *testing.T) {
+	t.Run("Non-Done column with active tasks cannot be deleted", func(t *testing.T) {
+		store.activeTasks = 1
+		err := svc.DeleteColumn(ctx, ActorInfo{ID: pmID, Role: db.UserRoleProjectManager}, todoCol.ID)
+		if !errors.Is(err, ErrColumnNotEmpty) {
+			t.Fatalf("expected ErrColumnNotEmpty, got %v", err)
+		}
+		store.activeTasks = 0
+	})
+
+	t.Run("Non-Done column with only deleted tasks can be deleted", func(t *testing.T) {
 		err := svc.DeleteColumn(ctx, ActorInfo{ID: pmID, Role: db.UserRoleProjectManager}, todoCol.ID)
 		if err != nil {
 			t.Fatalf("expected non-done column to be deleted, got %v", err)
+		}
+		if !store.purgedColumns[todoCol.ID] {
+			t.Fatal("expected soft-deleted tasks to be purged before deleting the column")
 		}
 	})
 

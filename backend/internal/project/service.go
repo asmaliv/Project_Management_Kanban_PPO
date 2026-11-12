@@ -29,6 +29,10 @@ var (
 	ErrInvalidOwner        = errors.New("owner proyek harus memiliki role project_manager")
 )
 
+type softDeletedTaskPurger interface {
+	DeleteSoftDeletedTasksByColumn(context.Context, pgtype.UUID) error
+}
+
 // defaultColumns are created automatically for every new project.
 var defaultColumns = []struct {
 	name     string
@@ -838,6 +842,22 @@ func (s *Service) DeleteColumn(ctx context.Context, actor ActorInfo, columnID st
 		}
 		defer tx.Rollback(ctx) //nolint:errcheck
 		qtx = db.New(tx)
+	}
+
+	activeTasks, err := qtx.CountActiveTasksInColumn(ctx, col.ID)
+	if err != nil {
+		return fmt.Errorf("count active tasks: %w", err)
+	}
+	if activeTasks > 0 {
+		return ErrColumnNotEmpty
+	}
+
+	purger, ok := qtx.(softDeletedTaskPurger)
+	if !ok {
+		return errors.New("purge deleted tasks: store does not support task cleanup")
+	}
+	if err := purger.DeleteSoftDeletedTasksByColumn(ctx, col.ID); err != nil {
+		return fmt.Errorf("purge deleted tasks: %w", err)
 	}
 
 	if err := qtx.DeleteBoardColumn(ctx, col.ID); err != nil {

@@ -55,7 +55,7 @@ func mapProjectError(w http.ResponseWriter, err error) {
 	case errors.Is(err, project.ErrTransferTargetNotPM):
 		ErrorJSON(w, http.StatusBadRequest, "INVALID_INPUT", "Target transfer harus memiliki role project_manager.", nil)
 	case errors.Is(err, project.ErrColumnNotEmpty):
-		ErrorJSON(w, http.StatusConflict, "CONFLICT", "Kolom masih berisi task, tidak dapat dihapus.", nil)
+		ErrorJSON(w, http.StatusConflict, "CONFLICT", "Kolom masih berisi task aktif.", nil)
 	default:
 		ErrorJSON(w, http.StatusInternalServerError, "INTERNAL", "Terjadi kesalahan pada server.", nil)
 	}

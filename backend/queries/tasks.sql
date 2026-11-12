@@ -54,6 +54,10 @@ RETURNING *;
 SELECT COUNT(*)::int FROM tasks
 WHERE column_id = $1 AND deleted_at IS NULL;
 
+-- name: DeleteSoftDeletedTasksByColumn :exec
+DELETE FROM tasks
+WHERE column_id = $1 AND deleted_at IS NOT NULL;
+
 -- name: MaxTaskPositionInColumn :one
 SELECT COALESCE(MAX(position), 0)::int FROM tasks
 WHERE column_id = $1 AND deleted_at IS NULL;

@@ -113,6 +113,16 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 	return i, err
 }
 
+const deleteSoftDeletedTasksByColumn = `-- name: DeleteSoftDeletedTasksByColumn :exec
+DELETE FROM tasks
+WHERE column_id = $1 AND deleted_at IS NOT NULL
+`
+
+func (q *Queries) DeleteSoftDeletedTasksByColumn(ctx context.Context, columnID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteSoftDeletedTasksByColumn, columnID)
+	return err
+}
+
 const getTaskByID = `-- name: GetTaskByID :one
 SELECT id, project_id, column_id, title, description, priority, assignee_id, reporter_id, due_date, progress_percent, position, labels, version, completed_at, created_at, updated_at, deleted_at FROM tasks
 WHERE id = $1 AND deleted_at IS NULL
