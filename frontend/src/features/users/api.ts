@@ -7,6 +7,12 @@ export interface CreateUserInput {
   password: string
 }
 
+export interface UpdateUserInput {
+  full_name: string
+  role: UserRole
+  is_active: boolean
+}
+
 export async function apiListUsers(): Promise<User[]> {
   const res = await apiClient<User[]>('/api/v1/users')
   return res.data ?? []
@@ -19,4 +25,19 @@ export async function apiCreateUser(input: CreateUserInput): Promise<User> {
   })
   if (!res.data) throw new Error('Gagal menambahkan pengguna')
   return res.data
+}
+
+export async function apiUpdateUser(id: string, input: UpdateUserInput): Promise<User> {
+  const res = await apiClient<User>(`/api/v1/users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  })
+  if (!res.data) throw new Error('Gagal memperbarui pengguna')
+  return res.data
+}
+
+export async function apiDeleteUser(id: string): Promise<void> {
+  await apiClient<{ deleted: boolean }>(`/api/v1/users/${id}`, {
+    method: 'DELETE',
+  })
 }

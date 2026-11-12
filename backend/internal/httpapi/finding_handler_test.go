@@ -395,6 +395,8 @@ func (m *httpFindingMockStore) GetAuditFindingsSummaryStats(ctx context.Context,
 
 func (m *httpFindingMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
 func (m *httpFindingMockStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
+func (m *httpFindingMockStore) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.ListUsersRow, error) { return db.ListUsersRow{}, nil }
+func (m *httpFindingMockStore) DeleteUser(ctx context.Context, id pgtype.UUID) error { return nil }
 
 func parseUUIDHelper(s string) pgtype.UUID {
 	u, _ := uuid.Parse(s)

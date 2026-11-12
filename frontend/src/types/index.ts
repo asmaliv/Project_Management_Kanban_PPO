@@ -10,6 +10,7 @@ export interface User {
   email: string
   full_name: string
   role: UserRole
+  is_active?: boolean
   must_change_password: boolean
   created_at: string
   updated_at: string

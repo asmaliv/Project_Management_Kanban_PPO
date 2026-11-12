@@ -92,6 +92,8 @@ func NewRouter(params RouterParams) *chi.Mux {
 			r.Use(RequireAuth)
 			r.With(RequireRoles(db.UserRoleAdmin)).Get("/users", userHandler.HandleListUsers)
 			r.With(RequireRoles(db.UserRoleAdmin)).Post("/users", userHandler.HandleCreateUser)
+			r.With(RequireRoles(db.UserRoleAdmin)).Put("/users/{id}", userHandler.HandleUpdateUser)
+			r.With(RequireRoles(db.UserRoleAdmin)).Delete("/users/{id}", userHandler.HandleDeleteUser)
 		})
 
 		// Project, Member, and Board Column endpoints

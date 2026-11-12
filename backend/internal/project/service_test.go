@@ -461,6 +461,8 @@ func (m *mockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (db.
 func (m *mockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
 func (m *mockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
 func (m *mockStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
+func (m *mockStore) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.ListUsersRow, error) { return db.ListUsersRow{}, nil }
+func (m *mockStore) DeleteUser(ctx context.Context, id pgtype.UUID) error { return nil }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
