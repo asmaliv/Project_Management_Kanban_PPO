@@ -69,7 +69,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, email, full_name, password_hash, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at
 FROM users
-WHERE email = $1 LIMIT 1
+WHERE email = $1 OR split_part(email, '@', 1) = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -270,5 +270,55 @@ type UpdatePasswordParams struct {
 
 func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error {
 	_, err := q.db.Exec(ctx, updatePassword, arg.ID, arg.PasswordHash, arg.MustChangePassword)
+	return err
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET full_name = $2,
+    role = $3,
+    is_active = $4,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, email, full_name, role, is_active, must_change_password, locked_until, last_login_at, created_at, updated_at
+`
+
+type UpdateUserParams struct {
+	ID       pgtype.UUID `json:"id"`
+	FullName string      `json:"full_name"`
+	Role     UserRole    `json:"role"`
+	IsActive bool        `json:"is_active"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (ListUsersRow, error) {
+	row := q.db.QueryRow(ctx, updateUser,
+		arg.ID,
+		arg.FullName,
+		arg.Role,
+		arg.IsActive,
+	)
+	var i ListUsersRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.FullName,
+		&i.Role,
+		&i.IsActive,
+		&i.MustChangePassword,
+		&i.LockedUntil,
+		&i.LastLoginAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import type { Task, CreateTaskPayload, UpdateTaskPayload } from './types'
 import type { BoardColumn, ProjectMember } from '../projects/types'
+import type { UserRole } from '../../types'
 import {
   fetchProjectTasks,
   createTask,
@@ -41,6 +42,8 @@ export default function KanbanBoard({
 
   // Drag-and-drop state
   const [dragOverColId, setDragOverColId] = useState<string | null>(null)
+  const [isDragModeEnabled, setIsDragModeEnabled] = useState(false)
+  const [teamFilter, setTeamFilter] = useState<UserRole | 'all'>('all')
 
   // Modals state
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
@@ -89,6 +92,30 @@ export default function KanbanBoard({
     })
     return map
   }, [projectRisks])
+
+  const memberRoleById = useMemo(() => {
+    const roles = new Map<string, UserRole>()
+    roles.set(ownerId, 'project_manager')
+    members.forEach((member) => {
+      if (
+        member.role === 'project_manager' ||
+        member.role === 'team_leader' ||
+        member.role === 'risk_management' ||
+        member.role === 'audit'
+      ) {
+        roles.set(member.id, member.role)
+      }
+    })
+    return roles
+  }, [members, ownerId])
+
+  const visibleTasks = useMemo(
+    () =>
+      teamFilter === 'all'
+        ? tasks
+        : tasks.filter((task) => task.assignee_id && memberRoleById.get(task.assignee_id) === teamFilter),
+    [memberRoleById, tasks, teamFilter],
+  )
 
   // Move handler
   const handleMoveTask = async (
@@ -150,9 +177,9 @@ export default function KanbanBoard({
       const movingTask = tasks.find((t) => t.id === taskId)
       if (!movingTask) return
 
-      // Maker-checker check: moving to Done column requires PM
+      // Board write access is already enforced by the server for every internal role.
       if (targetCol.is_done_column && !isPM) {
-        setBoardError('Hanya Project Manager yang dapat memindahkan task ke kolom Done.')
+        setBoardError('Anda tidak memiliki izin untuk memindahkan task ke kolom Done.')
         return
       }
 
@@ -261,9 +288,38 @@ export default function KanbanBoard({
 
       {/* Board Controls Bar */}
       <div className="flex items-center justify-between gap-4">
-        <div className="text-xs text-slate-500 font-medium">
-          Total: <span className="font-bold text-slate-900">{tasks.length}</span> task di{' '}
+        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
+          <span>
+          Total: <span className="font-bold text-slate-900">{visibleTasks.length}</span> task di{' '}
           <span className="font-bold text-slate-900">{columns.length}</span> kolom
+          </span>
+          <label className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-slate-700">
+            <span>Tim</span>
+            <select
+              value={teamFilter}
+              onChange={(event) => setTeamFilter(event.target.value as UserRole | 'all')}
+              className="bg-transparent font-semibold outline-none"
+              aria-label="Filter task berdasarkan tim"
+            >
+              <option value="all">Semua Tim</option>
+              <option value="project_manager">Project Manager</option>
+              <option value="risk_management">Team Risk</option>
+              <option value="audit">Team Audit</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={() => setIsDragModeEnabled((enabled) => !enabled)}
+            aria-pressed={isDragModeEnabled}
+            className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 font-semibold transition-colors ${
+              isDragModeEnabled
+                ? 'border-blue-600 bg-blue-600 text-white'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300'
+            }`}
+          >
+            <span className={`h-2 w-2 rounded-full ${isDragModeEnabled ? 'bg-white' : 'bg-slate-300'}`} />
+            Mode Geser: {isDragModeEnabled ? 'Aktif' : 'Nonaktif'}
+          </button>
         </div>
 
         {canWrite && (
@@ -285,6 +341,7 @@ export default function KanbanBoard({
         {columns.map((column) => {
           const colTasks = tasks
             .filter((t) => t.column_id === column.id)
+            .filter((t) => teamFilter === 'all' || (t.assignee_id && memberRoleById.get(t.assignee_id) === teamFilter))
             .sort((a, b) => a.position - b.position)
 
           const isOverLimit =
@@ -378,6 +435,16 @@ export default function KanbanBoard({
                       columns={columns}
                       currentColumn={column}
                       canMove={canWrite}
+                      isDragModeEnabled={isDragModeEnabled}
+                      teamLabel={
+                        memberRoleById.get(t.assignee_id || '') === 'risk_management'
+                          ? 'Team Risk'
+                          : memberRoleById.get(t.assignee_id || '') === 'audit'
+                            ? 'Team Audit'
+                            : memberRoleById.get(t.assignee_id || '') === 'project_manager'
+                              ? 'PM'
+                              : undefined
+                      }
                       isPM={isPM}
                       linkedRisks={risksByTaskId[t.id] || []}
                       onTaskClick={handleCardClick}

@@ -71,6 +71,8 @@ type Querier interface {
 	ListTasksByProject(ctx context.Context, projectID pgtype.UUID) ([]ListTasksByProjectRow, error)
 	ListTasksByProjectsFiltered(ctx context.Context, arg ListTasksByProjectsFilteredParams) ([]ListTasksByProjectsFilteredRow, error)
 	ListUsers(ctx context.Context) ([]ListUsersRow, error)
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (ListUsersRow, error)
+	DeleteUser(ctx context.Context, id pgtype.UUID) error
 	LockAccount(ctx context.Context, arg LockAccountParams) error
 	MaxColumnPosition(ctx context.Context, projectID pgtype.UUID) (int32, error)
 	MaxTaskPositionInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error)

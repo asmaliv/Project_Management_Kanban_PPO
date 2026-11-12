@@ -6,8 +6,8 @@ Semua developer dan AI coding agent **wajib** mengikuti aturan ini.
 
 ## 1. Authentication
 
-- Login email + password. Password di-hash dengan **argon2id**; jangan pernah menyimpan atau mencatat password asli.
-- Kebijakan password: minimal 12 karakter, tidak boleh sama dengan email, tolak password umum.
+- Login username internal + password. Password di-hash dengan **argon2id**; jangan pernah menyimpan atau mencatat password asli.
+- Kebijakan password: minimal 12 karakter, tidak boleh sama dengan username, tolak password umum.
 - Lockout: 5 kali gagal berturut-turut → akun terkunci 15 menit. Hitungan direset saat login sukses.
 - Pesan error login generik: "Email atau password salah."
 - Password sementara dari Admin menandai `must_change_password = true`.
@@ -34,16 +34,16 @@ Legenda: `Y` = diizinkan, `R` = read-only, `Own` = hanya proyek yang dimiliki, `
 |---|---|---|---|---|---|
 | Tambah user baru, kelola user, atur role, reset password | Y | - | - | - | - |
 | Lihat daftar user ringkas (id, nama, role) | Y | Y | Asg | Y | Y |
-| Buat proyek | - | Y | - | - | - |
-| Ubah / arsipkan proyek | - | Own | - | - | - |
+| Buat proyek | Y | Y | Y | Y | Y |
+| Ubah / arsipkan proyek | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
 | Pindahkan owner proyek | Y | - | - | - | - |
 | Lihat proyek | R (semua) | Own | Asg | R (semua) | R (semua) |
-| Kelola member & kolom papan | - | Own | - | - | - |
-| Buat / ubah task | - | Own | Asg | - | - |
-| Pindah task (selain ke/dari Done) | - | Own | Asg | - | - |
-| Pindah task ke/dari kolom Done | - | Own | - | - | - |
-| Hapus task (soft delete) | - | Own | - | - | - |
-| Komentar pada task | - | Own | Asg | - | - |
+| Kelola member & kolom papan | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
+| Buat / ubah task | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
+| Pindah task (selain ke/dari Done) | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
+| Pindah task ke/dari kolom Done | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
+| Hapus task (soft delete) | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
+| Komentar pada task | Y (semua) | Own | Asg | Y (semua) | Y (semua) |
 | Lihat task & komentar | R (semua) | Own | Asg | R (semua) | R (semua) |
 | Ajukan risiko | - | Own | Asg | - | Y |
 | Nilai, ubah level, tutup risiko | - | - | - | - | Y |
@@ -60,7 +60,7 @@ Catatan visibilitas Team Leader: `Asg` berarti Team Leader melihat **semua task 
 
 Aturan alur tambahan (dipaksakan di service, bukan di UI):
 
-- Task hanya boleh masuk/keluar kolom Done oleh PM owner (maker-checker).
+- Semua role internal dengan akses board dapat memindahkan task masuk/keluar kolom Done.
 - Hanya Audit yang menutup temuan; hanya Risk Management yang menutup risiko.
 - Proyek terarsip read-only untuk semua role.
 
@@ -107,7 +107,7 @@ BOOTSTRAP_ADMIN_PASSWORD=
 
 ## 6. Data Protection
 
-- Simpan hanya data yang dibutuhkan (nama, email kerja, role).
+- Simpan hanya data yang dibutuhkan (username, nama, email kerja internal, role).
 - Query hanya lewat sqlc/parameter. **Dilarang** menyusun SQL dengan string concatenation.
 - User database aplikasi dibatasi hak aksesnya; tidak memakai superuser.
 - Backup database terjadwal di production.

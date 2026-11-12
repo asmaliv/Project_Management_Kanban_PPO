@@ -1,7 +1,7 @@
 -- name: GetUserByEmail :one
 SELECT id, email, full_name, password_hash, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at
 FROM users
-WHERE email = $1 LIMIT 1;
+WHERE email = $1 OR split_part(email, '@', 1) = $1 LIMIT 1;
 
 -- name: GetUserByID :one
 SELECT id, email, full_name, password_hash, role, is_active, must_change_password, failed_login_count, locked_until, last_login_at, created_at, updated_at
@@ -51,6 +51,7 @@ SELECT id, email, full_name, role, is_active, must_change_password, locked_until
 FROM users
 ORDER BY created_at ASC;
 
+
 -- name: GetUserStats :one
 SELECT 
     COUNT(*)::bigint AS total_users,
@@ -62,4 +63,18 @@ SELECT
     COUNT(*) FILTER (WHERE locked_until IS NOT NULL AND locked_until > NOW())::bigint AS locked_count,
     COUNT(*) FILTER (WHERE is_active = false)::bigint AS inactive_count
 FROM users;
+
+-- name: UpdateUser :one
+UPDATE users
+SET full_name = $2,
+    role = $3,
+    is_active = $4,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, email, full_name, role, is_active, must_change_password, locked_until, last_login_at, created_at, updated_at;
+
+-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = $1;
+
 

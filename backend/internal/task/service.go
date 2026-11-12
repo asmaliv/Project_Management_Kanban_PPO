@@ -429,9 +429,7 @@ func (s *Service) MoveTask(ctx context.Context, actor ActorInfo, taskID string, 
 	isMovingFromDone := existing.IsDoneColumn
 	isMovingToDone := targetCol.IsDoneColumn
 	if isMovingFromDone || isMovingToDone {
-		if actor.Role != db.UserRoleProjectManager || uuid.UUID(p.OwnerID.Bytes).String() != actor.ID {
-			return TaskDTO{}, ErrMakerCheckerDone
-		}
+		// All roles with board write access may move tasks across Done.
 	}
 
 	isSameColumn := existing.ColumnID == targetCol.ID
@@ -531,7 +529,7 @@ func (s *Service) MoveTask(ctx context.Context, actor ActorInfo, taskID string, 
 		if err := s.auditLog.Log(ctx, auditlog.LogParams{
 			ActorID:    actorUUID,
 			ActorRole:  db.NullUserRole{UserRole: actor.Role, Valid: true},
-			Action:     "task.move",
+			Action:     "task.status_changed",
 			EntityType: "task",
 			EntityID:   uuid.UUID(updatedTask.ID.Bytes).String(),
 			ProjectID:  p.ID,
@@ -585,12 +583,8 @@ func (s *Service) DeleteTask(ctx context.Context, actor ActorInfo, taskID string
 		return ErrProjectArchived
 	}
 
-	// Soft delete task: PM (Own) only
-	if actor.Role != db.UserRoleProjectManager {
-		return ErrForbidden
-	}
-	if uuid.UUID(p.OwnerID.Bytes).String() != actor.ID {
-		return ErrTaskNotFound
+	if err := s.checkWriteAccess(ctx, actor, p); err != nil {
+		return err
 	}
 
 	var qtx db.Querier = s.queries
@@ -902,6 +896,8 @@ func (s *Service) checkReadAccessByProjectID(ctx context.Context, actor ActorInf
 
 func (s *Service) checkWriteAccess(ctx context.Context, actor ActorInfo, p db.Project) error {
 	switch actor.Role {
+	case db.UserRoleAdmin, db.UserRoleAudit, db.UserRoleRiskManagement:
+		return nil
 	case db.UserRoleProjectManager:
 		if uuid.UUID(p.OwnerID.Bytes).String() != actor.ID {
 			return ErrProjectNotFound

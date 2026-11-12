@@ -65,14 +65,18 @@ export default function ProjectDetailPage() {
   const [columnToEdit, setColumnToEdit] = useState<BoardColumn | null>(null)
 
   const isOwner = user?.id === project?.owner_id
-  const isPM = user?.role === 'project_manager'
-  const isTL = user?.role === 'team_leader'
   const isMember = members.some((m) => m.id === user?.id)
   const isAdmin = user?.role === 'admin'
   const isArchived = project?.status === 'archived'
+  const canManageBoard =
+    user?.role === 'admin' ||
+    user?.role === 'audit' ||
+    user?.role === 'risk_management' ||
+    (user?.role === 'project_manager' && isOwner) ||
+    (user?.role === 'team_leader' && (isOwner || isMember))
 
-  const canManageProject = isPM && isOwner && !isArchived
-  const canWriteTasks = !isArchived && ((isPM && isOwner) || (isTL && isMember))
+  const canManageProject = canManageBoard && !isArchived
+  const canWriteTasks = canManageBoard && !isArchived
 
   const loadData = useCallback(async () => {
     if (!id) return
@@ -363,7 +367,7 @@ export default function ProjectDetailPage() {
           members={members}
           ownerName={isOwner ? (user?.full_name || 'Project Manager') : 'Project Manager'}
           ownerId={project.owner_id}
-          isPM={isPM && isOwner && !isArchived}
+          isPM={canWriteTasks}
           canWrite={canWriteTasks}
         />
       )}

@@ -50,8 +50,6 @@ func mapTaskError(w http.ResponseWriter, err error) {
 		ErrorJSON(w, http.StatusForbidden, "FORBIDDEN", "Anda tidak memiliki izin untuk melakukan aksi ini.", nil)
 	case errors.Is(err, task.ErrProjectArchived):
 		ErrorJSON(w, http.StatusForbidden, "FORBIDDEN", "Proyek sudah diarsipkan dan bersifat read-only.", nil)
-	case errors.Is(err, task.ErrMakerCheckerDone):
-		ErrorJSON(w, http.StatusForbidden, "FORBIDDEN", "Hanya Project Manager yang dapat memindahkan task ke atau dari kolom Done.", nil)
 	case errors.Is(err, task.ErrVersionConflict):
 		ErrorJSON(w, http.StatusConflict, "VERSION_CONFLICT", "Task sudah diubah oleh pengguna lain. Muat ulang papan.", nil)
 	case errors.Is(err, task.ErrWIPLimitExceeded):

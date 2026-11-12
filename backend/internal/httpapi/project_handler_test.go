@@ -86,7 +86,9 @@ func (m *projectMockStore) GetUserByID(ctx context.Context, id pgtype.UUID) (db.
 func (m *projectMockStore) IncrementFailedLogin(ctx context.Context, id pgtype.UUID) (int32, error) {
 	return 0, nil
 }
-func (m *projectMockStore) LockAccount(ctx context.Context, arg db.LockAccountParams) error { return nil }
+func (m *projectMockStore) LockAccount(ctx context.Context, arg db.LockAccountParams) error {
+	return nil
+}
 func (m *projectMockStore) ResetFailedLoginAndTouchLastLogin(ctx context.Context, id pgtype.UUID) error {
 	return nil
 }
@@ -421,54 +423,144 @@ func (m *projectMockStore) ListAuditLogs(ctx context.Context, arg db.ListAuditLo
 	return nil, nil
 }
 
-func (m *projectMockStore) CountActiveTasksInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error) { return 0, nil }
-func (m *projectMockStore) CountTaskComments(ctx context.Context, taskID pgtype.UUID) (int32, error) { return 0, nil }
-func (m *projectMockStore) CountTasksByProjectsFiltered(ctx context.Context, arg db.CountTasksByProjectsFilteredParams) (int64, error) { return 0, nil }
-func (m *projectMockStore) CreateTask(ctx context.Context, arg db.CreateTaskParams) (db.Task, error) { return db.Task{}, nil }
-func (m *projectMockStore) CreateTaskComment(ctx context.Context, arg db.CreateTaskCommentParams) (db.TaskComment, error) { return db.TaskComment{}, nil }
-func (m *projectMockStore) GetTaskByID(ctx context.Context, id pgtype.UUID) (db.Task, error) { return db.Task{}, pgx.ErrNoRows }
-func (m *projectMockStore) GetTaskByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetTaskByIDWithDetailsRow, error) { return db.GetTaskByIDWithDetailsRow{}, pgx.ErrNoRows }
-func (m *projectMockStore) ListTaskComments(ctx context.Context, taskID pgtype.UUID) ([]db.ListTaskCommentsRow, error) { return nil, nil }
-func (m *projectMockStore) ListTasksByColumn(ctx context.Context, columnID pgtype.UUID) ([]db.ListTasksByColumnRow, error) { return nil, nil }
-func (m *projectMockStore) ListTasksByProject(ctx context.Context, projectID pgtype.UUID) ([]db.ListTasksByProjectRow, error) { return nil, nil }
-func (m *projectMockStore) ListTasksByProjectsFiltered(ctx context.Context, arg db.ListTasksByProjectsFilteredParams) ([]db.ListTasksByProjectsFilteredRow, error) { return nil, nil }
-func (m *projectMockStore) MaxTaskPositionInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error) { return 0, nil }
-func (m *projectMockStore) ShiftTasksBetweenPositionsDown(ctx context.Context, arg db.ShiftTasksBetweenPositionsDownParams) error { return nil }
-func (m *projectMockStore) ShiftTasksBetweenPositionsUp(ctx context.Context, arg db.ShiftTasksBetweenPositionsUpParams) error { return nil }
-func (m *projectMockStore) ShiftTasksDownInColumn(ctx context.Context, arg db.ShiftTasksDownInColumnParams) error { return nil }
-func (m *projectMockStore) ShiftTasksUpInColumn(ctx context.Context, arg db.ShiftTasksUpInColumnParams) error { return nil }
-func (m *projectMockStore) SoftDeleteTask(ctx context.Context, id pgtype.UUID) (db.Task, error) { return db.Task{}, nil }
-func (m *projectMockStore) UpdateTask(ctx context.Context, arg db.UpdateTaskParams) (db.Task, error) { return db.Task{}, nil }
-func (m *projectMockStore) UpdateTaskPositionAndColumn(ctx context.Context, arg db.UpdateTaskPositionAndColumnParams) (db.Task, error) { return db.Task{}, nil }
+func (m *projectMockStore) CountActiveTasksInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error) {
+	return 0, nil
+}
+func (m *projectMockStore) CountTaskComments(ctx context.Context, taskID pgtype.UUID) (int32, error) {
+	return 0, nil
+}
+func (m *projectMockStore) CountTasksByProjectsFiltered(ctx context.Context, arg db.CountTasksByProjectsFilteredParams) (int64, error) {
+	return 0, nil
+}
+func (m *projectMockStore) CreateTask(ctx context.Context, arg db.CreateTaskParams) (db.Task, error) {
+	return db.Task{}, nil
+}
+func (m *projectMockStore) CreateTaskComment(ctx context.Context, arg db.CreateTaskCommentParams) (db.TaskComment, error) {
+	return db.TaskComment{}, nil
+}
+func (m *projectMockStore) GetTaskByID(ctx context.Context, id pgtype.UUID) (db.Task, error) {
+	return db.Task{}, pgx.ErrNoRows
+}
+func (m *projectMockStore) GetTaskByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetTaskByIDWithDetailsRow, error) {
+	return db.GetTaskByIDWithDetailsRow{}, pgx.ErrNoRows
+}
+func (m *projectMockStore) ListTaskComments(ctx context.Context, taskID pgtype.UUID) ([]db.ListTaskCommentsRow, error) {
+	return nil, nil
+}
+func (m *projectMockStore) ListTasksByColumn(ctx context.Context, columnID pgtype.UUID) ([]db.ListTasksByColumnRow, error) {
+	return nil, nil
+}
+func (m *projectMockStore) ListTasksByProject(ctx context.Context, projectID pgtype.UUID) ([]db.ListTasksByProjectRow, error) {
+	return nil, nil
+}
+func (m *projectMockStore) ListTasksByProjectsFiltered(ctx context.Context, arg db.ListTasksByProjectsFilteredParams) ([]db.ListTasksByProjectsFilteredRow, error) {
+	return nil, nil
+}
+func (m *projectMockStore) MaxTaskPositionInColumn(ctx context.Context, columnID pgtype.UUID) (int32, error) {
+	return 0, nil
+}
+func (m *projectMockStore) ShiftTasksBetweenPositionsDown(ctx context.Context, arg db.ShiftTasksBetweenPositionsDownParams) error {
+	return nil
+}
+func (m *projectMockStore) ShiftTasksBetweenPositionsUp(ctx context.Context, arg db.ShiftTasksBetweenPositionsUpParams) error {
+	return nil
+}
+func (m *projectMockStore) ShiftTasksDownInColumn(ctx context.Context, arg db.ShiftTasksDownInColumnParams) error {
+	return nil
+}
+func (m *projectMockStore) ShiftTasksUpInColumn(ctx context.Context, arg db.ShiftTasksUpInColumnParams) error {
+	return nil
+}
+func (m *projectMockStore) SoftDeleteTask(ctx context.Context, id pgtype.UUID) (db.Task, error) {
+	return db.Task{}, nil
+}
+func (m *projectMockStore) UpdateTask(ctx context.Context, arg db.UpdateTaskParams) (db.Task, error) {
+	return db.Task{}, nil
+}
+func (m *projectMockStore) UpdateTaskPositionAndColumn(ctx context.Context, arg db.UpdateTaskPositionAndColumnParams) (db.Task, error) {
+	return db.Task{}, nil
+}
 
 // Phase 6 Querier stubs
-func (m *projectMockStore) AssessRisk(ctx context.Context, arg db.AssessRiskParams) (db.Risk, error) { return db.Risk{}, nil }
-func (m *projectMockStore) CloseRisk(ctx context.Context, id pgtype.UUID) (db.Risk, error) { return db.Risk{}, nil }
-func (m *projectMockStore) CountRisksByTaskIDs(ctx context.Context, taskIds []pgtype.UUID) ([]db.CountRisksByTaskIDsRow, error) { return nil, nil }
-func (m *projectMockStore) CountRisksFiltered(ctx context.Context, arg db.CountRisksFilteredParams) (int64, error) { return 0, nil }
-func (m *projectMockStore) CreateRisk(ctx context.Context, arg db.CreateRiskParams) (db.Risk, error) { return db.Risk{}, nil }
-func (m *projectMockStore) GetNextRiskCode(ctx context.Context) (string, error) { return "RSK-0001", nil }
-func (m *projectMockStore) GetRiskByID(ctx context.Context, id pgtype.UUID) (db.Risk, error) { return db.Risk{}, nil }
-func (m *projectMockStore) GetRiskByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetRiskByIDWithDetailsRow, error) { return db.GetRiskByIDWithDetailsRow{}, nil }
-func (m *projectMockStore) GetRisksHeatmapCounts(ctx context.Context, arg db.GetRisksHeatmapCountsParams) ([]db.GetRisksHeatmapCountsRow, error) { return nil, nil }
-func (m *projectMockStore) GetRisksSummaryStats(ctx context.Context, arg db.GetRisksSummaryStatsParams) (db.GetRisksSummaryStatsRow, error) { return db.GetRisksSummaryStatsRow{}, nil }
-func (m *projectMockStore) ListRisksFiltered(ctx context.Context, arg db.ListRisksFilteredParams) ([]db.ListRisksFilteredRow, error) { return nil, nil }
-func (m *projectMockStore) UpdateRiskByRiskManagement(ctx context.Context, arg db.UpdateRiskByRiskManagementParams) (db.Risk, error) { return db.Risk{}, nil }
-func (m *projectMockStore) UpdateRiskMitigationPlan(ctx context.Context, arg db.UpdateRiskMitigationPlanParams) (db.Risk, error) { return db.Risk{}, nil }
+func (m *projectMockStore) AssessRisk(ctx context.Context, arg db.AssessRiskParams) (db.Risk, error) {
+	return db.Risk{}, nil
+}
+func (m *projectMockStore) CloseRisk(ctx context.Context, id pgtype.UUID) (db.Risk, error) {
+	return db.Risk{}, nil
+}
+func (m *projectMockStore) CountRisksByTaskIDs(ctx context.Context, taskIds []pgtype.UUID) ([]db.CountRisksByTaskIDsRow, error) {
+	return nil, nil
+}
+func (m *projectMockStore) CountRisksFiltered(ctx context.Context, arg db.CountRisksFilteredParams) (int64, error) {
+	return 0, nil
+}
+func (m *projectMockStore) CreateRisk(ctx context.Context, arg db.CreateRiskParams) (db.Risk, error) {
+	return db.Risk{}, nil
+}
+func (m *projectMockStore) GetNextRiskCode(ctx context.Context) (string, error) {
+	return "RSK-0001", nil
+}
+func (m *projectMockStore) GetRiskByID(ctx context.Context, id pgtype.UUID) (db.Risk, error) {
+	return db.Risk{}, nil
+}
+func (m *projectMockStore) GetRiskByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetRiskByIDWithDetailsRow, error) {
+	return db.GetRiskByIDWithDetailsRow{}, nil
+}
+func (m *projectMockStore) GetRisksHeatmapCounts(ctx context.Context, arg db.GetRisksHeatmapCountsParams) ([]db.GetRisksHeatmapCountsRow, error) {
+	return nil, nil
+}
+func (m *projectMockStore) GetRisksSummaryStats(ctx context.Context, arg db.GetRisksSummaryStatsParams) (db.GetRisksSummaryStatsRow, error) {
+	return db.GetRisksSummaryStatsRow{}, nil
+}
+func (m *projectMockStore) ListRisksFiltered(ctx context.Context, arg db.ListRisksFilteredParams) ([]db.ListRisksFilteredRow, error) {
+	return nil, nil
+}
+func (m *projectMockStore) UpdateRiskByRiskManagement(ctx context.Context, arg db.UpdateRiskByRiskManagementParams) (db.Risk, error) {
+	return db.Risk{}, nil
+}
+func (m *projectMockStore) UpdateRiskMitigationPlan(ctx context.Context, arg db.UpdateRiskMitigationPlanParams) (db.Risk, error) {
+	return db.Risk{}, nil
+}
 
 // Phase 7 Querier stubs
-func (m *projectMockStore) CloseAuditFinding(ctx context.Context, arg db.CloseAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
-func (m *projectMockStore) CountAuditFindingsFiltered(ctx context.Context, arg db.CountAuditFindingsFilteredParams) (int64, error) { return 0, nil }
-func (m *projectMockStore) CreateAuditFinding(ctx context.Context, arg db.CreateAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
-func (m *projectMockStore) GetAuditFindingByID(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
-func (m *projectMockStore) GetAuditFindingByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetAuditFindingByIDWithDetailsRow, error) { return db.GetAuditFindingByIDWithDetailsRow{}, nil }
-func (m *projectMockStore) GetAuditFindingsSummaryStats(ctx context.Context, arg db.GetAuditFindingsSummaryStatsParams) (db.GetAuditFindingsSummaryStatsRow, error) { return db.GetAuditFindingsSummaryStatsRow{}, nil }
-func (m *projectMockStore) GetNextFindingCode(ctx context.Context) (string, error) { return "FND-0001", nil }
-func (m *projectMockStore) ListAuditFindingsFiltered(ctx context.Context, arg db.ListAuditFindingsFilteredParams) ([]db.ListAuditFindingsFilteredRow, error) { return nil, nil }
-func (m *projectMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
-func (m *projectMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
-func (m *projectMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
+func (m *projectMockStore) CloseAuditFinding(ctx context.Context, arg db.CloseAuditFindingParams) (db.AuditFinding, error) {
+	return db.AuditFinding{}, nil
+}
+func (m *projectMockStore) CountAuditFindingsFiltered(ctx context.Context, arg db.CountAuditFindingsFilteredParams) (int64, error) {
+	return 0, nil
+}
+func (m *projectMockStore) CreateAuditFinding(ctx context.Context, arg db.CreateAuditFindingParams) (db.AuditFinding, error) {
+	return db.AuditFinding{}, nil
+}
+func (m *projectMockStore) GetAuditFindingByID(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) {
+	return db.AuditFinding{}, nil
+}
+func (m *projectMockStore) GetAuditFindingByIDWithDetails(ctx context.Context, id pgtype.UUID) (db.GetAuditFindingByIDWithDetailsRow, error) {
+	return db.GetAuditFindingByIDWithDetailsRow{}, nil
+}
+func (m *projectMockStore) GetAuditFindingsSummaryStats(ctx context.Context, arg db.GetAuditFindingsSummaryStatsParams) (db.GetAuditFindingsSummaryStatsRow, error) {
+	return db.GetAuditFindingsSummaryStatsRow{}, nil
+}
+func (m *projectMockStore) GetNextFindingCode(ctx context.Context) (string, error) {
+	return "FND-0001", nil
+}
+func (m *projectMockStore) ListAuditFindingsFiltered(ctx context.Context, arg db.ListAuditFindingsFilteredParams) ([]db.ListAuditFindingsFilteredRow, error) {
+	return nil, nil
+}
+func (m *projectMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) (db.AuditFinding, error) {
+	return db.AuditFinding{}, nil
+}
+func (m *projectMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) {
+	return db.AuditFinding{}, nil
+}
+func (m *projectMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) {
+	return db.GetUserStatsRow{}, nil
+}
 func (m *projectMockStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
+func (m *projectMockStore) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.ListUsersRow, error) {
+	return db.ListUsersRow{}, nil
+}
+func (m *projectMockStore) DeleteUser(ctx context.Context, id pgtype.UUID) error { return nil }
 
 // ─── HTTP Test Setup ──────────────────────────────────────────────────────────
 
@@ -549,15 +641,15 @@ func TestProjectHandler_RBAC_Matrix(t *testing.T) {
 		}
 	})
 
-	t.Run("Team Leader cannot create project -> 403 FORBIDDEN", func(t *testing.T) {
+	t.Run("Team Leader can create project -> 201 Created", func(t *testing.T) {
 		body := bytes.NewBufferString(`{"name": "TL Project"}`)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/projects", body)
 		addSessionCookie(req, tlToken)
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
 
-		if rec.Code != http.StatusForbidden {
-			t.Errorf("expected 403, got %d", rec.Code)
+		if rec.Code != http.StatusCreated {
+			t.Errorf("expected 201, got %d", rec.Code)
 		}
 	})
 

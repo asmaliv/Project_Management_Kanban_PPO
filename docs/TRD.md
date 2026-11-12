@@ -39,14 +39,14 @@ Aplikasi web Kanban multi-role untuk manajemen proyek, risiko, dan temuan audit.
 ## 4. Functional Requirements
 
 ### 4.1 Autentikasi
-- User dapat login dengan email dan password, dan logout.
+- User dapat login dengan username internal dan password, dan logout.
 - Sesi berakhir setelah idle 30 menit dan maksimal 8 jam sejak login.
 - Setelah 5 kali gagal login berturut-turut, akun terkunci 15 menit.
 - User dengan `must_change_password = true` hanya dapat mengakses endpoint ganti password sampai password diganti.
-- Pesan gagal login tidak membedakan "email tidak ada" dan "password salah".
+- Pesan gagal login tidak membedakan "username tidak ada" dan "password salah".
 
 ### 4.2 User & Role
-- Admin dapat **menambah user baru** (email, nama, role, password sementara), mengubah, menonaktifkan, dan mengaktifkan user, serta mengatur role dan mereset password.
+- Admin dapat **menambah user baru** (username, nama, role, password sementara), mengubah, menonaktifkan, dan mengaktifkan user, serta mengatur role dan mereset password.
 - User baru otomatis memiliki `must_change_password = true`. Password sementara hanya ditampilkan sekali dan tidak pernah disimpan atau dicatat dalam bentuk asli.
 - Satu user memiliki tepat satu role.
 - User nonaktif tidak dapat login dan sesi aktifnya dicabut.

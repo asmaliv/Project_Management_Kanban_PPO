@@ -9,8 +9,9 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -25,7 +26,7 @@ export default function LoginPage() {
     setIsSubmitting(true)
 
     try {
-      const user = await login(email, password)
+      const user = await login(username, password)
       if (user.must_change_password) {
         navigate('/change-password', { replace: true })
       } else {
@@ -87,33 +88,33 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-            {/* Email */}
+            {/* Username */}
             <div>
               <label
-                htmlFor="login-email"
+                htmlFor="login-username"
                 className="block text-sm font-medium text-text mb-1.5"
               >
-                Email
+                Username
               </label>
               <input
-                id="login-email"
-                type="email"
-                autoComplete="email"
+                id="login-username"
+                type="text"
+                autoComplete="username"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 disabled={isSubmitting}
-                aria-describedby={fieldErrors.email ? 'login-email-error' : undefined}
-                aria-invalid={!!fieldErrors.email}
+                aria-describedby={fieldErrors.username ? 'login-username-error' : undefined}
+                aria-invalid={!!fieldErrors.username}
                 className={`w-full px-3.5 py-2.5 rounded-lg border text-sm transition-colors
                   focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-primary
                   disabled:opacity-50 disabled:cursor-not-allowed
-                  ${fieldErrors.email ? 'border-danger' : 'border-border hover:border-slate-400'}`}
-                placeholder="nama@bank.co.id"
+                  ${fieldErrors.username ? 'border-danger' : 'border-border hover:border-slate-400'}`}
+                placeholder="Masukkan username Anda"
               />
-              {fieldErrors.email && (
-                <p id="login-email-error" className="mt-1 text-xs text-danger">
-                  {fieldErrors.email}
+              {fieldErrors.username && (
+                <p id="login-username-error" className="mt-1 text-xs text-danger">
+                  {fieldErrors.username}
                 </p>
               )}
             </div>
@@ -126,22 +127,41 @@ export default function LoginPage() {
               >
                 Password
               </label>
-              <input
-                id="login-password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isSubmitting}
-                aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
-                aria-invalid={!!fieldErrors.password}
-                className={`w-full px-3.5 py-2.5 rounded-lg border text-sm transition-colors
+              <div className="relative">
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting}
+                  aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
+                  aria-invalid={!!fieldErrors.password}
+                  className={`w-full px-3.5 py-2.5 pr-11 rounded-lg border text-sm transition-colors
                   focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-primary
                   disabled:opacity-50 disabled:cursor-not-allowed
                   ${fieldErrors.password ? 'border-danger' : 'border-border hover:border-slate-400'}`}
-                placeholder="••••••••"
-              />
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted hover:text-primary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary rounded-r-lg transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    {showPassword ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3l18 18M10.58 10.58A2 2 0 0012 14a2 2 0 001.42-.58M9.88 4.24A10.9 10.9 0 0112 4c5 0 8.27 4.11 9.5 8a12.7 12.7 0 01-2.02 3.73M6.61 6.61C4.8 7.87 3.57 9.78 2.5 12c1.23 3.89 4.5 8 9.5 8 1.05 0 2.03-.16 2.94-.45" />
+                    ) : (
+                      <>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.5 12S6 4 12 4s9.5 8 9.5 8-3.5 8-9.5 8-9.5-8-9.5-8z" />
+                        <circle cx="12" cy="12" r="2.5" strokeWidth={2} />
+                      </>
+                    )}
+                  </svg>
+                </button>
+              </div>
               {fieldErrors.password && (
                 <p id="login-password-error" className="mt-1 text-xs text-danger">
                   {fieldErrors.password}
@@ -153,7 +173,7 @@ export default function LoginPage() {
             <button
               id="login-submit"
               type="submit"
-              disabled={isSubmitting || !email || !password}
+              disabled={isSubmitting || !username || !password}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
                 bg-primary text-white text-sm font-semibold shadow-sm
                 hover:bg-primary-hover active:scale-[0.98]

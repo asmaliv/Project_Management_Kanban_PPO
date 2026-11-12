@@ -73,7 +73,7 @@ func NewRouter(params RouterParams) *chi.Mux {
 				})
 			})
 		}
-		
+
 		// Audit logs endpoint (admin and audit roles only)
 		if params.AuditService != nil {
 			auditHandler := NewAuditLogHandler(params.AuditService)
@@ -86,6 +86,16 @@ func NewRouter(params RouterParams) *chi.Mux {
 			})
 		}
 
+		// User management endpoints (admin only)
+		userHandler := NewUserHandler(params.Queries, params.AuditService)
+		r.Group(func(r chi.Router) {
+			r.Use(RequireAuth)
+			r.With(RequireRoles(db.UserRoleAdmin)).Get("/users", userHandler.HandleListUsers)
+			r.With(RequireRoles(db.UserRoleAdmin)).Post("/users", userHandler.HandleCreateUser)
+			r.With(RequireRoles(db.UserRoleAdmin)).Put("/users/{id}", userHandler.HandleUpdateUser)
+			r.With(RequireRoles(db.UserRoleAdmin)).Delete("/users/{id}", userHandler.HandleDeleteUser)
+		})
+
 		// Project, Member, and Board Column endpoints
 		if params.ProjectService != nil {
 			projectHandler := NewProjectHandler(params.ProjectService)
@@ -95,7 +105,13 @@ func NewRouter(params RouterParams) *chi.Mux {
 
 				// Projects
 				r.Get("/projects", projectHandler.HandleListProjects)
-				r.With(RequireRoles(db.UserRoleProjectManager)).Post("/projects", projectHandler.HandleCreateProject)
+				r.With(RequireRoles(
+					db.UserRoleAdmin,
+					db.UserRoleProjectManager,
+					db.UserRoleTeamLeader,
+					db.UserRoleAudit,
+					db.UserRoleRiskManagement,
+				)).Post("/projects", projectHandler.HandleCreateProject)
 
 				r.Route("/projects/{id}", func(r chi.Router) {
 					r.Get("/", projectHandler.HandleGetProject)
@@ -146,6 +162,7 @@ func NewRouter(params RouterParams) *chi.Mux {
 					r.Patch("/", taskHandler.HandleUpdateTask)
 					r.Put("/", taskHandler.HandleUpdateTask)
 					r.Post("/move", taskHandler.HandleMoveTask)
+					r.Patch("/move", taskHandler.HandleMoveTask)
 					r.Delete("/", taskHandler.HandleDeleteTask)
 
 					// Comments

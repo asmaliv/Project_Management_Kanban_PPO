@@ -8,6 +8,8 @@ interface TaskCardProps {
   columns: BoardColumn[]
   currentColumn: BoardColumn
   canMove: boolean
+  isDragModeEnabled: boolean
+  teamLabel?: string
   isPM: boolean
   linkedRisks?: Risk[]
   onTaskClick: (task: Task) => void
@@ -45,6 +47,8 @@ export default function TaskCard({
   columns,
   currentColumn,
   canMove,
+  isDragModeEnabled,
+  teamLabel,
   isPM,
   linkedRisks = [],
   onTaskClick,
@@ -92,7 +96,7 @@ export default function TaskCard({
   const isLockedByMakerChecker = currentColumn.is_done_column && !isPM
 
   const handleDragStart = (e: React.DragEvent) => {
-    if (isLockedByMakerChecker || !canMove) {
+    if (isLockedByMakerChecker || !canMove || !isDragModeEnabled) {
       e.preventDefault()
       return
     }
@@ -112,7 +116,7 @@ export default function TaskCard({
 
   return (
     <div
-      draggable={canMove && !isLockedByMakerChecker}
+      draggable={canMove && isDragModeEnabled && !isLockedByMakerChecker}
       onDragStart={handleDragStart}
       onClick={() => onTaskClick(task)}
       className={`group relative bg-white rounded-xl p-4 border border-slate-200 shadow-xs hover:shadow-md transition-all cursor-pointer select-none ${
@@ -128,6 +132,11 @@ export default function TaskCard({
             <span className={`w-1.5 h-1.5 rounded-full ${priorityInfo.dot}`} />
             {priorityInfo.label}
           </span>
+          {teamLabel && (
+            <span className="inline-flex items-center rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
+              {teamLabel}
+            </span>
+          )}
 
           {/* Linked Risks Indicator Badge */}
           {linkedRisks.length > 0 && (

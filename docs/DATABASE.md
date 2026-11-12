@@ -23,6 +23,7 @@ Menjelaskan bagaimana data dimodelkan, dihubungkan, diakses, dan diubah dengan a
 ### users
 Akun aplikasi.
 - `id`, `email` (unik, disimpan huruf kecil), `full_name`
+- Username login adalah prefix sebelum `@` pada email internal (contoh `admin` dari `admin@ppo.bank.co.id`).
 - `password_hash`
 - `role` — enum `user_role`: `admin`, `project_manager`, `team_leader`, `audit`, `risk_management`
 - `is_active`, `must_change_password`
@@ -38,7 +39,7 @@ Akun aplikasi.
 ### projects
 - `id`, `code` (unik, mis. `PRJ-0001`), `name`, `description`
 - `status` — enum `project_status`: `active`, `on_hold`, `completed`, `archived`
-- `owner_id` → users.id (harus berrole `project_manager`)
+- `owner_id` → users.id (dapat berasal dari role internal mana pun)
 - `start_date`, `end_date`
 - `created_by` → users.id
 - `created_at`, `updated_at`, `deleted_at`

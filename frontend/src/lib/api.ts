@@ -79,12 +79,12 @@ export class ApiClientError extends Error {
 // ─── Auth API ────────────────────────────────────────────────────────
 
 export async function apiLogin(
-  email: string,
+  username: string,
   password: string,
 ): Promise<AuthData> {
   const res = await apiClient<AuthData>('/api/v1/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, password }),
   })
   if (res.data) {
     setCsrfToken(res.data.csrf_token)
