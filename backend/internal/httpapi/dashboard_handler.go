@@ -100,20 +100,9 @@ func (h *DashboardHandler) handleAdminDashboard(w http.ResponseWriter, r *http.R
 		}
 	}
 
-	var recentActivities any
-	if h.auditService != nil {
-		logs, err := h.auditService.Read(ctx, auditlog.ListFilters{
-			Limit: 10,
-		})
-		if err == nil {
-			recentActivities = logs
-		}
-	}
-
 	JSON(w, http.StatusOK, map[string]any{
 		"role":              "admin",
 		"user_stats":        userStats,
-		"recent_activities": recentActivities,
 	})
 }
 
@@ -312,21 +301,10 @@ func (h *DashboardHandler) handleAuditDashboard(
 		Limit:     10,
 	})
 
-	var recentActivities any
-	if h.auditService != nil {
-		logs, err := h.auditService.Read(ctx, auditlog.ListFilters{
-			Limit: 10,
-		})
-		if err == nil {
-			recentActivities = logs
-		}
-	}
-
 	JSON(w, http.StatusOK, map[string]any{
 		"role":              "audit",
 		"findings_summary":  summary,
 		"open_findings":     openFindings,
-		"recent_activities": recentActivities,
 	})
 }
 

@@ -2,7 +2,6 @@ import type { Project } from '../projects/types'
 import type { Task } from '../tasks/types'
 import type { Risk, RiskSummary } from '../risks/types'
 import type { AuditFinding, FindingSummary } from '../findings/types'
-import type { AuditLog } from '../audit/types'
 
 export interface AdminUserStats {
   total_users: number
@@ -18,7 +17,6 @@ export interface AdminUserStats {
 export interface AdminDashboardData {
   role: 'admin'
   user_stats?: AdminUserStats
-  recent_activities?: AuditLog[]
 }
 
 export interface PMDashboardData {
@@ -64,7 +62,6 @@ export interface AuditDashboardData {
   role: 'audit'
   findings_summary?: FindingSummary
   open_findings: AuditFinding[]
-  recent_activities?: AuditLog[]
 }
 
 export interface RiskManagementDashboardData {

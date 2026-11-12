@@ -44,7 +44,6 @@ Admin buat user PM dan Team Leader
 → PM menyetujui (pindah ke Done)
 → Team Leader ajukan risiko → Risk Management menilai
 → Audit buat temuan → PM merespons → Audit menutup
-→ Audit melihat seluruh jejak di Audit Trail dan mengekspor CSV
 ```
 
 Rilis **tidak boleh** keluar jika perjalanan ini rusak.
@@ -125,7 +124,7 @@ Hasil yang diharapkan harus cocok dengan matriks di SECURITY.md. Test dibuat tab
 - [x] Status tidak dapat dilompati (`open → closed` langsung ditolak)
 - [x] Temuan hanya terlihat oleh role/proyek yang berhak
 
-## 12. Audit Trail Tests
+## 12. Internal Audit Logging Tests
 - [x] Setiap aksi tulis menghasilkan baris audit log
 - [x] `UPDATE`/`DELETE` langsung ke `audit_logs` gagal (trigger)
 - [x] Jika penulisan audit log gagal, perubahan data ikut dibatalkan

@@ -72,10 +72,10 @@ Menu per role:
 
 | Role | Menu |
 |---|---|
-| admin | Dashboard, Pengguna, Proyek (read-only), Audit Trail |
+| admin | Dashboard, Pengguna, Proyek (read-only) |
 | project_manager | Dashboard, Proyek, Risiko (proyek saya), Temuan |
 | team_leader | Dashboard (Tim), Tugas Tim, Tugas Saya, Proyek, Risiko (ajukan) |
-| audit | Dashboard, Proyek (read-only), Temuan, Audit Trail |
+| audit | Dashboard, Proyek (read-only), Temuan |
 | risk_management | Dashboard, Risk Register, Proyek (read-only) |
 
 ## 7. Components
@@ -89,7 +89,7 @@ Reuse komponen yang ada sebelum membuat baru.
 - **Board Column:** judul, jumlah task, indikator WIP limit (mis. `3/5`), tombol tambah task (hanya jika diizinkan), area drop.
 - **Task Card:** judul (maks 2 baris), badge prioritas, avatar assignee, due date (merah + ikon jika lewat tenggat), indikator risiko terkait, progres tipis.
 - **Modal / Drawer:** detail task di drawer kanan; konfirmasi aksi destruktif di modal kecil.
-- **Table:** header lengket, baris hover, paginasi, filter di atas (Audit Trail, Risiko, Temuan).
+- **Table:** header lengket, baris hover, paginasi, filter di atas (Risiko, Temuan).
 - **Risk Heatmap:** grid 5×5 likelihood × impact dengan jumlah risiko per sel dan label teks.
 - **Stat Card:** angka besar (tabular-nums) + label + ikon; dapat diklik menuju daftar terfilter. Dipakai di semua dashboard.
 - **Workload Bar:** batang horizontal jumlah task aktif per member, selalu disertai angka teks (bukan warna saja).

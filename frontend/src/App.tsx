@@ -10,7 +10,6 @@ import ProjectListPage from './features/projects/ProjectListPage'
 import ProjectDetailPage from './features/projects/ProjectDetailPage'
 import RiskRegisterPage from './features/risks/RiskRegisterPage'
 import FindingListPage from './features/findings/FindingListPage'
-import AuditTrailPage from './features/audit/AuditTrailPage'
 import TeamTasksPage from './features/tasks/TeamTasksPage'
 import { ThemeProvider } from './context/ThemeContext'
 
@@ -41,7 +40,6 @@ export default function App() {
                 <Route path="/my-tasks" element={<TeamTasksPage initialMineOnly={true} />} />
                 <Route path="/risks" element={<RiskRegisterPage />} />
                 <Route path="/findings" element={<FindingListPage />} />
-                <Route path="/audit-trail" element={<AuditTrailPage />} />
               </Route>
             </Route>
 

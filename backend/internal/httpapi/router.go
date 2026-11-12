@@ -74,18 +74,6 @@ func NewRouter(params RouterParams) *chi.Mux {
 			})
 		}
 
-		// Audit logs endpoint (admin and audit roles only)
-		if params.AuditService != nil {
-			auditHandler := NewAuditLogHandler(params.AuditService)
-
-			r.Group(func(r chi.Router) {
-				r.Use(RequireAuth)
-
-				r.With(RequireRoles(db.UserRoleAdmin, db.UserRoleAudit)).Get("/audit-logs", auditHandler.HandleListAuditLogs)
-				r.With(RequireRoles(db.UserRoleAudit), RateLimitExport()).Get("/audit-logs/export", auditHandler.HandleExportAuditLogsCSV)
-			})
-		}
-
 		// User management endpoints (admin only)
 		userHandler := NewUserHandler(params.Queries, params.AuditService)
 		r.Group(func(r chi.Router) {

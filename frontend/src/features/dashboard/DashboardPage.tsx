@@ -143,35 +143,6 @@ function AdminView({ data }: { data: AdminDashboardData }) {
         </div>
       </div>
 
-      {/* Recent activities */}
-      <div className="bg-surface rounded-xl border border-border shadow-sm p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-bold text-text">Aktivitas Sistem Terbaru (Audit Trail)</h2>
-          <Link to="/audit-trail" className="text-xs text-primary font-medium hover:underline">
-            Lihat Semua Log &rarr;
-          </Link>
-        </div>
-        <div className="divide-y divide-border">
-          {(!data.recent_activities || data.recent_activities.length === 0) ? (
-            <p className="text-xs text-text-muted py-4">Belum ada aktivitas tercatat.</p>
-          ) : (
-            data.recent_activities.map((act) => (
-              <div key={act.id} className="py-2.5 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded font-mono text-[10px] bg-slate-100 text-slate-800">
-                    {act.action}
-                  </span>
-                  <span className="text-text font-medium capitalize">{act.entity_type}</span>
-                  <span className="text-text-muted font-mono text-[10px]">({act.entity_id.slice(0, 8)})</span>
-                </div>
-                <div className="text-text-muted text-[11px]">
-                  {new Date(act.created_at).toLocaleString('id-ID')}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
     </div>
   )
 }
@@ -473,34 +444,6 @@ function AuditView({ data }: { data: AuditDashboardData }) {
           </div>
         </div>
 
-        {/* Audit trail quick logs */}
-        <div className="bg-surface rounded-xl border border-border shadow-sm p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-text">Log Audit Terbaru</h2>
-            <Link to="/audit-trail" className="text-xs text-primary font-medium hover:underline">
-              Ekspor / Audit Trail &rarr;
-            </Link>
-          </div>
-          <div className="divide-y divide-border">
-            {(!data.recent_activities || data.recent_activities.length === 0) ? (
-              <p className="text-xs text-text-muted py-4">Belum ada aktivitas tercatat.</p>
-            ) : (
-              data.recent_activities.slice(0, 6).map((act) => (
-                <div key={act.id} className="py-2.5 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="px-1.5 py-0.5 rounded font-mono text-[10px] bg-slate-100 text-slate-800">
-                      {act.action}
-                    </span>
-                    <span className="text-text capitalize">{act.entity_type}</span>
-                  </div>
-                  <span className="text-text-muted text-[11px]">
-                    {new Date(act.created_at).toLocaleTimeString('id-ID')}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
       </div>
     </div>
   )

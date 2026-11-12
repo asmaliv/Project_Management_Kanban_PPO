@@ -24,7 +24,6 @@ Dashboard
 → Pengguna → Buat Pengguna (email, nama, role, password sementara)
 → Edit role / Nonaktifkan / Aktifkan / Reset Password
 → Proyek (read-only) → Pindahkan Owner (jika diperlukan)
-→ Audit Trail (read-only)
 ```
 
 ### 3.2 Project Manager
@@ -56,7 +55,6 @@ Dashboard
 → Proyek (read-only) → Papan / Task / Komentar
 → Buat Temuan (proyek/task, severity)
 → Tinjau Respons PM → Tutup Temuan / Buka Kembali (dengan alasan)
-→ Audit Trail → Filter → Ekspor CSV
 ```
 
 ### 3.5 Risk Management
@@ -111,8 +109,8 @@ Tabel: kode, judul, proyek, kategori, skor, level, status, owner. Filter level/s
 ### Temuan Audit
 Tabel: kode, judul, proyek, severity, status. Detail: deskripsi, respons PM, riwayat. Tombol aksi sesuai role dan status.
 
-### Audit Trail
-Tabel: waktu, actor, role, aksi, entitas, proyek, IP. Filter rentang waktu, actor, aksi, entitas. Detail baris menampilkan before/after. Tombol Ekspor CSV hanya untuk Audit.
+### Audit Logging Internal
+Tidak tersedia sebagai menu atau halaman pengguna. Sistem tetap menulis audit log internal secara append-only untuk setiap aksi tulis.
 
 ## 5. Decision Points & Rules
 

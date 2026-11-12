@@ -474,7 +474,7 @@ func createFindingUserSession(t *testing.T, store *httpFindingMockStore, authSvc
 func TestFindingHTTP_RBAC(t *testing.T) {
 	handler, store, authSvc, _ := setupFindingHTTPServer(t)
 
-	auditCookie, auditUID := createFindingUserSession(t, store, authSvc, db.UserRoleAudit)
+	auditCookie, _ := createFindingUserSession(t, store, authSvc, db.UserRoleAudit)
 	pmCookie, pmUID := createFindingUserSession(t, store, authSvc, db.UserRoleProjectManager)
 	tlCookie, _ := createFindingUserSession(t, store, authSvc, db.UserRoleTeamLeader)
 	rmCookie, _ := createFindingUserSession(t, store, authSvc, db.UserRoleRiskManagement)
@@ -590,31 +590,5 @@ func TestFindingHTTP_RBAC(t *testing.T) {
 		}
 	})
 
-	// 8. CSV Export rate limit & permissions
-	t.Run("Non-audit cannot export audit logs -> 403", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/audit-logs/export", nil)
-		req.AddCookie(pmCookie)
-		rec := httptest.NewRecorder()
-		handler.ServeHTTP(rec, req)
-		if rec.Code != http.StatusForbidden {
-			t.Errorf("expected 403 for PM exporting audit logs, got %d", rec.Code)
-		}
-	})
-
-	t.Run("Auditor exports audit logs -> 200 CSV", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/audit-logs/export", nil)
-		req.AddCookie(auditCookie)
-		rec := httptest.NewRecorder()
-		handler.ServeHTTP(rec, req)
-		if rec.Code != http.StatusOK {
-			t.Fatalf("expected 200, got %d", rec.Code)
-		}
-		contentType := rec.Header().Get("Content-Type")
-		if !bytes.Contains([]byte(contentType), []byte("text/csv")) {
-			t.Errorf("expected text/csv header, got %s", contentType)
-		}
-	})
-
-	_ = auditUID
 	_ = rmCookie
 }

@@ -142,12 +142,6 @@ Error:
 | POST | `/findings/:id/reopen` | audit |
 | POST | `/findings/:id/close` | audit |
 
-### Audit Trail
-| Method | Path | Akses |
-|---|---|---|
-| GET | `/audit-logs` | audit, admin; filter `actor_id`, `entity_type`, `entity_id`, `project_id`, `action`, `from`, `to` |
-| GET | `/audit-logs/export` | audit — CSV (rate limited) |
-
 ### Dashboard
 | Method | Path | Akses |
 |---|---|---|
@@ -256,7 +250,6 @@ Sukses — 200: skor dan level dihitung server.
 
 - `/auth/login`: 10/menit per IP.
 - Endpoint tulis: 120/menit per user.
-- `/audit-logs/export`: 5/menit per user.
 - Melebihi batas → `429` dengan header `Retry-After`.
 
 ## 12. Third-Party APIs

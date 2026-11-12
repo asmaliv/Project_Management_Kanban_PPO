@@ -30,7 +30,7 @@
 | Admin | `admin` | Mengelola akun user dan konfigurasi sistem. Tidak mengurus isi pekerjaan proyek. |
 | Project Manager | `project_manager` | Membuat dan memiliki proyek, menyusun papan, menugaskan Team Leader, menyetujui task selesai, merespons temuan audit. |
 | Team Leader | `team_leader` | Mengerjakan dan memperbarui task di proyek yang ditugaskan, mengajukan risiko. |
-| Audit | `audit` | Memeriksa semua proyek secara read-only, membuat temuan audit, melihat dan mengekspor audit trail. |
+| Audit | `audit` | Memeriksa semua proyek secara read-only dan membuat temuan audit. |
 | Risk Management | `risk_management` | Menilai, memantau, dan menutup risiko di semua proyek. |
 
 Izin rinci per role: lihat matriks di **SECURITY.md → bagian RBAC** (satu-satunya sumber kebenaran).
@@ -64,11 +64,11 @@ Izin rinci per role: lihat matriks di **SECURITY.md → bagian RBAC** (satu-satu
 - Rencana mitigasi, status, pemilik risiko, tautan ke proyek/task.
 - Ringkasan heatmap risiko.
 
-### 5.6 Temuan Audit & Audit Trail
+### 5.6 Temuan Audit & Audit Logging Internal
 - Audit membuat temuan (severity, deskripsi) pada proyek/task.
 - PM merespons; Audit menutup temuan.
 - Audit trail otomatis untuk setiap aksi tulis; hanya bisa ditambah, tidak bisa diubah/dihapus.
-- Audit dapat memfilter dan mengekspor audit trail (CSV).
+- Setiap perubahan penting tercatat pada audit log internal yang append-only.
 
 ### 5.7 Dashboard per Role
 - Admin: jumlah user per role, akun terkunci, aktivitas terbaru.

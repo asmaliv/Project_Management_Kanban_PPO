@@ -52,8 +52,6 @@ Legenda: `Y` = diizinkan, `R` = read-only, `Own` = hanya proyek yang dimiliki, `
 | Buat / buka kembali / tutup temuan audit | - | - | - | Y | - |
 | Respons temuan audit | - | Own | - | - | - |
 | Lihat temuan audit | R (semua) | Own | Asg | Y (semua) | R (semua) |
-| Lihat audit trail | R | - | - | Y | - |
-| Ekspor audit trail (CSV) | - | - | - | Y | - |
 | Dashboard | admin | PM | TL | audit | risk |
 
 Catatan visibilitas Team Leader: `Asg` berarti Team Leader melihat **semua task di proyek tempat ia member** (termasuk task member lain), bukan hanya task miliknya. Ini berlaku juga untuk `GET /tasks` dan dashboard: query wajib dibatasi ke proyek yang diikuti pemanggil, dan dibatasi di sisi server.

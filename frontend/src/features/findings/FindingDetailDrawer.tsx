@@ -352,7 +352,7 @@ export const FindingDetailDrawer: React.FC<FindingDetailDrawerProps> = ({
               {showConfirmClose && (
                 <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-xl space-y-3 animate-in fade-in">
                   <div className="text-xs text-emerald-900 font-medium">
-                    Apakah Anda yakin telah memverifikasi bukti perbaikan dan menutup temuan ini? Aksi ini akan dicatat dalam Audit Trail.
+                    Apakah Anda yakin telah memverifikasi bukti perbaikan dan menutup temuan ini? Aksi ini akan dicatat dalam log keamanan internal.
                   </div>
                   <div className="flex gap-2">
                     <button

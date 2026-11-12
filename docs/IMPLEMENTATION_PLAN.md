@@ -84,7 +84,6 @@ Tasks:
 - Migrasi `audit_logs` + trigger append-only
 - Service `auditlog` yang menulis dalam transaksi yang sama dengan perubahan data
 - Catat event auth dan user (login sukses/gagal, lockout, logout, perubahan role)
-- `GET /audit-logs` dengan filter, halaman Audit Trail (Audit & Admin)
 
 Dependencies: Phase 2.
 
