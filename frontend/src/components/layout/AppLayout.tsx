@@ -97,8 +97,8 @@ const ROLE_LABELS: Record<UserRole, { label: string; badge: string }> = {
   admin: { label: 'Administrator', badge: 'bg-purple-100 text-purple-800 border-purple-200' },
   project_manager: { label: 'Project Manager', badge: 'bg-blue-100 text-blue-800 border-blue-200' },
   team_leader: { label: 'Team Leader', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-  audit: { label: 'Audit', badge: 'bg-amber-100 text-amber-800 border-amber-200' },
-  risk_management: { label: 'Risk Management', badge: 'bg-rose-100 text-rose-800 border-rose-200' },
+  audit: { label: 'Team Audit', badge: 'bg-amber-100 text-amber-800 border-amber-200' },
+  risk_management: { label: 'Team Risk', badge: 'bg-rose-100 text-rose-800 border-rose-200' },
 }
 
 export default function AppLayout() {

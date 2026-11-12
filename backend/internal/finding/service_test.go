@@ -52,6 +52,8 @@ func (m *mockFindingStore) CountTasksByProjectsFiltered(ctx context.Context, arg
 func (m *mockFindingStore) CountUsersByEmail(ctx context.Context, email string) (int64, error) { return 0, nil }
 func (m *mockFindingStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
 func (m *mockFindingStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
+func (m *mockFindingStore) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.ListUsersRow, error) { return db.ListUsersRow{}, nil }
+func (m *mockFindingStore) DeleteUser(ctx context.Context, id pgtype.UUID) error { return nil }
 func (m *mockFindingStore) CreateBoardColumn(ctx context.Context, arg db.CreateBoardColumnParams) (db.BoardColumn, error) { return db.BoardColumn{}, nil }
 func (m *mockFindingStore) CreateProject(ctx context.Context, arg db.CreateProjectParams) (db.Project, error) { return db.Project{}, nil }
 func (m *mockFindingStore) CreateRisk(ctx context.Context, arg db.CreateRiskParams) (db.Risk, error) { return db.Risk{}, nil }

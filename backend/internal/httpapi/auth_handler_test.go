@@ -288,6 +288,8 @@ func (m *httpMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUID) 
 func (m *httpMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
 func (m *httpMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
 func (m *httpMockStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
+func (m *httpMockStore) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.ListUsersRow, error) { return db.ListUsersRow{}, nil }
+func (m *httpMockStore) DeleteUser(ctx context.Context, id pgtype.UUID) error { return nil }
 
 func setupTestServer(t *testing.T) (http.Handler, *auth.Service, *httpMockStore, string) {
 	t.Helper()

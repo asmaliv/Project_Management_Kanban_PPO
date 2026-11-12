@@ -531,7 +531,7 @@ func (s *Service) MoveTask(ctx context.Context, actor ActorInfo, taskID string, 
 		if err := s.auditLog.Log(ctx, auditlog.LogParams{
 			ActorID:    actorUUID,
 			ActorRole:  db.NullUserRole{UserRole: actor.Role, Valid: true},
-			Action:     "task.move",
+			Action:     "task.status_changed",
 			EntityType: "task",
 			EntityID:   uuid.UUID(updatedTask.ID.Bytes).String(),
 			ProjectID:  p.ID,

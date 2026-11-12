@@ -469,6 +469,8 @@ func (m *projectMockStore) ReopenAuditFinding(ctx context.Context, id pgtype.UUI
 func (m *projectMockStore) RespondAuditFinding(ctx context.Context, arg db.RespondAuditFindingParams) (db.AuditFinding, error) { return db.AuditFinding{}, nil }
 func (m *projectMockStore) GetUserStats(ctx context.Context) (db.GetUserStatsRow, error) { return db.GetUserStatsRow{}, nil }
 func (m *projectMockStore) ListUsers(ctx context.Context) ([]db.ListUsersRow, error) { return nil, nil }
+func (m *projectMockStore) UpdateUser(ctx context.Context, arg db.UpdateUserParams) (db.ListUsersRow, error) { return db.ListUsersRow{}, nil }
+func (m *projectMockStore) DeleteUser(ctx context.Context, id pgtype.UUID) error { return nil }
 
 // ─── HTTP Test Setup ──────────────────────────────────────────────────────────
 
