@@ -86,6 +86,14 @@ func NewRouter(params RouterParams) *chi.Mux {
 			})
 		}
 
+		// User management endpoints (admin only)
+		userHandler := NewUserHandler(params.Queries, params.AuditService)
+		r.Group(func(r chi.Router) {
+			r.Use(RequireAuth)
+			r.With(RequireRoles(db.UserRoleAdmin)).Get("/users", userHandler.HandleListUsers)
+			r.With(RequireRoles(db.UserRoleAdmin)).Post("/users", userHandler.HandleCreateUser)
+		})
+
 		// Project, Member, and Board Column endpoints
 		if params.ProjectService != nil {
 			projectHandler := NewProjectHandler(params.ProjectService)
