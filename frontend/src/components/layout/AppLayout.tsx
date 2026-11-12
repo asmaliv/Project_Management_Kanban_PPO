@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation, Outlet } from 'react-router-dom'
 import { useAuth } from '../../features/auth/useAuth'
 import type { UserRole } from '../../types'
@@ -136,6 +136,13 @@ export default function AppLayout() {
   const { user, logout } = useAuth()
   const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem('sidebar_collapsed') === 'true'
+  })
+
+  useEffect(() => {
+    localStorage.setItem('sidebar_collapsed', String(isCollapsed))
+  }, [isCollapsed])
 
   if (!user) return null
 
@@ -177,18 +184,40 @@ export default function AppLayout() {
       <aside
         className={`${
           mobileMenuOpen ? 'block' : 'hidden'
-        } md:block md:w-64 bg-surface border-r border-border shrink-0 md:min-h-screen flex flex-col justify-between`}
+        } md:block ${isCollapsed ? 'md:w-20' : 'md:w-64'} bg-surface border-r border-border shrink-0 md:min-h-screen flex flex-col justify-between transition-all duration-300 ease-in-out`}
       >
         <div>
           {/* Logo / Header */}
-          <div className="p-5 border-b border-border hidden md:flex items-center gap-3">
+          <div
+            className={`relative p-5 border-b border-border hidden md:flex items-center ${
+              isCollapsed ? 'justify-center' : 'justify-between'
+            } gap-3`}
+          >
             <div className="w-9 h-9 rounded-xl bg-primary text-white font-bold flex items-center justify-center text-base shadow-sm">
               P
             </div>
-            <div>
+            <div className={`${isCollapsed ? 'hidden' : 'block'} min-w-0 flex-1`}>
               <h1 className="font-bold text-text text-sm leading-tight">PPO Kanban Board</h1>
               <p className="text-[11px] text-text-muted">Perbankan</p>
             </div>
+            <button
+              type="button"
+              onClick={() => setIsCollapsed((collapsed) => !collapsed)}
+              className={`hidden md:inline-flex shrink-0 items-center justify-center rounded-lg border border-border p-2 text-text-muted transition-all duration-300 hover:bg-surface-muted hover:text-text ${
+                isCollapsed ? 'absolute right-2' : ''
+              }`}
+              aria-label={isCollapsed ? 'Perluas Sidebar' : 'Kecilkan Sidebar'}
+              title={isCollapsed ? 'Perluas Sidebar' : 'Kecilkan Sidebar'}
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d={isCollapsed ? 'M9 5l7 7-7 7' : 'M15 5l-7 7 7 7'}
+                />
+              </svg>
+            </button>
           </div>
 
           {/* Nav Items */}
@@ -200,14 +229,18 @@ export default function AppLayout() {
                   key={item.to}
                   to={item.to}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`group flex items-center ${
+                    isCollapsed ? 'justify-center px-2' : 'gap-3 px-3'
+                  } py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                     isActive
                       ? 'bg-primary-soft text-primary font-semibold'
                       : 'text-text-muted hover:text-text hover:bg-surface-muted'
                   }`}
+                  aria-label={isCollapsed ? item.label : undefined}
+                  title={isCollapsed ? item.label : undefined}
                 >
                   {item.icon(`w-5 h-5 shrink-0 ${isActive ? 'text-primary' : 'text-slate-400'}`)}
-                  <span>{item.label}</span>
+                  <span className={isCollapsed ? 'hidden' : 'block'}>{item.label}</span>
                 </Link>
               )
             })}
@@ -215,17 +248,21 @@ export default function AppLayout() {
         </div>
 
         {/* User Card at bottom of sidebar */}
-        <div className="p-4 border-t border-border bg-slate-50/50">
-          <div className="flex items-center gap-3 mb-3">
+        <div
+          className={`p-4 border-t border-border bg-slate-50/50 transition-all duration-300 ${
+            isCollapsed ? 'flex justify-center' : ''
+          }`}
+        >
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} mb-3`}>
             <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-300">
               {getInitials(user.full_name)}
             </div>
-            <div className="min-w-0 flex-1">
+            <div className={`${isCollapsed ? 'hidden' : 'block'} min-w-0 flex-1`}>
               <p className="text-xs font-semibold text-text truncate">{user.full_name}</p>
               <p className="text-[11px] text-text-muted truncate">@{user.username}</p>
             </div>
           </div>
-          <div className="flex items-center justify-between pt-1">
+          <div className={`${isCollapsed ? 'hidden' : 'flex'} items-center justify-between pt-1`}>
             <span
               className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded-full border ${roleInfo.badge}`}
             >
