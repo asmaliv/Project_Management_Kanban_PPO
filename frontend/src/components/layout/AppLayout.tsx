@@ -106,7 +106,7 @@ const ROLE_LABELS: Record<UserRole, { label: string; badge: string }> = {
 const THEME_OPTIONS: Array<{ value: Theme; label: string }> = [
   { value: 'light', label: '☀️ Light Mode' },
   { value: 'dark', label: '🌙 Dark Mode' },
-  { value: 'neobrutalism', label: '⚡ Gen Z (Neo-Brutalism)' },
+  { value: 'neobrutalism', label: '⚡ Gen Z' },
 ]
 
 function ThemeSwitcher() {
